@@ -469,18 +469,13 @@ public class ProcessData {
 	public static Instances mergeResultWithTransactionData(Instances right,String leftArffFile) throws Exception{
 		//读取磁盘上预先保存的左侧数据
 		Instances left=FileUtility.loadDataFromFile(leftArffFile);
-		Instances rightNeeded=FilterData.removeAttribs(right, "1-4");// 第1-4列是重复的数据， 输出结果中我们只需要最后两列数据
-	    // Create the vector of merged attributes
-		ArrayList<Attribute> newAttributes = new ArrayList<Attribute>(left.numAttributes() + rightNeeded.numAttributes() );
-		for (int m=0;m<left.numAttributes();m++){
-			newAttributes.add(left.attribute(m));
-		}
-		for (int m=0;m<rightNeeded.numAttributes();m++){
-			newAttributes.add(rightNeeded.attribute(m));
-		}
 
-	    // Create the set of Instances， 需要和结果的数据一致
-	    Instances mergedResult = new Instances(left.relationName() + '_'+ right.relationName(), newAttributes, 0);
+
+	    // 创建输出结果
+	    Instances mergedResult = new Instances(left, 0);
+	    mergedResult=FilterData.AddAttribute(mergedResult, "PredictedValue", mergedResult.numAttributes());
+	    mergedResult=FilterData.AddAttribute(mergedResult, "selected", mergedResult.numAttributes());
+
 		
 		int processed=0;
 		Instance leftCurr;
@@ -490,6 +485,8 @@ public class ProcessData {
 		Attribute rightMA=right.attribute("均线策略");
 		Attribute leftBias5=left.attribute("bias5");
 		Attribute rightBias5=right.attribute("bias5");
+		Attribute rightPredict=right.attribute("PredictedValue");
+		Attribute rightSelected=right.attribute("selected");
 		
 		//传入的结果集right不是排序的,而left的数据是排序的， 所以先按ID排序。
 		right.sort(0);
@@ -499,8 +496,26 @@ public class ProcessData {
 			rightCurr=right.instance(processed);
 			if (leftCurr.value(0)==rightCurr.value(0)){//找到相同ID的记录了，接下来做冗余字段的数据校验
 				if ( checkSumBeforeMerge(leftCurr, rightCurr, leftMA, rightMA,leftBias5, rightBias5)) {
-					//copy 数据
-					newData=leftCurr.mergeInstance(rightNeeded.instance(processed));
+					newData=new DenseInstance(mergedResult.numAttributes());
+					newData.setDataset(mergedResult);
+					for (int n = 0; n < leftCurr.numAttributes(); n++) { 
+						Attribute att = leftCurr.attribute(n);
+						if (att != null) {
+							if (att.isNominal()) {
+								String label = leftCurr.stringValue(att);
+								int index = att.indexOfValue(label);
+								if (index != -1) {
+									newData.setValue(n, index);
+								}
+							} else if (att.isNumeric()) {
+								newData.setValue(n, leftCurr.value(att));
+							} else {
+								throw new IllegalStateException("Unhandled attribute type!");
+							}
+						}
+					}
+					newData.setValue(mergedResult.numAttributes()-2, rightCurr.value(rightPredict));
+					newData.setValue(mergedResult.numAttributes()-1, rightCurr.value(rightSelected));
 					mergedResult.add(newData);
 					processed++;
 					if (processed % 100000 ==0){
