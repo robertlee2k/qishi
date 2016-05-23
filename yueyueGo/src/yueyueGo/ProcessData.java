@@ -490,35 +490,35 @@ public class ProcessData {
 		Attribute rightMA=right.attribute("均线策略");
 		Attribute leftBias5=left.attribute("bias5");
 		Attribute rightBias5=right.attribute("bias5");
-		//传入的结果集right不是排序的,而left的数据是排序的， 所以如此嵌套循环处理
-		while (processed<right.numInstances()){
-			boolean found=false;
+		
+		//传入的结果集right不是排序的,而left的数据是排序的， 所以先按ID排序。
+		right.sort(0);
+		
+		for (int i=0;i<left.numInstances();i++){	
+			leftCurr=left.instance(i);
 			rightCurr=right.instance(processed);
-			double rightId=rightCurr.value(0); 
-			int cursor=(int)(rightId-left.instance(0).value(0)-2);  //因为left是排序的，可以把游标直接放到接近rightID的位置附近以提高效率
-			while(cursor<left.numInstances() && found==false){
-				leftCurr=left.instance(cursor);
-				if ((leftCurr.value(0)==rightId)){ //找到相同ID的记录了，接下来做冗余字段的数据校验
-					if ( checkSumBeforeMerge(leftCurr, rightCurr, leftMA, rightMA,leftBias5, rightBias5)) {
-						//copy 数据
-						newData=leftCurr.mergeInstance(rightNeeded.instance(processed));
-						mergedResult.add(newData);
-						found=true;
-					}else {
-						throw new Exception("data value in header data and result data does not equal "+leftCurr.value(leftMA)+" = "+rightCurr.value(rightMA)+ " / "+leftCurr.value(leftBias5) + " = "+rightCurr.value(rightBias5));
+			if (leftCurr.value(0)==rightCurr.value(0)){//找到相同ID的记录了，接下来做冗余字段的数据校验
+				if ( checkSumBeforeMerge(leftCurr, rightCurr, leftMA, rightMA,leftBias5, rightBias5)) {
+					//copy 数据
+					newData=leftCurr.mergeInstance(rightNeeded.instance(processed));
+					mergedResult.add(newData);
+					processed++;
+					if (processed % 100000 ==0){
+						System.out.println("number of results processed:"+ processed);
 					}
+					if (processed>=right.numInstances()){
+						break;
+					}
+				}else {
+					throw new Exception("data value in header data and result data does not equal "+leftCurr.value(leftMA)+" = "+rightCurr.value(rightMA)+ " / "+leftCurr.value(leftBias5) + " = "+rightCurr.value(rightBias5));
 				}
-				cursor++;
-			}// end while cursor
-			if (found==true){
-				processed++;
-				if (processed % 100000 ==0){
-					System.out.println("number of results processed:"+ processed);
-				}
-			}else{
-				throw new Exception("data not found " +right.instance(processed).value(0));				
 			}
-		}// end while processed
+		}// end left processed
+		if (processed!=right.numInstances()){
+			throw new Exception("not all data in result have been processed , processed= "+processed+" ,while total result="+right.numInstances());
+		}else {
+			System.out.println("number of results merged and processed: "+ processed);
+		}
 
 		return mergedResult;
 	}
