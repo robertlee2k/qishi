@@ -34,20 +34,20 @@ public class MLPClassifier extends NominalClassifier {
 	public Classifier loadModel(String yearSplit, String policySplit) throws Exception{
 		//TODO 这是为MLP单独准备的模型
 		int inputYear=Integer.parseInt(yearSplit.substring(0,4));
-		String modelYear=null;
-		if (inputYear>=2008 && inputYear<2010)
-			modelYear="2008";
-		else if (inputYear>=2010 && inputYear<2012)
-			modelYear="2010";
-		else if (inputYear>=2012 && inputYear<2014)
-			modelYear="2012";
-		else if (inputYear>=2014 && inputYear<2015)
-			modelYear="2014";
-		else if (inputYear>=2015 && inputYear<2016)
-			modelYear="2015";
-		else if (inputYear>=2016)
-			modelYear="2016";
-		String filename=this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + modelYear + MA_PREFIX + policySplit;//如果使用固定模型
+//		String modelYear=null;
+//		if (inputYear>=2008 && inputYear<2010)
+//			modelYear="2008";
+//		else if (inputYear>=2010 && inputYear<2012)
+//			modelYear="2010";
+//		else if (inputYear>=2012 && inputYear<2014)
+//			modelYear="2012";
+//		else if (inputYear>=2014 && inputYear<2015)
+//			modelYear="2014";
+//		else if (inputYear>=2015 && inputYear<2016)
+//			modelYear="2015";
+//		else if (inputYear>=2016)
+//			modelYear="2016";
+		String filename=this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + inputYear + MA_PREFIX + policySplit;//如果使用固定模型
 		
 		this.setModelFileName(filename);
 
