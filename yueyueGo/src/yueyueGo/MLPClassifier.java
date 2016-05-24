@@ -15,10 +15,13 @@ public class MLPClassifier extends NominalClassifier {
 	//4. HS300 2008-2016最优10单元格 17%(5单元格平均25%， 应该是有偶然性) 全市场整体胜率57732/150029
 	// 参数：  eval 0.9 / 单独评估阀值/ TP——FP RATIO { 1.8, 1.5, 1.2, 1.0, 1.0 }, UPPer{ 0.2, 0.2, 0.2, 0.2, 0.2 } TP_FP_BOTTOM_LINE=0.8
 	
-	//全部年份建模之后（以上数据是2009、2011、2013未单独建模时的数据）
-	//5. HS300 2008-2016最优10单元格 13%(5单元格平均18%， 应该是有偶然性) 全市场整体胜率61709/158507  但直接利用模型评估时是 57132/142081？？？
+	//全部年份建模之后（以上数据是2009、2011、2013未单独建模时的数据，以下为全建模数据）
+	//5. HS300 2008-2016最优10-20单元格 12%（中证500 20/30/50 9%-11%） 全市场整体胜率61709/158507  
 	// 参数：  eval 0.9 / 单独评估阀值/ TP——FP RATIO { 1.8, 1.5, 1.2, 1.0, 1.0 }, UPPer{ 0.2, 0.2, 0.2, 0.2, 0.2 } TP_FP_BOTTOM_LINE=0.8
-
+	
+	//6. HS300 2008-2016 10单元格（中证500 20/30/50 ）  全市场整体胜率
+	// 参数：  eval 0.9 / 单独评估阀值/ TP——FP RATIO { 1.8, 1.5, 1.2, 1.0, 1.0 }, UPPer{ 0.07, 0.09, 0.11, 0.15, 0.18 } TP_FP_BOTTOM_LINE=0.8
+		
 	public MLPClassifier() {
 		super();
 		classifierName="mlp";
@@ -31,8 +34,8 @@ public class MLPClassifier extends NominalClassifier {
 		m_seperate_classify_HS300=true;
 		
 		SAMPLE_LOWER_LIMIT =new double[] { 0.01, 0.01, 0.01, 0.02,0.02 }; // 各条均线选择样本的下限
-		SAMPLE_UPPER_LIMIT =new double[] { 0.2, 0.2, 0.2, 0.2, 0.2 }; // 各条均线选择样本的上限
-		TP_FP_RATIO_LIMIT=new double[] { 1.8, 1.5, 1.2, 1.0, 1.0 };//{ 1.8, 1.5, 1.2, 1.0, 1.0 };//选择样本阀值时TP FP RATIO从何开始
+		SAMPLE_UPPER_LIMIT =new double[] { 0.07, 0.09, 0.11, 0.15, 0.18 }; // 各条均线选择样本的上限
+		TP_FP_RATIO_LIMIT=new double[] { 1.8, 1.5, 1.2, 1.0, 1.0 };//选择样本阀值时TP FP RATIO从何开始
 		TP_FP_BOTTOM_LINE=0.8; //TP/FP的下限
 	}
 	

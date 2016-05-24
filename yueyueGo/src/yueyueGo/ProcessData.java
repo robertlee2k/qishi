@@ -29,14 +29,14 @@ public class ProcessData {
 			
 			
 
-			//预测模型的工作目录
+//			//预测模型的工作目录
 //			String	 predictPathName="C:\\Users\\robert\\Desktop\\提升均线策略\\03-预测模型\\";
 ////			//用二分类模型预测每日增量数据
-//			MLPClassifier clModel=new MLPClassifier();
-//
-////			//用连续模型预测每日增量数据
-////			M5PClassifier clModel=new M5PClassifier();
-////			//读取数据库预测
+////			MLPClassifier clModel=new MLPClassifier();
+////
+//////			//用连续模型预测每日增量数据
+//			M5PClassifier clModel=new M5PClassifier();
+//////			//读取数据库预测
 //			predictWithDB(clModel,predictPathName);
 
 			
