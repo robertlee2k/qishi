@@ -342,8 +342,8 @@ public abstract class MyClassifier {
 	@SuppressWarnings("rawtypes")
 	protected Vector loadEvaluationFromFile()	throws Exception {
 		String evalFileName=this.getEvaluationFilename();
-		System.out.println("Classifier Threshold Loaded From: "+ evalFileName+THRESHOLD_EXTENSION);
-		return (Vector) SerializationHelper.read( evalFileName+ THRESHOLD_EXTENSION);
+		System.out.println("Classifier Threshold Loaded From: "+ evalFileName);
+		return (Vector) SerializationHelper.read( evalFileName);
 	}
 	
 	public void saveResultFile(Instances result) throws IOException{
