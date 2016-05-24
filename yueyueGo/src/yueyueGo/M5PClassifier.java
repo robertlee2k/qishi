@@ -1,5 +1,8 @@
 package yueyueGo;
 
+
+//结论1： 5单元格的不可靠，偶然性因素太大， 应该在10-30单元格中间选择
+//结论2： 这个分类器适用于中证500及全市场， 沪深300上不合适。
 public class M5PClassifier extends ContinousClassifier {
 	
 	// 1. 全市场 2008-2016最优10单元格年均15% （5单元格有27%，但估计偶然性比较大），hs300 20格可以有13% （不单独评估）
@@ -10,6 +13,10 @@ public class M5PClassifier extends ContinousClassifier {
 
 	// 3.  中证5002008-2016 10单元格年均 19%，hs300 10-20格有7% （单独评估）
 	// 参数：  eval 0.9 / 单独评估阀值/ TP——FP RATIO { 1.6, 1.4, 1.3, 1.1, 0.9 }, UPPer { 0.07, 0.09, 0.1, 0.1, 0.1 }TP_FP_BOTTOM_LINE=0.7
+
+	// 4.  中证5002008-2016 10单元格年均 19%（20格 14%），全市场10单元15%，hs300 10格7% （单独评估）
+	// 参数：  eval 0.9 / 单独评估阀值/ TP——FP RATIO { 1.6, 1.4, 1.3, 1.1, 0.9 }, UPPer { 0.07, 0.09, 0.1, 0.1, 0.1 }TP_FP_BOTTOM_LINE=0.7
+
 	public M5PClassifier() {
 		super();
 		classifierName = "m5p";
@@ -24,7 +31,7 @@ public class M5PClassifier extends ContinousClassifier {
 				//{ 0.07, 0.09, 0.12, 0.15, 0.2 }; // 各条均线选择样本比例，按这个可以做到08-16 年均15% （全市场 20格仅参与60日线上机会）
 		SAMPLE_UPPER_LIMIT = new double[] { 0.07, 0.09, 0.1, 0.1, 0.1 };//{ 0.07, 0.09, 0.11, 0.15, 0.2 };
 		TP_FP_RATIO_LIMIT = new double[]  { 1.6, 1.4, 1.3, 1.1, 0.9 };//选择样本阀值时TP FP RATIO到了何种值就可以停止了。{ 1.6, 1.4, 1.3, 1.1, 0.9 }
-		TP_FP_BOTTOM_LINE=0.9; //TP/FP的下限
+		TP_FP_BOTTOM_LINE=0.7; //TP/FP的下限
 	}
 	
 //	public Classifier loadModel(String yearSplit, String policySplit) throws Exception{

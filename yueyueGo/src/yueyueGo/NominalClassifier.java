@@ -155,8 +155,8 @@ public class NominalClassifier extends MyClassifier{
 		double final_deviation=-999999999.9;
 		Attribute att_tp = result.attribute("True Positives");
 		Attribute att_fp = result.attribute("False Positives");
-		Attribute att_tpr = result.attribute("True Positive Rate"); 
-		Attribute att_fpr= result.attribute("False Positive Rate");
+//		Attribute att_tpr = result.attribute("True Positive Rate"); 
+//		Attribute att_fpr= result.attribute("False Positive Rate");
 		Attribute att_lift = result.attribute("Lift");
 		Attribute att_threshold = result.attribute("Threshold");
 		Attribute att_samplesize = result.attribute("Sample Size");

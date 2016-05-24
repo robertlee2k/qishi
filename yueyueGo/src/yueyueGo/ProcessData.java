@@ -1,7 +1,6 @@
 package yueyueGo;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
@@ -32,14 +31,16 @@ public class ProcessData {
 
 			//预测模型的工作目录
 //			String	 predictPathName="C:\\Users\\robert\\Desktop\\提升均线策略\\03-预测模型\\";
-//			//用二分类模型预测每日增量数据
+////			//用二分类模型预测每日增量数据
 //			MLPClassifier clModel=new MLPClassifier();
 //
-//			//用连续模型预测每日增量数据
+////			//用连续模型预测每日增量数据
 ////			M5PClassifier clModel=new M5PClassifier();
-//			//读取数据库预测
+////			//读取数据库预测
 //			predictWithDB(clModel,predictPathName);
-//			//使用文件预测
+
+			
+			//使用文件预测
 //			String dataFileName=("zengliang"+FormatUtility.getDateStringFor(1)).trim();
 //			predictWithFile(clModel,predictPathName,dataFileName);
 
@@ -180,8 +181,9 @@ public class ProcessData {
 						result.numAttributes());
 
 			}
-
+ 
 			clModel.setModelFileName(modelFileName);
+			clModel.setEvaluationFilename(modelFileName+MyClassifier.THRESHOLD_EXTENSION);
 			result = clModel.predictData(newData, result);
 			System.out.println("accumulated predicted rows: "+ result.numInstances());
 			System.out.println("complete for 均线策略: " + clModel.m_policySubGroup[j]);
@@ -324,7 +326,7 @@ public class ProcessData {
 		Instances testingData = null;
 		
 		System.out.println("-----------------start for " + yearSplit + "-----------均线策略: ------" + policySplit);
-		clModel.generateModelFileName(yearSplit,policySplit);
+		clModel.generateModelAndEvalFileName(yearSplit,policySplit);
 
 		Classifier model = null;
 		if (clModel.m_skipTrainInBacktest == false || clModel.m_skipEvalInBacktest==false ) { //如果不需要培训和评估，则无需训练样本
@@ -467,18 +469,13 @@ public class ProcessData {
 	public static Instances mergeResultWithTransactionData(Instances right,String leftArffFile) throws Exception{
 		//读取磁盘上预先保存的左侧数据
 		Instances left=FileUtility.loadDataFromFile(leftArffFile);
-		Instances rightNeeded=FilterData.removeAttribs(right, "1-4");// 第1-4列是重复的数据， 输出结果中我们只需要最后两列数据
-	    // Create the vector of merged attributes
-		ArrayList<Attribute> newAttributes = new ArrayList<Attribute>(left.numAttributes() + rightNeeded.numAttributes() );
-		for (int m=0;m<left.numAttributes();m++){
-			newAttributes.add(left.attribute(m));
-		}
-		for (int m=0;m<rightNeeded.numAttributes();m++){
-			newAttributes.add(rightNeeded.attribute(m));
-		}
 
-	    // Create the set of Instances， 需要和结果的数据一致
-	    Instances mergedResult = new Instances(left.relationName() + '_'+ right.relationName(), newAttributes, 0);
+
+	    // 创建输出结果
+	    Instances mergedResult = new Instances(left, 0);
+	    mergedResult=FilterData.AddAttribute(mergedResult, "PredictedValue", mergedResult.numAttributes());
+	    mergedResult=FilterData.AddAttribute(mergedResult, "selected", mergedResult.numAttributes());
+
 		
 		int processed=0;
 		Instance leftCurr;
@@ -488,35 +485,55 @@ public class ProcessData {
 		Attribute rightMA=right.attribute("均线策略");
 		Attribute leftBias5=left.attribute("bias5");
 		Attribute rightBias5=right.attribute("bias5");
-		//传入的结果集right不是排序的,而left的数据是排序的， 所以如此嵌套循环处理
-		while (processed<right.numInstances()){
-			boolean found=false;
+		Attribute rightPredict=right.attribute("PredictedValue");
+		Attribute rightSelected=right.attribute("selected");
+		
+		//传入的结果集right不是排序的,而left的数据是排序的， 所以先按ID排序。
+		right.sort(0);
+		
+		for (int i=0;i<left.numInstances();i++){	
+			leftCurr=left.instance(i);
 			rightCurr=right.instance(processed);
-			double rightId=rightCurr.value(0); 
-			int cursor=(int)(rightId-left.instance(0).value(0)-2);  //因为left是排序的，可以把游标直接放到接近rightID的位置附近以提高效率
-			while(cursor<left.numInstances() && found==false){
-				leftCurr=left.instance(cursor);
-				if ((leftCurr.value(0)==rightId)){ //找到相同ID的记录了，接下来做冗余字段的数据校验
-					if ( checkSumBeforeMerge(leftCurr, rightCurr, leftMA, rightMA,leftBias5, rightBias5)) {
-						//copy 数据
-						newData=leftCurr.mergeInstance(rightNeeded.instance(processed));
-						mergedResult.add(newData);
-						found=true;
-					}else {
-						throw new Exception("data value in header data and result data does not equal "+leftCurr.value(leftMA)+" = "+rightCurr.value(rightMA)+ " / "+leftCurr.value(leftBias5) + " = "+rightCurr.value(rightBias5));
+			if (leftCurr.value(0)==rightCurr.value(0)){//找到相同ID的记录了，接下来做冗余字段的数据校验
+				if ( checkSumBeforeMerge(leftCurr, rightCurr, leftMA, rightMA,leftBias5, rightBias5)) {
+					newData=new DenseInstance(mergedResult.numAttributes());
+					newData.setDataset(mergedResult);
+					for (int n = 0; n < leftCurr.numAttributes(); n++) { 
+						Attribute att = leftCurr.attribute(n);
+						if (att != null) {
+							if (att.isNominal()) {
+								String label = leftCurr.stringValue(att);
+								int index = att.indexOfValue(label);
+								if (index != -1) {
+									newData.setValue(n, index);
+								}
+							} else if (att.isNumeric()) {
+								newData.setValue(n, leftCurr.value(att));
+							} else {
+								throw new IllegalStateException("Unhandled attribute type!");
+							}
+						}
 					}
+					newData.setValue(mergedResult.numAttributes()-2, rightCurr.value(rightPredict));
+					newData.setValue(mergedResult.numAttributes()-1, rightCurr.value(rightSelected));
+					mergedResult.add(newData);
+					processed++;
+					if (processed % 100000 ==0){
+						System.out.println("number of results processed:"+ processed);
+					}
+					if (processed>=right.numInstances()){
+						break;
+					}
+				}else {
+					throw new Exception("data value in header data and result data does not equal "+leftCurr.value(leftMA)+" = "+rightCurr.value(rightMA)+ " / "+leftCurr.value(leftBias5) + " = "+rightCurr.value(rightBias5));
 				}
-				cursor++;
-			}// end while cursor
-			if (found==true){
-				processed++;
-				if (processed % 100000 ==0){
-					System.out.println("number of results processed:"+ processed);
-				}
-			}else{
-				throw new Exception("data not found " +right.instance(processed).value(0));				
 			}
-		}// end while processed
+		}// end left processed
+		if (processed!=right.numInstances()){
+			throw new Exception("not all data in result have been processed , processed= "+processed+" ,while total result="+right.numInstances());
+		}else {
+			System.out.println("number of results merged and processed: "+ processed);
+		}
 
 		return mergedResult;
 	}

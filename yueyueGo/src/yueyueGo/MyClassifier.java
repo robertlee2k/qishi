@@ -51,7 +51,16 @@ public abstract class MyClassifier {
 
 	
 	protected String model_filename;
+	protected String evaluation_filename;
 	
+	public String getEvaluationFilename() {
+		return evaluation_filename;
+	}
+
+	public void setEvaluationFilename(String evaluation_filename) {
+		this.evaluation_filename = evaluation_filename;
+	}
+
 	//统计信息
 	protected DescriptiveStatistics summary_selected_TPR;
 	protected DescriptiveStatistics summary_selected_positive;
@@ -292,8 +301,11 @@ public abstract class MyClassifier {
 		model_filename=modelFileName;
 	}
 	
-	public void generateModelFileName(String yearSplit,String policySplit) {
-		this.model_filename =this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + yearSplit + MA_PREFIX + policySplit;
+	//生成回测时使用的model文件和eval文件名称
+	public void generateModelAndEvalFileName(String yearSplit,String policySplit) {
+		String modelFile=this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + yearSplit + MA_PREFIX + policySplit;
+		setModelFileName(modelFile);
+		setEvaluationFilename(modelFile+THRESHOLD_EXTENSION);
 	}
 	
 	
@@ -322,16 +334,16 @@ public abstract class MyClassifier {
 	}
 	
 	protected void saveEvaluationToFile(Vector<Double> v) throws Exception {
-		String modelFileName=this.getModelFileName();
-		SerializationHelper.write( modelFileName+ THRESHOLD_EXTENSION, v);
-		System.out.println("evaluation saved to :"+ modelFileName+THRESHOLD_EXTENSION);
+		String evalFileName=this.getEvaluationFilename();
+		SerializationHelper.write( evalFileName, v);
+		System.out.println("evaluation saved to :"+ evalFileName);
 	}
 	
 	@SuppressWarnings("rawtypes")
 	protected Vector loadEvaluationFromFile()	throws Exception {
-		String modelFileName=this.getModelFileName();
-		System.out.println("Classifier Threshold Loaded From: "+ modelFileName+THRESHOLD_EXTENSION);
-		return (Vector) SerializationHelper.read( modelFileName+ THRESHOLD_EXTENSION);
+		String evalFileName=this.getEvaluationFilename();
+		System.out.println("Classifier Threshold Loaded From: "+ evalFileName+THRESHOLD_EXTENSION);
+		return (Vector) SerializationHelper.read( evalFileName+ THRESHOLD_EXTENSION);
 	}
 	
 	public void saveResultFile(Instances result) throws IOException{
