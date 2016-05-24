@@ -1,7 +1,6 @@
 package yueyueGo;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
@@ -182,8 +181,9 @@ public class ProcessData {
 						result.numAttributes());
 
 			}
-
+ 
 			clModel.setModelFileName(modelFileName);
+			clModel.setEvaluationFilename(modelFileName+MyClassifier.THRESHOLD_EXTENSION);
 			result = clModel.predictData(newData, result);
 			System.out.println("accumulated predicted rows: "+ result.numInstances());
 			System.out.println("complete for 均线策略: " + clModel.m_policySubGroup[j]);
@@ -326,7 +326,7 @@ public class ProcessData {
 		Instances testingData = null;
 		
 		System.out.println("-----------------start for " + yearSplit + "-----------均线策略: ------" + policySplit);
-		clModel.generateModelFileName(yearSplit,policySplit);
+		clModel.generateModelAndEvalFileName(yearSplit,policySplit);
 
 		Classifier model = null;
 		if (clModel.m_skipTrainInBacktest == false || clModel.m_skipEvalInBacktest==false ) { //如果不需要培训和评估，则无需训练样本
