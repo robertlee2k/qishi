@@ -65,7 +65,36 @@ public class ProcessData {
 		}
 	}
 
-	protected static void processHistoryFile() throws Exception, IOException {
+	protected static void refreshArffFileForYear(int year, String newDataFile) throws Exception {
+		System.out.println("loading original history file into memory "  );
+		String originFileName="C:\\Users\\robert\\Desktop\\提升均线策略\\AllTransaction20052016";
+		Instances originData = FileUtility.loadDataFromFile(originFileName+".arff");
+		int originNumber=originData.numInstances() ;
+		System.out.println("finish  loading original File row : "+ originNumber + " column:"+ originData.numAttributes());
+		//将原始文件里的原有的该年数据删除
+		String splitCurrentYearClause = "( ATT" + yearPosition + " < " + year + "01) or ( ATT" + yearPosition+ " > "	+ year + "12) ";
+		Instances filteredData=FilterData.getInstancesSubset(originData, splitCurrentYearClause);
+		int filteredNumber=filteredData.numInstances() ;
+		System.out.println("number of rows removed = "+ (originNumber-filteredNumber));
+		
+		
+		Instances newData = FileUtility.loadDataFromCSVFile(newDataFile);
+		//TODO 单次收益率的文件格式要修正
+		System.out.println("number of new rows loaded = "+ newData.numInstances());
+		//TODO 调整nominal属性
+		newData=calibrateAttributes("C:\\Users\\robert\\Desktop\\提升均线策略\\03-预测模型\\", newData);
+		//把计算字段加上
+		newData=ArffFormat.addCalculateAttribute(newData);
+		
+		Instances newFullData=Instances.mergeInstances(filteredData, newData);
+		System.out.println("number of refreshed dataset = "+newFullData.numInstances());
+		newFullData.sort(0);
+		System.out.println("new arff file sorted, start to save....");
+		FileUtility.SaveDataIntoFile(newFullData, originFileName+"-refreshed.arff");
+		
+	}
+
+	protected static void processHistoryFile() throws Exception {
 		System.out.println("loading original history file into memory "  );
 		String originFileName="C:\\Users\\robert\\Desktop\\提升均线策略\\AllTransaction20052016";
 		Instances fullSetData = FileUtility.loadDataFromFile(originFileName+".arff");

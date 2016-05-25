@@ -16,6 +16,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 public class NominalClassifier extends MyClassifier{
+	protected double DEFAULT_THRESHOLD=0.7; // 找不出threshold时缺省值。
 
 
 	public NominalClassifier() {
@@ -125,7 +126,7 @@ public class NominalClassifier extends MyClassifier{
 			}
 		}
 		if (thresholdBottom==0)  //如果无法找到合适的阀值
-			thresholdBottom=0.6; //设置下限
+			thresholdBottom=DEFAULT_THRESHOLD; //设置下限
 		else if (thresholdBottom >0.99) { //计算出阀值过于乐观时
 			thresholdBottom =thresholdBottom*0.95;//设置上限
 		}
