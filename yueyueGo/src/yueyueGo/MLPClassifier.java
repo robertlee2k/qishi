@@ -33,7 +33,7 @@ public class MLPClassifier extends NominalClassifier {
 		classifierName="mlp";
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = true;
-		m_skipEvalInBacktest = true;
+		m_skipEvalInBacktest = false;
 		
 		EVAL_RECENT_PORTION = 0.5; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
 		m_sepeperate_eval_HS300=true;//单独为HS300评估阀值
