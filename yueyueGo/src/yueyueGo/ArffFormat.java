@@ -41,9 +41,19 @@ public class ArffFormat {
 	// "shouyilv" 最后一个可能是shouyilv也有可能是positive
 	};
 	
-	public static final int LEFT_COLUMN_NUMBER=10; //交易ARFF数据全集中左侧字段数目（从ID到均线策略之前） 
+
 	
-	//从All Transaction Data中删除无关字段remove attribute: 3-9
+	//交易ARFF数据全集数据的格式 （从ID到均线策略，后面都和trainingarff的相同了）， 总共10个字段
+	public static final String[] ORIGINAL_TRANSACTION_ARFF_FORMAT={
+		"﻿id","yearmonth","tradeDate ","code ","mc_date","股票名称","year","dataDate","positive","均线策略"
+	};
+	
+	//单次收益率增量数据的格式 （从ID到均线策略，后面都和trainingarff的相同了）
+	public static final String[] INCREMENTAL_ARFF_FORMAT={
+		"id","tradeDate","code","mc_date","dataDate","positive","selected_avgline"
+	};
+	
+	//从All Transaction Data中删除无关字段remove attribute: 3-9 (tradeDate到均线策略）
 	public static Instances processAllTransaction(Instances allData) throws Exception{
 		Instances result=FilterData.removeAttribs(allData, "3-9");
 		return result;
@@ -52,14 +62,15 @@ public class ArffFormat {
 	//此方法与上面方法正好相反，从All Transaction Data中保留计算收益率的相关字段保留1-9，以及最后的收益率，删除其他计算字段
 	public static Instances getTransLeftPartFromAllTransaction(Instances allData) throws Exception{
 		//用查找的方式保留下来中间的属性字段
-		int bias10Index= LEFT_COLUMN_NUMBER+2;
+		int left_column_number=ORIGINAL_TRANSACTION_ARFF_FORMAT.length;
+		int bias10Index= left_column_number+2;
 		int codeBegin=0;
 		int codeEnd=0;
 		for (int i=0;i<TRAINING_ARFF_FORMAT.length;i++){
 			if (IS_SZ50.equals(TRAINING_ARFF_FORMAT[i])){
-				codeBegin=LEFT_COLUMN_NUMBER+i-1;
+				codeBegin=left_column_number+i-1;
 			}else if(IS_ZZ500.equals(TRAINING_ARFF_FORMAT[i])){
-				codeEnd=LEFT_COLUMN_NUMBER+i+1;
+				codeEnd=left_column_number+i+1;
 			}
 		}
 		Instances result=FilterData.removeAttribs(allData,bias10Index+"-"+codeBegin+","+codeEnd+"-"+(allData.numAttributes()-1)); //第10-11个字段（均线策略，bias5）保留下来做校验用
