@@ -32,10 +32,10 @@ public class ProcessData {
 //			//预测模型的工作目录
 //			String	 predictPathName="C:\\Users\\robert\\Desktop\\提升均线策略\\03-预测模型\\";
 ////			//用二分类模型预测每日增量数据
-////			MLPClassifier clModel=new MLPClassifier();
+//			MLPClassifier clModel=new MLPClassifier();
 ////
 //////			//用连续模型预测每日增量数据
-//			M5PClassifier clModel=new M5PClassifier();
+////			M5PClassifier clModel=new M5PClassifier();
 //////			//读取数据库预测
 //			predictWithDB(clModel,predictPathName);
 
@@ -80,6 +80,7 @@ public class ProcessData {
 		
 		Instances newData = FileUtility.loadDataFromCSVFile(newDataFile);
 		//TODO 单次收益率的文件格式要修正
+		
 		System.out.println("number of new rows loaded = "+ newData.numInstances());
 		//TODO 调整nominal属性
 		newData=calibrateAttributes("C:\\Users\\robert\\Desktop\\提升均线策略\\03-预测模型\\", newData);
@@ -189,14 +190,21 @@ public class ProcessData {
 					+ newData.numAttributes());
 			
 			String modelFileName;
+			String evalFileName;
 			if (clModel instanceof NominalClassifier ){
 				modelFileName = pathName+"\\"+clModel.classifierName
 						+ "\\交易分析2005-2016 by month-new-mlp-2016 MA " + clModel.m_policySubGroup[j]	;				
+				evalFileName = pathName+"\\"+clModel.classifierName
+						+ "\\交易分析2005-2016 by month-new-mlp-201603 MA " + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
 			}else{
 				modelFileName = pathName+"\\"+clModel.classifierName
 						+ "\\交易分析2005-2016 by month-new-m5p-201603 MA " + clModel.m_policySubGroup[j]	;
+				evalFileName = pathName+"\\"+clModel.classifierName
+						+ "\\交易分析2005-2016 by month-new-m5p-201603 MA " + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
 			}
 
+			clModel.setModelFileName(modelFileName);
+			clModel.setEvaluationFilename(evalFileName);
 	
 
 			if (result == null) {// initialize result instances
@@ -211,8 +219,6 @@ public class ProcessData {
 
 			}
  
-			clModel.setModelFileName(modelFileName);
-			clModel.setEvaluationFilename(modelFileName+MyClassifier.THRESHOLD_EXTENSION);
 			result = clModel.predictData(newData, result);
 			System.out.println("accumulated predicted rows: "+ result.numInstances());
 			System.out.println("complete for 均线策略: " + clModel.m_policySubGroup[j]);
