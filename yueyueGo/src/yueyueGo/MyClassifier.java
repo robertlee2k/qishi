@@ -288,9 +288,9 @@ public abstract class MyClassifier {
 		
 		System.out.println("selected_TPR mean: "+FormatUtility.formatPercent(summary_selected_TPR.getMean()));
 		System.out.println("selected_LIFT mean : "+FormatUtility.formatDouble(summary_lift.getMean()));
-		System.out.println("selected_positive summary: "+summary_selected_positive.getSum());
-		System.out.println("selected_count summary: "+summary_selected_count.getSum());
-		System.out.println("summary_judge_result summary: good number= "+summary_judge_result.getSum() + " bad number=" +(summary_judge_result.getN()-summary_judge_result.getSum()));
+		System.out.println("selected_positive summary: "+FormatUtility.formatDouble(summary_selected_positive.getSum(),8,0));
+		System.out.println("selected_count summary: "+FormatUtility.formatDouble(summary_selected_count.getSum(),8,0));
+		System.out.println("summary_judge_result summary: good number= "+FormatUtility.formatDouble(summary_judge_result.getSum(),8,0) + " bad number=" +FormatUtility.formatDouble((summary_judge_result.getN()-summary_judge_result.getSum()),8,0));
 	}
 	
 	public String getModelFileName() {

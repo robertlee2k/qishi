@@ -206,8 +206,8 @@ public class NominalClassifier extends MyClassifier{
 	public Instances processDataForNominalClassifier(Instances inData) throws Exception{
 		//Attribute oldClassAtt=inData.attribute(ArffFormat.SHOUYILV);
 		ArrayList<String> values=new ArrayList<String>();
-		values.add("0");
-		values.add("1");
+		values.add(ArffFormat.VALUE_NO);
+		values.add(ArffFormat.VALUE_YES);
 		Attribute newClassAtt=new Attribute(ArffFormat.IS_POSITIVE,values);
 		//在classValue之前插入positve,然后记录下它的新位置index
 		inData.insertAttributeAt(newClassAtt, inData.numAttributes()-1);
@@ -216,9 +216,9 @@ public class NominalClassifier extends MyClassifier{
 		for (int i=0;i<inData.numInstances();i++){
 			shouyilv=inData.instance(i).classValue();
 			if (shouyilv>0){
-				inData.instance(i).setValue(newClassIndex, "1");
+				inData.instance(i).setValue(newClassIndex, ArffFormat.VALUE_YES);
 			}else {
-				inData.instance(i).setValue(newClassIndex, "0");
+				inData.instance(i).setValue(newClassIndex, ArffFormat.VALUE_NO);
 			}
 		}
 		//删除shouyilv

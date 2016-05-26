@@ -54,6 +54,7 @@ public class FilterData {
 		return output;
 	}
 
+	//在position的位置插入新的属性 （position从0开始） ，这个方法会创建新的instances后再插入，所以似乎可以直接调用原有instances中的insertAttributeAt方法
 	public static Instances AddAttribute(Instances data, String attributeName,
 			int position) {
 		Instances newData = new Instances(data);
@@ -72,7 +73,7 @@ public class FilterData {
 		return getInstancesSubset(origin,WEKA_ATT_PREFIX+pos+" is '"+ ArffFormat.VALUE_YES+"'");
 	}
 	
-	// 找到指数所属第几个参数（从1开始）
+	// 找到指定数据集中属性所处位置（从1开始）
 	public static int findATTPosition(Instances origin,String attName) {
 		int pos=-1;
 		for (int i=0;i<origin.numAttributes();i++){

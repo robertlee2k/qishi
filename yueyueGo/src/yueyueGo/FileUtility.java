@@ -32,8 +32,8 @@ public class FileUtility {
 		return data;
 	}
 
-	// load full set of data from CSV File
-	protected static Instances loadDataFromCSVFile(String fileName)
+	// 从文件中加载每天的预测数据（该方法不常用，仅限于数据库加载失败时使用）
+	public static Instances loadDailyNewDataFromCSVFile(String fileName)
 			throws Exception {
 		CSVLoader loader = new CSVLoader();
 		loader.setSource(new File(fileName));
@@ -48,13 +48,35 @@ public class FileUtility {
 		//全部读进来之后再转nominal，否则直接加载， nominal的值的顺序会和文件顺序有关，造成数据不对！！！
 		datasrc=FilterData.numToNominal(datasrc, "2,48-56");
 		
-		
 		// 把读入的数据改名 以适应内部训练的arff格式，注意读入的数据里多了第一列的ID
-		datasrc=ArffFormat.trainingAttribMapper(datasrc);
+		datasrc=ArffFormat.trainingAttribMapper(datasrc,1);
 		if (datasrc.classIndex() == -1)
 			  datasrc.setClassIndex(datasrc.numAttributes() - 1);
 		return datasrc;
 	}
+	
+	
+	// 从增量的交易CSV文件中加载数据
+	public static Instances loadDataFromIncrementalCSVFile(String fileName)
+				throws Exception {
+			CSVLoader loader = new CSVLoader();
+			loader.setSource(new File(fileName));
+
+			//loader.setNumericAttributes("1-91");//先把所有的数据设为numeric,
+			
+			//数据全部读进来之后再看怎么转nominal，否则直接加载， nominal的值的顺序会和文件顺序有关，造成数据不对
+			Instances datasrc = loader.getDataSet();
+			
+			datasrc=FilterData.numToNominal(datasrc, "2-7,53-61");
+			
+			
+			// 把读入的数据改名 以适应内部训练的arff格式，更名从均线策略这里开始
+			datasrc=ArffFormat.trainingAttribMapper(datasrc,ArffFormat.INCREMENTAL_ARFF_FORMAT.length-1);
+			if (datasrc.classIndex() == -1)
+				  datasrc.setClassIndex(datasrc.numAttributes() - 1);
+			return datasrc;
+		}
+	
 	protected static void SaveDataIntoFile(Instances dataSet, String fileName) throws IOException {
 
 		ArffSaver saver = new ArffSaver();
