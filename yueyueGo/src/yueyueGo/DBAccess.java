@@ -38,7 +38,8 @@ public class DBAccess  {
 //		//全部读进来之后再转nominal，否则直接加载， nominal的值的顺序会和文件顺序有关，造成数据不对！！！
 		data=FilterData.numToNominal(data, "2,48-56");
 
-		data=ArffFormat.trainingAttribMapper(data);
+		//把读入的数据改名 以适应内部训练的arff格式,读入的数据里多了第一列的ID
+		data=ArffFormat.trainingAttribMapper(data,1);
 		data.setClassIndex(data.numAttributes()-1);
 		System.out.println("records loaded from database: "+data.numInstances());
 		return data;

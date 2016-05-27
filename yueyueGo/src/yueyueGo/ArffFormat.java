@@ -10,6 +10,7 @@ import weka.core.Instances;
 public class ArffFormat {
 	public static final String ARFF_FILE="AllTransaction20052016-new.arff";
 	public static final String SELECTED_MA="均线策略";
+	public static final String SELECTED_MA_IN_OTHER_SYSTEM="selected_avgline"; //输入输出文件中的“均线策略”名称
 	public static final String IS_HS300="属沪深300指数";
 	public static final String IS_ZZ500="属中证500指数";
 	public static final String IS_SZ50="属上证50指数";
@@ -17,7 +18,15 @@ public class ArffFormat {
 	public static final String IS_POSITIVE="positive";
 	public static final String VALUE_YES="1";
 	public static final String VALUE_NO="0";
+	
+	public static final String RESULT_PREDICTED_VALUE="PredictedValue";
+	public static final String RESULT_SELECTED="selected";
 
+	public static final String TRADE_DATE="tradeDate"; //之所以定义这个字段，是因为所有的数据都要以它排序
+	public static final String SELL_DATE="mc_date";
+	public static final String DATA_DATE="dataDate";
+	
+	public static final String ID="id"; 
 	public static final int ID_POSITION = 1; // ID的位置
 	
 	//用于training的数据顺序
@@ -45,13 +54,25 @@ public class ArffFormat {
 	
 	//交易ARFF数据全集数据的格式 （从ID到均线策略，后面都和trainingarff的相同了）， 总共10个字段
 	public static final String[] ORIGINAL_TRANSACTION_ARFF_FORMAT={
-		"﻿id","yearmonth","tradeDate ","code ","mc_date","股票名称","year","dataDate","positive","均线策略"
+		ID,"yearmonth",TRADE_DATE,"code",SELL_DATE,"股票名称","year",DATA_DATE,IS_POSITIVE,SELECTED_MA
 	};
+	
 	
 	//单次收益率增量数据的格式 （从ID到均线策略，后面都和trainingarff的相同了）
 	public static final String[] INCREMENTAL_ARFF_FORMAT={
-		"id","tradeDate","code","mc_date","dataDate","positive","selected_avgline"
+		ID,TRADE_DATE,"code",SELL_DATE,DATA_DATE,IS_POSITIVE,SELECTED_MA_IN_OTHER_SYSTEM
 	};
+	
+	//每日数据（数据库和数据文件都是如此)的格式（从ID到均线策略，后面都和trainingarff的相同了）
+	public static final String[] DAILY_DATA_TO_PREDICT_FORMAT={
+		ID,SELECTED_MA_IN_OTHER_SYSTEM
+	};
+	
+
+	//读取的数据源（每日预测数据和单次收益率数据）中的日期格式
+	public static final String INPUT_DATE_FORMAT="yyyy/M/d";
+	//ARFF文件中的日期格式
+	public static final String ARFF_DATE_FORMAT="M/d/yyyy";
 	
 	//从All Transaction Data中删除无关字段remove attribute: 3-9 (tradeDate到均线策略）
 	public static Instances processAllTransaction(Instances allData) throws Exception{
@@ -143,16 +164,16 @@ public class ArffFormat {
 		}
 		return result;
 	}	
-	//将输入文件和training数据顺序对比
-	public static Instances trainingAttribMapper(Instances data) {
-		// 把读入的数据改名 以适应内部训练的arff格式，注意读入的数据里多了第一列的ID
+	//将输入文件和training数据顺序对比 ，bypassColumnCount是指需要忽略掉的colum数（比如每日增量里多了一列ID需要忽略）
+	public static Instances trainingAttribMapper(Instances data,int bypassColumnCount) {
+		// 把读入的数据改名 以适应内部训练的arff格式
 		for (int i = 0; i < TRAINING_ARFF_FORMAT.length; i++) {
-			if (TRAINING_ARFF_FORMAT[i].equals(data.attribute(i + 1).name()) == false) {
+			if (TRAINING_ARFF_FORMAT[i].equals(data.attribute(i + bypassColumnCount).name()) == false) {
 				System.out.println("rename input db column name ["
-						+ data.attribute(i + 1).name()
+						+ data.attribute(i + bypassColumnCount).name()
 						+ "] to training attribuate name ["
 						+ ArffFormat.TRAINING_ARFF_FORMAT[i] + "]");
-				data.renameAttribute(i + 1, TRAINING_ARFF_FORMAT[i]);
+				data.renameAttribute(i + bypassColumnCount, TRAINING_ARFF_FORMAT[i]);
 
 			}
 		}
