@@ -15,8 +15,7 @@ public class ProcessData {
 	public static final String yearPosition = "2"; // 分割訓練集和測試集的年份所處的位置
 	
 	// "200801","200802","200803","200804","200805","200806","200807","200808","200809","200810","200811","200812","200901","200902","200903","200904","200905","200906","200907","200908","200909","200910","200911","200912","201001","201002","201003","201004","201005","201006","201007","201008","201009","201010","201011","201012","201101","201102","201103","201104","201105","201106","201107","201108","201109","201110","201111","201112","201201","201202","201203","201204","201205","201206","201207","201208","201209","201210","201211","201212","201301","201302","201303","201304","201305","201306","201307","201308","201309","201310","201311","201312","201401","201402","201403","201404","201405","201406","201407","201408","201409","201410","201411","201412","201501","201502","201503","201504","201505","201506","201507","201508","201509","201510","201511","201512","201601","201602","201603"};
-	public static final String[] splitYear ={"201604"};
-		//{"200801","200802","200803","200804","200805","200806","200807","200808","200809","200810","200811","200812","200901","200902","200903","200904","200905","200906","200907","200908","200909","200910","200911","200912","201001","201002","201003","201004","201005","201006","201007","201008","201009","201010","201011","201012","201101","201102","201103","201104","201105","201106","201107","201108","201109","201110","201111","201112","201201","201202","201203","201204","201205","201206","201207","201208","201209","201210","201211","201212","201301","201302","201303","201304","201305","201306","201307","201308","201309","201310","201311","201312","201401","201402","201403","201404","201405","201406","201407","201408","201409","201410","201411","201412","201501","201502","201503","201504","201505","201506","201507","201508","201509","201510","201511","201512","201601","201602","201603"};
+	public static final String[] splitYear ={"200801","200802","200803","200804","200805","200806","200807","200808","200809","200810","200811","200812","200901","200902","200903","200904","200905","200906","200907","200908","200909","200910","200911","200912","201001","201002","201003","201004","201005","201006","201007","201008","201009","201010","201011","201012","201101","201102","201103","201104","201105","201106","201107","201108","201109","201110","201111","201112","201201","201202","201203","201204","201205","201206","201207","201208","201209","201210","201211","201212","201301","201302","201303","201304","201305","201306","201307","201308","201309","201310","201311","201312","201401","201402","201403","201404","201405","201406","201407","201408","201409","201410","201411","201412","201501","201502","201503","201504","201505","201506","201507","201508","201509","201510","201511","201512","201601","201602","201603","201604"};
 		
 
 	
@@ -32,25 +31,24 @@ public class ProcessData {
 			
 			
 
-			//预测模型的工作目录
-			String	 predictPathName="C:\\Users\\robert\\Desktop\\提升均线策略\\03-预测模型\\";
-			//用二分类模型预测每日增量数据
-			MLPClassifier nModel=new MLPClassifier();
-			predictWithDB(nModel,predictPathName);
-			//用连续模型预测每日增量数据
-			M5PClassifier cModel=new M5PClassifier();
-			//读取数据库预测
-			predictWithDB(cModel,predictPathName);
+//			//预测模型的工作目录
+//			String	 predictPathName="C:\\Users\\robert\\Desktop\\提升均线策略\\03-预测模型\\";
+//			//用二分类模型预测每日增量数据
+//			MLPClassifier nModel=new MLPClassifier();
+//			predictWithDB(nModel,predictPathName);
+//			//用连续模型预测每日增量数据
+//			M5PClassifier cModel=new M5PClassifier();
+//			//读取数据库预测
+//			predictWithDB(cModel,predictPathName);
 
 			
-			//使用文件预测
+//			//使用文件预测
 //			String dataFileName=("zengliang"+FormatUtility.getDateStringFor(1)).trim();
 //			predictWithFile(clModel,predictPathName,dataFileName);
 
-//			
-//			//按二分类器回测历史数据
-//			MLPClassifier nModel = new MLPClassifier();
-//			testBackward(nModel);
+			//按二分类器回测历史数据
+			MLPClassifier nModel = new MLPClassifier();
+			testBackward(nModel);
 //			
 //			//按连续分类器回测历史数据
 //			M5PClassifier cModel=new M5PClassifier();
@@ -68,6 +66,8 @@ public class ProcessData {
 			e.printStackTrace();
 		}
 	}
+
+
 
 	//这里是用最近一年的数据刷新最原始的文件，调整完再用processHistoryData生成有计算字段之后的数据
 	protected static void refreshArffFileForYear(int year, String newDataFile) throws Exception {
@@ -255,9 +255,9 @@ public class ProcessData {
 						+ "\\交易分析2005-2016 by month-new-mlp-201603 MA " + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
 			}else{
 				modelFileName = pathName+"\\"+clModel.classifierName
-						+ "\\交易分析2005-2016 by month-new-m5p-201603 MA " + clModel.m_policySubGroup[j]	;
+						+ "\\交易分析2005-2016 by month-new-m5p-201604 MA " + clModel.m_policySubGroup[j]	;
 				evalFileName = pathName+"\\"+clModel.classifierName
-						+ "\\交易分析2005-2016 by month-new-m5p-201603 MA " + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
+						+ "\\交易分析2005-2016 by month-new-m5p-201604 MA " + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
 			}
 
 			clModel.setModelFileName(modelFileName);
@@ -647,8 +647,12 @@ public class ProcessData {
 		//返回结果之前需要按TradeDate重新排序
 		int tradeDateIndex=FilterData.findATTPosition(mergedResult, ArffFormat.TRADE_DATE);
 		mergedResult.sort(tradeDateIndex-1);
+		
+		//输出前改名
+		mergedResult.renameAttribute(mergedResult.attribute(ArffFormat.SELECTED_MA), ArffFormat.SELECTED_MA_IN_OTHER_SYSTEM);
 		//给mergedResult瘦身。
 		mergedResult=FilterData.removeAttribs(mergedResult, "1-2,6-9,11");
+
 
 		return mergedResult;
 	}
