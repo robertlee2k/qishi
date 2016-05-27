@@ -1,9 +1,7 @@
 package yueyueGo;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.List;
 
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
@@ -56,14 +54,13 @@ public class ProcessData {
 //			M5PClassifier clModel=new M5PClassifier();
 //			testBackward(clModel);
 
-			//转存模型为WEKA格式
-			//FileWriter.convertMyModelToWekaModel(clModel.WORK_PATH+"temp\\","交易分析2005-2016 by monthtrain201312MA5.model");
+		
+			//用最新的单次交易数据，更新原始的交易数据文件
+			refreshArffFileForYear(2016,"C:\\Users\\robert\\Desktop\\提升均线策略\\单次收益率20160101-20160430.txt");
 
 			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
-//			processHistoryFile();
+			processHistoryFile();
 			
-			//更新交易数据文件
-			refreshArffFileForYear(2016,"C:\\Users\\robert\\Desktop\\提升均线策略\\单次收益率20160101-20160430.txt");
 		} catch (Exception e) {
 			
 			e.printStackTrace();
@@ -73,11 +70,19 @@ public class ProcessData {
 	//这里是用最近一年的数据刷新最原始的文件，调整完再用processHistoryData生成有计算字段之后的数据
 	protected static void refreshArffFileForYear(int year, String newDataFile) throws Exception {
 		System.out.println("loading original history file into memory "  );
-		String originFileName="C:\\Users\\robert\\Desktop\\提升均线策略\\AllTransaction20052016-short";
-		Instances originData = FileUtility.loadDataFromFile(originFileName+".arff");
+		String originFileName="C:\\Users\\robert\\Desktop\\提升均线策略\\AllTransaction20052016";
+		Instances originData = FileUtility.loadDataFromFile(originFileName+"-origin.arff");
 		
+		//做这个处理是因为不知为何有时id之前会出现全角空格
+		if (ArffFormat.ID.equals(originData.attribute(ArffFormat.ID_POSITION-1).name())==false){
+			originData.renameAttribute(ArffFormat.ID_POSITION-1, ArffFormat.ID);
+		}
+		//将股票代码，交易日期之类的字段变换为String格式
+		originData=FilterData.NominalToString(originData, "3-6,8");
 
 		int originNumber=originData.numInstances() ;
+
+
 		System.out.println("finish  loading original File row : "+ originNumber + " column:"+ originData.numAttributes());
 		//将原始文件里的原有的该年数据删除
 		String splitCurrentYearClause = "( ATT" + yearPosition + " < " + year + "01) or ( ATT" + yearPosition+ " > "	+ year + "12) ";
@@ -87,59 +92,70 @@ public class ProcessData {
 		
 		
 		Instances newData = FileUtility.loadDataFromIncrementalCSVFile(newDataFile);
-//		// for testing use
-//		originData=FilterData.getInstancesSubset(originData, "ATT2>201511");
-//		FileUtility.SaveDataIntoFile(originData, "C:\\Users\\robert\\Desktop\\提升均线策略\\AllTransaction20052016-short.arff");
-		newData=FilterData.getInstancesSubset(newData, "ATT1<6422038");
+		
+//		newData=FilterData.getInstancesSubset(newData, "ATT1<6422038");
 				
 		
 		
 		//将单次收益率增量数据修正成为原始文件数据格式（yearmonth重新计算，插入一列空的股票代码和year（这两列暂时用不上），改名“均线策略”）
-		int yearMonthIndex=FilterData.findATTPosition(newData, "id"); //在ID之后插入
-		int stockNameIndex=FilterData.findATTPosition(newData, "mc_date"); //在MC_DATA之后插入
+		int yearMonthIndex=FilterData.findATTPosition(newData, ArffFormat.ID); //在ID之后插入
+		int stockNameIndex=FilterData.findATTPosition(newData, ArffFormat.SELL_DATE); //在MC_DATA之后插入
 		newData.insertAttributeAt(new Attribute("yearmonth"), yearMonthIndex);
-	    newData.insertAttributeAt(new Attribute("year"),stockNameIndex+1); //加1的原因是上面已经插入了yearmonth
-	    newData.insertAttributeAt(new Attribute("股票名称"),stockNameIndex+2); //加2的原因是上面已经插入了两个属性
+		List<String> attLabels=null;
+		newData.insertAttributeAt(new Attribute("股票名称",attLabels),stockNameIndex+1);//加1的原因是上面已经插入了yearmonth
+		newData.insertAttributeAt(new Attribute("year"),stockNameIndex+2);//加2的原因是上面已经插入了两个属性 
+	     
 	    
 	    
 	    System.out.println("!!!!!verifying new data format , you should read this .... "+ filteredData.equalHeadersMsg(newData));
 	    //重新计算yearmonth
-	    Attribute tradeDateAtt=newData.attribute("tradeDate");
+	    Attribute tradeDateAtt=newData.attribute(ArffFormat.TRADE_DATE);
+	    Attribute mcDateAtt=newData.attribute(ArffFormat.SELL_DATE);
+	    Attribute dataDateAtt=newData.attribute(ArffFormat.DATA_DATE);
 	    Attribute yearMonthAtt=newData.attribute("yearmonth");
 	    Instance curr;
 	    String tradeDate;
 	    double ym;
 	    for (int i=0;i<newData.numInstances();i++){
 	    	curr=newData.instance(i);
+	    	
 	    	tradeDate=curr.stringValue(tradeDateAtt);
-		    ym=FormatUtility.parseYearMonth(tradeDate);
+	    	//设置yearmonth
+	    	ym=FormatUtility.parseYearMonth(tradeDate);
 		    curr.setValue(yearMonthAtt, ym);
-		    curr.setDataset(filteredData);
-		    filteredData.add(curr);
+		    //修改日期格式
+		    curr.setValue(tradeDateAtt, FormatUtility.convertDate(tradeDate));
+		    curr.setValue(mcDateAtt, FormatUtility.convertDate(curr.stringValue(mcDateAtt)));
+		    curr.setValue(dataDateAtt, FormatUtility.convertDate(curr.stringValue(dataDateAtt)));
+		    
 	    }
 		
 		System.out.println("number of new rows added = "+ newData.numInstances());
-		//TODO 调整nominal属性
-	//	newData=calibrateAttributes("C:\\Users\\robert\\Desktop\\提升均线策略\\03-预测模型\\", newData);
+
+		calibrateAttributes(newData,filteredData);
+
 		System.out.println("number of refreshed dataset = "+filteredData.numInstances());
-		//保险起见把新数据按ID重新排序，虽然这样比较花时间，但可以确保ID升序。
-		//TODO 数据库中ID普遍比原始手工SPSS文件大，应该重新处理，因为在原有体系中ID升序隐含着日期升序的含义。
-		filteredData.sort(0);
+		//保险起见把新数据按日期重新排序，虽然这样比较花时间，但可以确保日后处理时按tradeDate升序。
+		filteredData.sort(2);
 		System.out.println("new arff file sorted, start to save....");
-		FileUtility.SaveDataIntoFile(filteredData, originFileName+"-refreshed.arff");
-		System.out.println("new arff file saved....");
+		FileUtility.SaveDataIntoFile(filteredData, originFileName+".arff");
+		System.out.println("new arff file saved, mission completed.");
+
+		// for testing use
+		filteredData=FilterData.getInstancesSubset(filteredData, "ATT2>201501");
+		FileUtility.SaveDataIntoFile(filteredData, originFileName+"-sample.arff");
 	}
 
 
 
 	protected static void processHistoryFile() throws Exception {
-		System.out.println("loading original history file into memory "  );
+		System.out.println("loading history file into memory "  );
 		String originFileName="C:\\Users\\robert\\Desktop\\提升均线策略\\AllTransaction20052016";
 		Instances fullSetData = FileUtility.loadDataFromFile(originFileName+".arff");
 		System.out.println("finish  loading fullset File  row : "+ fullSetData.numInstances() + " column:"+ fullSetData.numAttributes());
 		// 去除与训练无关的字段
 		Instances result=ArffFormat.processAllTransaction(fullSetData);
-//		//保存训练用的format，用于做日后的校验 ，这是段临时代码
+//		//保存训练用的format，用于做日后的校验 
 		Instances format=new Instances(result,0);
 		FileUtility.SaveDataIntoFile(format, originFileName+"-format.arff");		
 		
@@ -193,7 +209,7 @@ public class ProcessData {
 		Instances result = null;
 
 		//TODO 调整nominal属性
-		Instances fullData=calibrateAttributes(pathName, inData);
+		Instances fullData=calibrateAttributesForDailyData(pathName, inData);
 	
 		//把计算字段加上
 		fullData=ArffFormat.addCalculateAttribute(fullData);		
@@ -305,8 +321,7 @@ public class ProcessData {
 					fullSetData.renameAttribute(maIndex-1, "policy");
 				}
 
-//				//TODO 单独过滤出HS300
-//				fullSetData = FilterData.filterDataForIndex(fullSetData, ArffFormat.IS_HS300);			
+		
 			}
 			// 准备输出数据格式
 			if (result == null) {// initialize result instances
@@ -464,25 +479,34 @@ public class ProcessData {
 	}
 
 	//这是对增量数据nominal label的处理 （因为增量数据中的nominal数据，label会可能不全）
-	private static Instances calibrateAttributes(String pathName,Instances incomingData) throws Exception {
+	private static Instances calibrateAttributesForDailyData(String pathName,Instances incomingData) throws Exception {
 		
 		//与本地格式数据比较，这地方基本上会有nominal数据的label不一致，临时处理办法就是先替换掉
 		Instances format=FileUtility.loadDataFromFile(pathName+"AllTransaction20052016-format.arff");
 		format=FilterData.removeAttribs(format, "2");
 		System.out.println("!!!!!verifying input data format , you should read this .... "+ format.equalHeadersMsg(incomingData));
-		for (int m=0; m<incomingData.numInstances();m++){
-			Instance inst=new DenseInstance(format.numAttributes());
-			inst.setDataset(format);
-			for (int n = 0; n < incomingData.numAttributes() - 1; n++) { 
-				Attribute incomingAtt = incomingData.attribute(n);
-				Attribute formatAtt=format.attribute(n);
+		calibrateAttributes(incomingData, format);
+		return format;
+	}
+
+	/**
+	 * read all data from input , add them to the output instances using output format
+	 * output instances will be changed in this method!
+	 */
+	private static void calibrateAttributes(Instances input,
+			Instances output) throws Exception, IllegalStateException {
+		for (int m=0; m<input.numInstances();m++){
+			Instance inst=new DenseInstance(output.numAttributes());
+			inst.setDataset(output);
+			for (int n = 0; n < input.numAttributes() - 1; n++) { 
+				Attribute incomingAtt = input.attribute(n);
+				Attribute formatAtt=output.attribute(n);
 				
 				String formatAttName=formatAtt.name();
 				String incomingAttName=incomingAtt.name();
+				Instance curr=input.instance(m);
 				if (formatAttName.equals(incomingAttName)){
-					//System.out.println("processing incoming attribute: "+incomingAttName+ " using format attribute: "+formatAttName);
 					if (formatAtt.isNominal()) {
-						Instance curr=incomingData.instance(m);
 						String label = curr.stringValue(incomingAtt);
 						if ("?".equals(label)){
 							System.out.println("Attribute value is empty. value= "+ label+" @ "+ incomingAttName );
@@ -491,22 +515,23 @@ public class ProcessData {
 							if (index != -1) {
 								inst.setValue(n, index);
 							}else{
-								throw new Exception("!!!!Attribute value invalid!!! value= "+ label+" @ "+ incomingAttName + " & "+ formatAttName);
+								throw new Exception("Attribute value is invalid. value= "+ label+" @ "+ incomingAttName + " & "+ formatAttName);
 							}
 						}
+					} else if (formatAtt.isString()) {
+						String label = curr.stringValue(incomingAtt);
+						inst.setValue(n, label);
 					} else if (formatAtt.isNumeric()) {
-						inst.setValue(n, incomingData.instance(m).value(incomingAtt));
+						inst.setValue(n, input.instance(m).value(incomingAtt));
 					} else {
 						throw new IllegalStateException("Unhandled attribute type!");
 					}
 				}else {
 					throw new Exception("Attribute order error! "+ incomingAttName + " vs. "+ formatAttName);
-//					System.out.println("Attribute order error! "+ incomingAttName + " vs. "+ formatAttName);
 				}
 			}
-			format.add(inst);
+			output.add(inst);
 		}
-		return format;
 	}
 	
 //	//这是对增量数据nominal label的处理 （因为增量数据中的nominal数据，label会可能不全）
@@ -566,8 +591,9 @@ public class ProcessData {
 		Attribute rightPredict=right.attribute(ArffFormat.RESULT_PREDICTED_VALUE);
 		Attribute rightSelected=right.attribute(ArffFormat.RESULT_SELECTED);
 		
-		//传入的结果集right不是排序的,而left的数据是排序的， 所以先按ID排序。
-		right.sort(0);
+		//传入的结果集right不是排序的,而left的数据是按tradeDate日期排序的， 所以都先按ID排序。
+		left.sort(ArffFormat.ID_POSITION-1);
+		right.sort(ArffFormat.ID_POSITION-1);
 		
 		for (int i=0;i<left.numInstances();i++){	
 			leftCurr=left.instance(i);
@@ -612,6 +638,10 @@ public class ProcessData {
 		}else {
 			System.out.println("number of results merged and processed: "+ processed);
 		}
+		
+		//返回结果之前需要按TradeDate重新排序
+		int tradeDateIndex=FilterData.findATTPosition(mergedResult, ArffFormat.TRADE_DATE);
+		mergedResult.sort(tradeDateIndex-1);
 
 		return mergedResult;
 	}

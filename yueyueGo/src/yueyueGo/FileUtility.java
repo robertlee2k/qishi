@@ -68,7 +68,10 @@ public class FileUtility {
 			Instances datasrc = loader.getDataSet();
 			
 			datasrc=FilterData.numToNominal(datasrc, "2-7,53-61");
-			
+			// I do the following according to a saying from the weka forum:
+			//"You can't add a value to a nominal attribute once it has been created. 
+			//If you want to do this, you need to use a string attribute instead." 
+			datasrc=FilterData.NominalToString(datasrc, "2-5");
 			
 			// 把读入的数据改名 以适应内部训练的arff格式，更名从均线策略这里开始
 			datasrc=ArffFormat.trainingAttribMapper(datasrc,ArffFormat.INCREMENTAL_ARFF_FORMAT.length-1);

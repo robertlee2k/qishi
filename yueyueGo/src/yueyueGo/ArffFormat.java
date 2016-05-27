@@ -22,6 +22,11 @@ public class ArffFormat {
 	public static final String RESULT_PREDICTED_VALUE="PredictedValue";
 	public static final String RESULT_SELECTED="selected";
 
+	public static final String TRADE_DATE="tradeDate"; //之所以定义这个字段，是因为所有的数据都要以它排序
+	public static final String SELL_DATE="mc_date";
+	public static final String DATA_DATE="dataDate";
+	
+	public static final String ID="id"; 
 	public static final int ID_POSITION = 1; // ID的位置
 	
 	//用于training的数据顺序
@@ -49,18 +54,25 @@ public class ArffFormat {
 	
 	//交易ARFF数据全集数据的格式 （从ID到均线策略，后面都和trainingarff的相同了）， 总共10个字段
 	public static final String[] ORIGINAL_TRANSACTION_ARFF_FORMAT={
-		"﻿id","yearmonth","tradeDate","code","mc_date","股票名称","year","dataDate",IS_POSITIVE,SELECTED_MA
+		ID,"yearmonth",TRADE_DATE,"code",SELL_DATE,"股票名称","year",DATA_DATE,IS_POSITIVE,SELECTED_MA
 	};
+	
 	
 	//单次收益率增量数据的格式 （从ID到均线策略，后面都和trainingarff的相同了）
 	public static final String[] INCREMENTAL_ARFF_FORMAT={
-		"id","tradeDate","code","mc_date","dataDate",IS_POSITIVE,SELECTED_MA_IN_OTHER_SYSTEM
+		ID,TRADE_DATE,"code",SELL_DATE,DATA_DATE,IS_POSITIVE,SELECTED_MA_IN_OTHER_SYSTEM
 	};
 	
 	//每日数据（数据库和数据文件都是如此)的格式（从ID到均线策略，后面都和trainingarff的相同了）
 	public static final String[] DAILY_DATA_TO_PREDICT_FORMAT={
-		"id",SELECTED_MA_IN_OTHER_SYSTEM
+		ID,SELECTED_MA_IN_OTHER_SYSTEM
 	};
+	
+
+	//读取的数据源（每日预测数据和单次收益率数据）中的日期格式
+	public static final String INPUT_DATE_FORMAT="yyyy/M/d";
+	//ARFF文件中的日期格式
+	public static final String ARFF_DATE_FORMAT="M/d/yyyy";
 	
 	//从All Transaction Data中删除无关字段remove attribute: 3-9 (tradeDate到均线策略）
 	public static Instances processAllTransaction(Instances allData) throws Exception{

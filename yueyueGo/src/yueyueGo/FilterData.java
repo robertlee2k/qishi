@@ -3,6 +3,7 @@ package yueyueGo;
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.NominalToString;
 import weka.filters.unsupervised.attribute.NumericToNominal;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.filters.unsupervised.instance.SubsetByExpression;
@@ -23,7 +24,19 @@ public class FilterData {
 		return newData;
 	}
 	
-
+	// 转换numeric为String
+	public static Instances NominalToString(Instances data, String attribPos)
+			throws Exception {
+		String[] options = new String[2];
+		options[0] = "-C"; // "range"
+		options[1] = attribPos; // attribute position
+		NominalToString convert = new NominalToString();
+		convert.setOptions(options);
+		convert.setInputFormat(data);
+		Instances newData = Filter.useFilter(data, convert); // apply filter
+		return newData;
+	}
+	
 	
 	
 	//删除指定的列（此处的index是从1开始）
