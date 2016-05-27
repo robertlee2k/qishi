@@ -32,13 +32,13 @@ public class ProcessData {
 
 			//预测模型的工作目录
 //			String	 predictPathName="C:\\Users\\robert\\Desktop\\提升均线策略\\03-预测模型\\";
-////			//用二分类模型预测每日增量数据
-//			MLPClassifier clModel=new MLPClassifier();
-////
-//////			//用连续模型预测每日增量数据
-////			M5PClassifier clModel=new M5PClassifier();
-//////			//读取数据库预测
-//			predictWithDB(clModel,predictPathName);
+//			//用二分类模型预测每日增量数据
+//			MLPClassifier nModel=new MLPClassifier();
+//			predictWithDB(nModel,predictPathName);
+//			//用连续模型预测每日增量数据
+//			M5PClassifier cModel=new M5PClassifier();
+//			//读取数据库预测
+//			predictWithDB(cModel,predictPathName);
 
 			
 			//使用文件预测
@@ -47,19 +47,19 @@ public class ProcessData {
 
 			
 			//按二分类器回测历史数据
-//			MLPClassifier clModel = new MLPClassifier();
-//			testBackward(clModel);
+			MLPClassifier nModel = new MLPClassifier();
+			testBackward(nModel);
 			
-//			//按连续分类器回测历史数据
-//			M5PClassifier clModel=new M5PClassifier();
-//			testBackward(clModel);
+			//按连续分类器回测历史数据
+			M5PClassifier cModel=new M5PClassifier();
+			testBackward(cModel);
 
 		
-			//用最新的单次交易数据，更新原始的交易数据文件
-			refreshArffFileForYear(2016,"C:\\Users\\robert\\Desktop\\提升均线策略\\单次收益率20160101-20160430.txt");
-
-			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
-			processHistoryFile();
+//			//用最新的单次交易数据，更新原始的交易数据文件
+//			refreshArffFileForYear(2016,"C:\\Users\\robert\\Desktop\\提升均线策略\\单次收益率20160101-20160430.txt");
+//
+//			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
+//			processHistoryFile();
 			
 		} catch (Exception e) {
 			
