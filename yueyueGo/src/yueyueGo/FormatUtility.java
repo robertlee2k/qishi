@@ -76,4 +76,19 @@ public class FormatUtility {
 		return parsed;
 	}
 	
+	public static final double LOWER_LIMIT=-0.005;
+	public static final double UPPER_LIMIT=0.005;
+	public static boolean compareDouble(double first,double second) {
+		boolean result=false;
+		double compare=0.0;
+		if (second!=0){
+			compare=first/second-1;
+		}else{
+			compare=first-second;
+		}
+		if (compare>=LOWER_LIMIT && compare<=UPPER_LIMIT){
+			result=true;
+		}
+		return result;
+	}
 }
