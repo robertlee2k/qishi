@@ -146,10 +146,11 @@ public class ProcessData {
 						originMa=originRow.value(maIndex-1);
 						refreshedMa=refreshedRow.value(maIndex-1);
 						if (originMa!=refreshedMa){
-							System.out.println("--------------------------fatal error---------------------------");
+							System.out.println("--------------------------probabily original data error---------------------------");
+							System.out.println("daily origin and refreshed MA are not same on date "+tradeDate+" for code:"+code+" origin/refreshed MA= "+originMa+" vs. "+refreshedMa);
 							System.out.println(originRow.toString());
 							System.out.println(refreshedRow.toString());
-							throw new Exception("daily data origin and refreshed data are not same on date "+tradeDate+" for code:"+code+" origin/refreshed MA= "+originMa+" vs. "+refreshedMa);
+							rowDiffer++;
 						}else{
 							for (int n = 10; n < originRow.numAttributes() ; n++) { //跳过左边的值 
 
@@ -162,9 +163,9 @@ public class ProcessData {
 										String originAttName=originAtt.name();
 										String refreshedAttName=refresedAtt.name();
 										System.out.println("@"+tradeDate+"@"+code+" Attribute value is not the same. value= "+ originValue+" vs."+refreshedValue+" @ "+originAttName + " & "+ refreshedAttName);;
+										rowDiffer++;
 										System.out.println(originRow.toString());
 										System.out.println(refreshedRow.toString());
-										rowDiffer++;
 										break;
 									}
 								} else if (originAtt.isNumeric()) {
@@ -176,10 +177,13 @@ public class ProcessData {
 										String originAttName=originAtt.name();
 										String refreshedAttName=refresedAtt.name();
 										System.out.println("@"+tradeDate+"@"+code+" Attribute value is not the same. value= "+ originValue+" vs."+refreshedValue+" @ "+originAttName + " & "+ refreshedAttName+ " difference= "+difference);;
-										System.out.println(originRow.toString());
-										System.out.println(refreshedRow.toString());										
 										rowDiffer++;
-										break;
+										//TODO临时屏蔽换手率的错误
+										if ("换手率".equals(originAttName)==false){
+											System.out.println(originRow.toString());
+											System.out.println(refreshedRow.toString());										
+											break;
+										}
 									}
 								} else {
 									throw new IllegalStateException("Unhandled attribute type!");
