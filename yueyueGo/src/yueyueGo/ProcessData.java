@@ -31,15 +31,15 @@ public class ProcessData {
 			
 			
 
-//			预测模型的工作目录
-//			String	 predictPathName="C:\\Users\\robert\\Desktop\\提升均线策略\\03-预测模型\\";
-//			//用二分类模型预测每日增量数据
-//			MLPClassifier nModel=new MLPClassifier();
-//			predictWithDB(nModel,predictPathName);
-//			//用连续模型预测每日增量数据
-//			M5PClassifier cModel=new M5PClassifier();
-//			//读取数据库预测
-//			predictWithDB(cModel,predictPathName);
+			////预测模型的工作目录
+			String	 predictPathName="C:\\Users\\robert\\Desktop\\提升均线策略\\03-预测模型\\";
+			//用二分类模型预测每日增量数据
+			MLPClassifier nModel=new MLPClassifier();
+			predictWithDB(nModel,predictPathName);
+			//用连续模型预测每日增量数据
+			M5PClassifier cModel=new M5PClassifier();
+			//读取数据库预测
+			predictWithDB(cModel,predictPathName);
 
 			
 //			//使用文件预测
@@ -55,13 +55,13 @@ public class ProcessData {
 //			testBackward(cModel);
 
 		
-			//用最新的单次交易数据，更新原始的交易数据文件
-			int refreshedYear=2016;
-//			refreshArffFileForYear(refreshedYear,"C:\\Users\\robert\\Desktop\\提升均线策略\\单次收益率新（20160101-20160430）.txt");
-//
-//			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
-//			processHistoryFile();
-			compareRefreshedInstancesForYear(refreshedYear);
+//			//用最新的单次交易数据，更新原始的交易数据文件
+//			int refreshedYear=2016;
+////			refreshArffFileForYear(refreshedYear,"C:\\Users\\robert\\Desktop\\提升均线策略\\单次收益率新（20160101-20160430）.txt");
+////
+////			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
+////			processHistoryFile();
+//			compareRefreshedInstancesForYear(refreshedYear);
 		} catch (Exception e) {
 			
 			e.printStackTrace();
@@ -113,7 +113,7 @@ public class ProcessData {
 		String lastDate=null;
 		String lastCode=null;
 		
-		while (cursor<originDataSize){
+		while (cursor<refreshedDataSize){
 
 			//从原始数据全集中取出某天某只股票的数据，然后对刷新数据也如此操作进行比对
 			tradeDate=originData.instance(cursor).stringValue(tradeDateIndex-1);
@@ -204,6 +204,7 @@ public class ProcessData {
 			}else{
 				System.out.println("daily data size in origin and refreshed data are not same on date "+tradeDate+" for code:"+code+" origin/refreshed data number= "+originDailyDataSize+" vs. "+refreshedDailyDataSize);
 				rowDiffer+=originDailyDataSize-refreshedDailyDataSize;
+				cursor++;
 			}			
 		}// end while
 		System.out.println("mission completed, rowCompared="+rowCompared +"row Added="+rowAdded+"row differ="+rowDiffer);
