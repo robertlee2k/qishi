@@ -31,7 +31,7 @@ public class ProcessData {
 			
 			
 
-//			//预测模型的工作目录
+//			预测模型的工作目录
 //			String	 predictPathName="C:\\Users\\robert\\Desktop\\提升均线策略\\03-预测模型\\";
 //			//用二分类模型预测每日增量数据
 //			MLPClassifier nModel=new MLPClassifier();
@@ -47,20 +47,20 @@ public class ProcessData {
 //			predictWithFile(clModel,predictPathName,dataFileName);
 
 			//按二分类器回测历史数据
-			MLPClassifier nModel = new MLPClassifier();
-			testBackward(nModel);
+//			MLPClassifier nModel = new MLPClassifier();
+//			testBackward(nModel);
 //			
 //			//按连续分类器回测历史数据
 //			M5PClassifier cModel=new M5PClassifier();
 //			testBackward(cModel);
 
 		
-//			//用最新的单次交易数据，更新原始的交易数据文件
-//			refreshArffFileForYear(2016,"C:\\Users\\robert\\Desktop\\提升均线策略\\单次收益率20160101-20160430.txt");
+			//用最新的单次交易数据，更新原始的交易数据文件
+//			refreshArffFileForYear(2016,"C:\\Users\\robert\\Desktop\\提升均线策略\\单次收益率新（20160101-20160430）.txt");
 //
 //			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
 //			processHistoryFile();
-			
+			compareRefreshedInstances();
 		} catch (Exception e) {
 			
 			e.printStackTrace();
@@ -68,7 +68,138 @@ public class ProcessData {
 	}
 
 
+	//此方法用于比较原始文件和refreshed文件之间的差异
+	// 根据原始文件的格式ORIGINAL_TRANSACTION_ARFF_FORMAT
+	//TRADE_DATE （2）,"code"（3） 和 SELECTED_MA（9） 是唯一性键值
+	protected static void compareRefreshedInstances() throws Exception {
+		
+		String filePrefix="C:\\Users\\robert\\Desktop\\提升均线策略\\AllTransaction20052016";
+		Instances originData=FileUtility.loadDataFromFile(filePrefix+"-origin.arff");
+		originData=FilterData.getInstancesSubset(originData, "ATT2 >= 201601");
+		
+		int originDataSize=originData.numInstances();
+		System.out.println("loaded original file into memory, number= "+originDataSize);
+		Instances refreshedData=FileUtility.loadDataFromFile(filePrefix+".arff");
+		refreshedData=FilterData.getInstancesSubset(refreshedData, "ATT2 >= 201601");
+		
+		int refreshedDataSize=refreshedData.numInstances();
+		System.out.println("loaded refreshed file into memory, number= "+refreshedDataSize);
+		System.out.println("compare originData and newData header,result is :"+originData.equalHeadersMsg(refreshedData));
+		
+		//获取tradeDateIndex （从1开始）， 并按其排序
+		int tradeDateIndex=FilterData.findATTPosition(originData, ArffFormat.TRADE_DATE);
+		originData.sort(tradeDateIndex-1);
 
+		System.out.println("data sorted on tradeDate");
+		
+		int codeIndex=FilterData.findATTPosition(originData, "code");
+		int maIndex=FilterData.findATTPosition(originData, ArffFormat.SELECTED_MA);
+		
+//		Instances comparedResults=new Instances(originData,0);
+		Instances originDailyData=null;
+		Instances refreshedDailyData=null;
+		Instance originRow=null;
+		Instance refreshedRow=null;
+		String tradeDate=null;
+		String code=null;
+		double originMa=0;
+		double refreshedMa=0;
+		int cursor=0;
+		int rowCompared=0;
+		int rowDiffer=0;
+		int rowAdded=0;
+		String lastDate=null;
+		String lastCode=null;
+		
+		while (cursor<originDataSize){
+
+			//从原始数据全集中取出某天某只股票的数据，然后对刷新数据也如此操作进行比对
+			tradeDate=originData.instance(cursor).stringValue(tradeDateIndex-1);
+			code=originData.instance(cursor).stringValue(codeIndex-1);
+			if (tradeDate.equals(lastDate) && code.equals(lastCode)){
+				cursor++;
+				continue;
+			}else{
+				lastDate=tradeDate;
+				lastCode=code;
+			}
+
+			originDailyData=FilterData.getInstancesSubset(originData, "(ATT"+tradeDateIndex +" is '"+ tradeDate+"') and (ATT"+codeIndex+" is '"+code+"')");
+			refreshedDailyData=FilterData.getInstancesSubset(refreshedData, "(ATT"+tradeDateIndex +" is '"+ tradeDate+"') and (ATT"+codeIndex+" is '"+code+"')");
+			
+			int refreshedDailyDataSize=refreshedDailyData.numInstances();
+			int originDailyDataSize=originDailyData.numInstances();
+			
+			//如果新旧数据同时存在，记录条数应该一致 （也就是说新数据要么是完全新增的日期，要么需要整个替换之前的旧数据）
+			if (refreshedDailyDataSize==originDailyDataSize || originDailyDataSize==0){
+				//System.out.println("ready to compare data on date "+ tradeDate+" for code:"+code+" origin/refreshed data number= "+originDailyDataSize);
+				//将同一天的数据按均线排序
+				originDailyData.sort(maIndex-1);
+				refreshedDailyData.sort(maIndex-1);
+				//按天、股票代码、均线对比
+				for(int i=0;i<refreshedDailyDataSize;i++){
+					if (originDailyDataSize>0){ //新旧数据同时存在，比较新旧数据
+						originRow=originDailyData.instance(i);
+						refreshedRow=refreshedDailyData.instance(i);
+						originMa=originRow.value(maIndex-1);
+						refreshedMa=refreshedRow.value(maIndex-1);
+						if (originMa!=refreshedMa){
+							throw new Exception("daily data origin and refreshed data are not same on date "+tradeDate+" for code:"+code+" origin/refreshed MA= "+originMa+" vs. "+refreshedMa);
+						}else{
+							for (int n = 10; n < originRow.numAttributes() ; n++) { //跳过左边的值 
+
+								Attribute originAtt = originRow.attribute(n);
+								Attribute refresedAtt=refreshedRow.attribute(n);
+								if (originAtt.isNominal() || originAtt.isString()) {
+									String originValue=originRow.stringValue(n);
+									String refreshedValue=refreshedRow.stringValue(n);
+									if (originValue.equals(refreshedValue)==false){
+										String originAttName=originAtt.name();
+										String refreshedAttName=refresedAtt.name();
+										System.out.println("@"+tradeDate+"@"+code+" Attribute value is not the same. value= "+ originValue+" vs."+refreshedValue+" @ "+originAttName + " & "+ refreshedAttName);;
+										System.out.println(originRow.toString());
+										System.out.println(refreshedRow.toString());
+										rowDiffer++;
+										break;
+									}
+								} else if (originAtt.isNumeric()) {
+									double originValue=originRow.value(n);
+									double refreshedValue=refreshedRow.value(n);
+									double difference=FormatUtility.compareDouble(originValue,refreshedValue);
+
+									if ( difference!=0 ){
+										String originAttName=originAtt.name();
+										String refreshedAttName=refresedAtt.name();
+										System.out.println("@"+tradeDate+"@"+code+" Attribute value is not the same. value= "+ originValue+" vs."+refreshedValue+" @ "+originAttName + " & "+ refreshedAttName+ " difference= "+difference);;
+										System.out.println(originRow.toString());
+										System.out.println(refreshedRow.toString());										
+										rowDiffer++;
+										break;
+									}
+								} else {
+									throw new IllegalStateException("Unhandled attribute type!");
+								}
+							}//end for n;
+						}//end else
+						rowCompared++;
+						if ((rowCompared % 1000)==0) {
+							System.out.println("number of instances compared : "+rowCompared);
+						}
+					}else{ // 只有新数据，把新数据输出
+						System.out.println("new row added for @"+tradeDate+"@"+code);
+						rowAdded++;
+					}
+				}// end for i
+				//进到下一个日期
+				cursor+=refreshedDailyDataSize;
+			}else{
+				System.out.println("daily data size in origin and refreshed data are not same on date "+tradeDate+" for code:"+code+" origin/refreshed data number= "+originDailyDataSize+" vs. "+refreshedDailyDataSize);
+				rowDiffer+=originDailyDataSize-refreshedDailyDataSize;
+			}			
+		}// end while
+		System.out.println("mission completed, rowCompared="+rowCompared +"row Added="+rowAdded+"row differ="+rowDiffer);
+	}
+	
 	//这里是用最近一年的数据刷新最原始的文件，调整完再用processHistoryData生成有计算字段之后的数据
 	protected static void refreshArffFileForYear(int year, String newDataFile) throws Exception {
 		System.out.println("loading original history file into memory "  );
@@ -84,18 +215,16 @@ public class ProcessData {
 
 		int originNumber=originData.numInstances() ;
 
-
 		System.out.println("finish  loading original File row : "+ originNumber + " column:"+ originData.numAttributes());
 		//将原始文件里的原有的该年数据删除
 		String splitCurrentYearClause = "( ATT" + yearPosition + " < " + year + "01) or ( ATT" + yearPosition+ " > "	+ year + "12) ";
 		Instances filteredData=FilterData.getInstancesSubset(originData, splitCurrentYearClause);
 		int filteredNumber=filteredData.numInstances() ;
 		System.out.println("number of rows removed = "+ (originNumber-filteredNumber));
-		
+
 		
 		Instances newData = FileUtility.loadDataFromIncrementalCSVFile(newDataFile);
 		
-//		newData=FilterData.getInstancesSubset(newData, "ATT1<6422038");
 				
 		
 		
@@ -255,9 +384,9 @@ public class ProcessData {
 						+ "\\交易分析2005-2016 by month-new-mlp-201603 MA " + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
 			}else{
 				modelFileName = pathName+"\\"+clModel.classifierName
-						+ "\\交易分析2005-2016 by month-new-m5p-201604 MA " + clModel.m_policySubGroup[j]	;
+						+ "\\交易分析2005-2016 by month-new-m5p-201603 MA " + clModel.m_policySubGroup[j]	;
 				evalFileName = pathName+"\\"+clModel.classifierName
-						+ "\\交易分析2005-2016 by month-new-m5p-201604 MA " + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
+						+ "\\交易分析2005-2016 by month-new-m5p-201603 MA " + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
 			}
 
 			clModel.setModelFileName(modelFileName);

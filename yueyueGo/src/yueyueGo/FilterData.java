@@ -56,7 +56,7 @@ public class FilterData {
 	// 根据给定公式，获取数据集的子集
 	public static Instances getInstancesSubset(Instances data, String expression)
 			throws Exception {
-		System.out.println(" get Instances subset using expression: "+expression);
+		//System.out.println(" get Instances subset using expression: "+expression);
 		SubsetByExpression subset = new SubsetByExpression();
 		String[] options = new String[2];
 		options[0] = "-E"; // "range"

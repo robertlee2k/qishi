@@ -49,7 +49,7 @@ public class FileUtility {
 		datasrc=FilterData.numToNominal(datasrc, "2,48-56");
 		
 		// 把读入的数据改名 以适应内部训练的arff格式，注意读入的数据里多了第一列的ID
-		datasrc=ArffFormat.trainingAttribMapper(datasrc,1);
+		datasrc=ArffFormat.trainingAttribMapper(datasrc,ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT,1);
 		if (datasrc.classIndex() == -1)
 			  datasrc.setClassIndex(datasrc.numAttributes() - 1);
 		return datasrc;
@@ -74,7 +74,7 @@ public class FileUtility {
 			datasrc=FilterData.NominalToString(datasrc, "2-5");
 			
 			// 把读入的数据改名 以适应内部训练的arff格式，更名从均线策略这里开始
-			datasrc=ArffFormat.trainingAttribMapper(datasrc,ArffFormat.INCREMENTAL_ARFF_FORMAT.length-1);
+			datasrc=ArffFormat.trainingAttribMapper(datasrc,ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT,ArffFormat.INCREMENTAL_ARFF_FORMAT.length-1);
 			if (datasrc.classIndex() == -1)
 				  datasrc.setClassIndex(datasrc.numAttributes() - 1);
 			return datasrc;
