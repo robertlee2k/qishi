@@ -56,11 +56,12 @@ public class ProcessData {
 
 		
 			//用最新的单次交易数据，更新原始的交易数据文件
-//			refreshArffFileForYear(2016,"C:\\Users\\robert\\Desktop\\提升均线策略\\单次收益率新（20160101-20160430）.txt");
+			int refreshedYear=2016;
+//			refreshArffFileForYear(refreshedYear,"C:\\Users\\robert\\Desktop\\提升均线策略\\单次收益率新（20160101-20160430）.txt");
 //
 //			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
 //			processHistoryFile();
-			compareRefreshedInstances();
+			compareRefreshedInstancesForYear(refreshedYear);
 		} catch (Exception e) {
 			
 			e.printStackTrace();
@@ -71,16 +72,17 @@ public class ProcessData {
 	//此方法用于比较原始文件和refreshed文件之间的差异
 	// 根据原始文件的格式ORIGINAL_TRANSACTION_ARFF_FORMAT
 	//TRADE_DATE （2）,"code"（3） 和 SELECTED_MA（9） 是唯一性键值
-	protected static void compareRefreshedInstances() throws Exception {
+	protected static void compareRefreshedInstancesForYear(int year) throws Exception {
 		
+		String splitSampleClause = "( ATT" + yearPosition + " >= " + year + "01) and ( ATT" + yearPosition+ " <= "	+ year + "12) ";
 		String filePrefix="C:\\Users\\robert\\Desktop\\提升均线策略\\AllTransaction20052016";
 		Instances originData=FileUtility.loadDataFromFile(filePrefix+"-origin.arff");
-		originData=FilterData.getInstancesSubset(originData, "ATT2 >= 201601");
+		originData=FilterData.getInstancesSubset(originData, splitSampleClause);
 		
 		int originDataSize=originData.numInstances();
 		System.out.println("loaded original file into memory, number= "+originDataSize);
 		Instances refreshedData=FileUtility.loadDataFromFile(filePrefix+".arff");
-		refreshedData=FilterData.getInstancesSubset(refreshedData, "ATT2 >= 201601");
+		refreshedData=FilterData.getInstancesSubset(refreshedData, splitSampleClause);
 		
 		int refreshedDataSize=refreshedData.numInstances();
 		System.out.println("loaded refreshed file into memory, number= "+refreshedDataSize);
@@ -272,8 +274,9 @@ public class ProcessData {
 		FileUtility.SaveDataIntoFile(filteredData, originFileName+".arff");
 		System.out.println("new arff file saved, mission completed.");
 
-		// for testing use
-		filteredData=FilterData.getInstancesSubset(filteredData, "ATT2>201501");
+		//取出前半年的旧数据和当年的新数据作为验证的sample数据
+		String splitSampleClause = "( ATT" + yearPosition + " >= " + (year-1) + "06) and ( ATT" + yearPosition+ " <= "	+ year + "12) ";
+		filteredData=FilterData.getInstancesSubset(filteredData, splitSampleClause);
 		FileUtility.SaveDataIntoFile(filteredData, originFileName+"-sample.arff");
 	}
 
