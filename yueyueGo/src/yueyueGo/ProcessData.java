@@ -32,14 +32,14 @@ public class ProcessData {
 			
 
 //			预测模型的工作目录
-			String	 predictPathName="C:\\Users\\robert\\Desktop\\提升均线策略\\03-预测模型\\";
-			//用二分类模型预测每日增量数据
-			MLPClassifier nModel=new MLPClassifier();
-			predictWithDB(nModel,predictPathName);
-			//用连续模型预测每日增量数据
-			M5PClassifier cModel=new M5PClassifier();
-			//读取数据库预测
-			predictWithDB(cModel,predictPathName);
+//			String	 predictPathName="C:\\Users\\robert\\Desktop\\提升均线策略\\03-预测模型\\";
+//			//用二分类模型预测每日增量数据
+//			MLPClassifier nModel=new MLPClassifier();
+//			predictWithDB(nModel,predictPathName);
+//			//用连续模型预测每日增量数据
+//			M5PClassifier cModel=new M5PClassifier();
+//			//读取数据库预测
+//			predictWithDB(cModel,predictPathName);
 
 			
 //			//使用文件预测
@@ -56,11 +56,11 @@ public class ProcessData {
 
 		
 			//用最新的单次交易数据，更新原始的交易数据文件
-//			refreshArffFileForYear(2016,"C:\\Users\\robert\\Desktop\\提升均线策略\\t_stock_avgline_onceyield_160101-160430.txt");
+//			refreshArffFileForYear(2016,"C:\\Users\\robert\\Desktop\\提升均线策略\\单次收益率新（20160101-20160430）.txt");
 //
 //			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
 //			processHistoryFile();
-//			compareRefreshedInstances();
+			compareRefreshedInstances();
 		} catch (Exception e) {
 			
 			e.printStackTrace();
@@ -165,11 +165,12 @@ public class ProcessData {
 								} else if (originAtt.isNumeric()) {
 									double originValue=originRow.value(n);
 									double refreshedValue=refreshedRow.value(n);
+									double difference=FormatUtility.compareDouble(originValue,refreshedValue);
 
-									if ((FormatUtility.compareDouble(originValue,refreshedValue) || Double.isNaN(originValue) && Double.isNaN(refreshedValue))==false){
+									if ( difference!=0 ){
 										String originAttName=originAtt.name();
 										String refreshedAttName=refresedAtt.name();
-										System.out.println("@"+tradeDate+"@"+code+" Attribute value is not the same. value= "+ originValue+" vs."+refreshedValue+" @ "+originAttName + " & "+ refreshedAttName);;
+										System.out.println("@"+tradeDate+"@"+code+" Attribute value is not the same. value= "+ originValue+" vs."+refreshedValue+" @ "+originAttName + " & "+ refreshedAttName+ " difference= "+difference);;
 										System.out.println(originRow.toString());
 										System.out.println(refreshedRow.toString());										
 										rowDiffer++;

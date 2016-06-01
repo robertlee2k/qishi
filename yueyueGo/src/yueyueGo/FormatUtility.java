@@ -76,19 +76,24 @@ public class FormatUtility {
 		return parsed;
 	}
 	
+	
+	//比较两个double数据，如果二者差值小于预定义范围，则返回0；
 	public static final double LOWER_LIMIT=-0.005;
 	public static final double UPPER_LIMIT=0.005;
-	public static boolean compareDouble(double first,double second) {
-		boolean result=false;
-		double compare=0.0;
-		if (second!=0){
-			compare=first/second-1;
-		}else{
-			compare=first-second;
+	public static double compareDouble(double first,double second) {
+		
+		double compare=0;
+		//如果first second都是NaN，认为二者相等
+		if((Double.isNaN(first) && Double.isNaN(second))==false){
+			if (second!=0){
+				compare=first/second-1;
+			}else{
+				compare=first-second;
+			}
+			if (compare>=LOWER_LIMIT && compare<=UPPER_LIMIT){
+				compare=0;
+			}
 		}
-		if (compare>=LOWER_LIMIT && compare<=UPPER_LIMIT){
-			result=true;
-		}
-		return result;
+		return compare;
 	}
 }
