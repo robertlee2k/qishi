@@ -32,14 +32,14 @@ public class ProcessData {
 			
 
 			////预测模型的工作目录
-			String	 predictPathName="C:\\Users\\robert\\Desktop\\提升均线策略\\03-预测模型\\";
-			//用二分类模型预测每日增量数据
-			MLPClassifier nModel=new MLPClassifier();
-			predictWithDB(nModel,predictPathName);
-			//用连续模型预测每日增量数据
-			M5PClassifier cModel=new M5PClassifier();
-			//读取数据库预测
-			predictWithDB(cModel,predictPathName);
+//			String	 predictPathName="C:\\Users\\robert\\Desktop\\提升均线策略\\03-预测模型\\";
+//			//用二分类模型预测每日增量数据
+//			MLPClassifier nModel=new MLPClassifier();
+//			predictWithDB(nModel,predictPathName);
+//			//用连续模型预测每日增量数据
+//			M5PClassifier cModel=new M5PClassifier();
+//			//读取数据库预测
+//			predictWithDB(cModel,predictPathName);
 
 			
 //			//使用文件预测
@@ -55,13 +55,13 @@ public class ProcessData {
 //			testBackward(cModel);
 
 		
-//			//用最新的单次交易数据，更新原始的交易数据文件
-//			int refreshedYear=2016;
-////			refreshArffFileForYear(refreshedYear,"C:\\Users\\robert\\Desktop\\提升均线策略\\单次收益率新（20160101-20160430）.txt");
-////
-////			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
-////			processHistoryFile();
-//			compareRefreshedInstancesForYear(refreshedYear);
+			//用最新的单次交易数据，更新原始的交易数据文件
+			int refreshedYear=2016;
+			refreshArffFileForYear(refreshedYear,"C:\\Users\\robert\\Desktop\\提升均线策略\\单次收益率20160101-20160430.txt");
+
+			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
+			processHistoryFile();
+			compareRefreshedInstancesForYear(refreshedYear);
 		} catch (Exception e) {
 			
 			e.printStackTrace();
@@ -106,7 +106,7 @@ public class ProcessData {
 		double originMa=0;
 		double refreshedMa=0;
 		int cursor=0;
-		int rowSame=0;
+		int rowCompare=0;
 		int rowDiffer=0;
 		int rowAdded=0;
 		String lastDate=null;
@@ -166,8 +166,6 @@ public class ProcessData {
 										System.out.println(originRow.toString());
 										System.out.println(refreshedRow.toString());
 										break;
-									}else{
-										rowSame++;
 									}
 								} else if (originAtt.isNumeric()) {
 									double originValue=originRow.value(n);
@@ -185,21 +183,21 @@ public class ProcessData {
 											System.out.println(refreshedRow.toString());										
 											break;
 										}
-									}else {
-										rowSame++;
 									}
 								} else {
 									throw new IllegalStateException("Unhandled attribute type!");
 								}
 							}//end for n;
 						}//end else
-						
-						if (((rowSame+rowDiffer) % 1000)==0) {
-							System.out.println("number of instances compared : "+(rowSame+rowDiffer));
+						rowCompare++;
+						if ((rowCompare % 1000)==0) {
+							System.out.println("number of instances compared : "+rowCompare);
 						}
 					}else{ // 只有新数据，把新数据输出
-						System.out.println("new row added for @"+tradeDate+"@"+code);
 						rowAdded++;
+						if ((rowAdded % 1000)==0){
+							System.out.println("number of new rows added="+ rowAdded+ "current is @"+tradeDate+"@"+code);
+						}
 					}
 				}// end for i
 				//进到下一个日期
@@ -210,9 +208,9 @@ public class ProcessData {
 				cursor++;
 			}			
 		}// end while
-		System.out.println("mission completed, rowSame="+rowSame +"row differ="+rowDiffer+"row Added="+rowAdded);
-		System.out.println("number of original data="+originDataSize+ " vs. rowSame+rowDiffer"+(rowSame+rowDiffer));
-		System.out.println("number of refreshed data="+refreshedDataSize+ " vs. rowSame+rowDiffer+rowAdded"+(rowSame+rowDiffer+rowAdded));
+		System.out.println("mission completed, rowSame="+(rowCompare-rowDiffer) +"row differ="+rowDiffer+"row Added="+rowAdded);
+		System.out.println("number of original data="+originDataSize+ " vs. rowCompared"+(rowCompare));
+		System.out.println("number of refreshed data="+refreshedDataSize+ " vs. rowCompared+rowAdded"+(rowCompare+rowAdded));
 	}
 	
 	//这里是用最近一年的数据刷新最原始的文件，调整完再用processHistoryData生成有计算字段之后的数据
