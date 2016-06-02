@@ -1,3 +1,26 @@
+/**********************************************
+//                   _ooOoo_
+//                  o8888888o
+//                  88" . "88
+//                  (| -_- |)
+//                  O\  =  /O
+//               ____/`---'\____
+//             .'  \\|     |//  `.
+//            /  \\|||  :  |||//  \
+//           /  _||||| -:- |||||-  \
+//           |   | \\\  -  /// |   |
+//           | \_|  ''\---/''  |   |
+//           \  .-\__  `-`  ___/-. /
+//         ___`. .'  /--.--\  `. . __
+//      ."" '<  `.___\_<|>_/___.'  >'"".
+//     | | :  `- \`.;`\ _ /`;.`/ - ` : | |
+//     \  \ `-.   \_ __\ /__ _/   .-` /  /
+//======`-.____`-.___\_____/___.-`____.-'======
+//                   `=---='
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//             佛祖保佑       永无BUG
+//             就算出错       也不亏钱
+************************************************/
 package yueyueGo;
 
 import java.io.IOException;
@@ -10,21 +33,8 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 public class ProcessData {
-	
 
-	public static final String yearPosition = "2"; // 分割訓練集和測試集的年份所處的位置
-	
-	// "200801","200802","200803","200804","200805","200806","200807","200808","200809","200810","200811","200812","200901","200902","200903","200904","200905","200906","200907","200908","200909","200910","200911","200912","201001","201002","201003","201004","201005","201006","201007","201008","201009","201010","201011","201012","201101","201102","201103","201104","201105","201106","201107","201108","201109","201110","201111","201112","201201","201202","201203","201204","201205","201206","201207","201208","201209","201210","201211","201212","201301","201302","201303","201304","201305","201306","201307","201308","201309","201310","201311","201312","201401","201402","201403","201404","201405","201406","201407","201408","201409","201410","201411","201412","201501","201502","201503","201504","201505","201506","201507","201508","201509","201510","201511","201512","201601","201602","201603"};
 	public static final String[] splitYear ={"200801","200802","200803","200804","200805","200806","200807","200808","200809","200810","200811","200812","200901","200902","200903","200904","200905","200906","200907","200908","200909","200910","200911","200912","201001","201002","201003","201004","201005","201006","201007","201008","201009","201010","201011","201012","201101","201102","201103","201104","201105","201106","201107","201108","201109","201110","201111","201112","201201","201202","201203","201204","201205","201206","201207","201208","201209","201210","201211","201212","201301","201302","201303","201304","201305","201306","201307","201308","201309","201310","201311","201312","201401","201402","201403","201404","201405","201406","201407","201408","201409","201410","201411","201412","201501","201502","201503","201504","201505","201506","201507","201508","201509","201510","201511","201512","201601","201602","201603","201604"};
-		
-
-	
-
-
-	public ProcessData() {
-		super();
-
-	}
 
 	public static void main(String[] args) {
 		try {
@@ -74,7 +84,7 @@ public class ProcessData {
 	//TRADE_DATE （2）,"code"（3） 和 SELECTED_MA（9） 是唯一性键值
 	protected static void compareRefreshedInstancesForYear(int year) throws Exception {
 		
-		String splitSampleClause = "( ATT" + yearPosition + " >= " + year + "01) and ( ATT" + yearPosition+ " <= "	+ year + "12) ";
+		String splitSampleClause = "( ATT" + ArffFormat.YEAR_MONTH_INDEX + " >= " + year + "01) and ( ATT" + ArffFormat.YEAR_MONTH_INDEX+ " <= "	+ year + "12) ";
 		String filePrefix="C:\\Users\\robert\\Desktop\\提升均线策略\\AllTransaction20052016";
 		Instances originData=FileUtility.loadDataFromFile(filePrefix+"-origin.arff");
 		originData=FilterData.getInstancesSubset(originData, splitSampleClause);
@@ -177,8 +187,8 @@ public class ProcessData {
 										String refreshedAttName=refresedAtt.name();
 										System.out.println("@"+tradeDate+"@"+code+" Attribute value is not the same. value= "+ originValue+" vs."+refreshedValue+" @ "+originAttName + " & "+ refreshedAttName+ " difference= "+difference);;
 										rowDiffer++;
-										//TODO临时屏蔽换手率的错误
-										if ("换手率".equals(originAttName)==false){
+										//TODO临时屏蔽换手率 收益率的详细错误输出
+										if (("换手率".equals(originAttName) || "shouyilv".equals(originAttName))==false){
 											System.out.println(originRow.toString());
 											System.out.println(refreshedRow.toString());										
 											break;
@@ -230,7 +240,7 @@ public class ProcessData {
 
 		System.out.println("finish  loading original File row : "+ originNumber + " column:"+ originData.numAttributes());
 		//将原始文件里的原有的该年数据删除
-		String splitCurrentYearClause = "( ATT" + yearPosition + " < " + year + "01) or ( ATT" + yearPosition+ " > "	+ year + "12) ";
+		String splitCurrentYearClause = "( ATT" + ArffFormat.YEAR_MONTH_INDEX + " < " + year + "01) or ( ATT" + ArffFormat.YEAR_MONTH_INDEX+ " > "	+ year + "12) ";
 		Instances filteredData=FilterData.getInstancesSubset(originData, splitCurrentYearClause);
 		int filteredNumber=filteredData.numInstances() ;
 		System.out.println("number of rows removed = "+ (originNumber-filteredNumber));
@@ -286,7 +296,7 @@ public class ProcessData {
 		System.out.println("new arff file saved, mission completed.");
 
 		//取出前半年的旧数据和当年的新数据作为验证的sample数据
-		String splitSampleClause = "( ATT" + yearPosition + " >= " + (year-1) + "06) and ( ATT" + yearPosition+ " <= "	+ year + "12) ";
+		String splitSampleClause = "( ATT" + ArffFormat.YEAR_MONTH_INDEX + " >= " + (year-1) + "06) and ( ATT" + ArffFormat.YEAR_MONTH_INDEX+ " <= "	+ year + "12) ";
 		filteredData=FilterData.getInstancesSubset(filteredData, splitSampleClause);
 		FileUtility.SaveDataIntoFile(filteredData, originFileName+"-sample.arff");
 	}
@@ -472,7 +482,7 @@ public class ProcessData {
 			if (result == null) {// initialize result instances
 				Instances header = new Instances(fullSetData, 0);
 				// 去除不必要的字段，保留ID（第1），均线策略（第3）、bias5（第4）、收益率（最后一列）、增加预测值、是否被选择。
-				result = FilterData.removeAttribs(header, yearPosition + ",5-"
+				result = FilterData.removeAttribs(header, ArffFormat.YEAR_MONTH_INDEX + ",5-"
 						+ (header.numAttributes() - 1));
 				result = FilterData.AddAttribute(result, "PredictedValue",
 						result.numAttributes());
@@ -484,7 +494,7 @@ public class ProcessData {
 			String splitTrainYearClause = "";
 			String splitTestYearClause = "";
 
-			String attribuateYear = "ATT" + yearPosition;
+			String attribuateYear = "ATT" + ArffFormat.YEAR_MONTH_INDEX;
 			if (splitMark.length() == 6) { // 按月分割时
 				splitTrainYearClause = "(" + attribuateYear + " < "
 						+ splitYear[i] + ") ";
@@ -568,7 +578,7 @@ public class ProcessData {
 			System.out.println("start to split training set");
 			trainingData = FilterData.getInstancesSubset(fullSetData,
 					splitTrainClause);
-			trainingData = FilterData.removeAttribs(trainingData,  Integer.toString(ArffFormat.ID_POSITION)+","+yearPosition);
+			trainingData = FilterData.removeAttribs(trainingData,  Integer.toString(ArffFormat.ID_POSITION)+","+ArffFormat.YEAR_MONTH_INDEX);
 			System.out.println(" training data size , row : "
 					+ trainingData.numInstances() + " column: "
 					+ trainingData.numAttributes());
@@ -606,7 +616,7 @@ public class ProcessData {
 		System.out.println("start to split testing set");
 		testingData = FilterData
 				.getInstancesSubset(fullSetData, splitTestClause);
-		testingData = FilterData.removeAttribs(testingData, yearPosition);
+		testingData = FilterData.removeAttribs(testingData, ArffFormat.YEAR_MONTH_INDEX);
 		System.out.println("testing data size, row: "
 				+ testingData.numInstances() + " column: "
 				+ testingData.numAttributes());

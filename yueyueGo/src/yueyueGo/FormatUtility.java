@@ -78,8 +78,8 @@ public class FormatUtility {
 	
 	
 	//比较两个double数据，如果二者差值小于预定义范围，则返回0；
-	public static final double LOWER_LIMIT=-0.005;
-	public static final double UPPER_LIMIT=0.005;
+	public static final double LOWER_LIMIT=-0.01;
+	public static final double UPPER_LIMIT=0.01;
 	public static double compareDouble(double first,double second) {
 		
 		double compare=0;

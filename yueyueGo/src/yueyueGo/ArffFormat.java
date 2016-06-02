@@ -1,12 +1,12 @@
 package yueyueGo;
 
+import java.util.ArrayList;
+
 import weka.core.Attribute;
 import weka.core.DenseInstance;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 
-@SuppressWarnings("deprecation")
 public class ArffFormat {
 	public static final String ARFF_FILE = "AllTransaction20052016-new.arff";
 	public static final String SELECTED_MA = "均线策略";
@@ -28,6 +28,8 @@ public class ArffFormat {
 
 	public static final String ID = "id";
 	public static final int ID_POSITION = 1; // ID的位置
+	public static final String YEAR_MONTH_INDEX = "2"; // yearmonth所处位置，理论上说可以不用这个定义，用findAttPosition查找，暂时保留吧
+
 
 	// 用于training的数据顺序
 	public static final String[] TRAINING_ARFF_FORMAT = { SELECTED_MA, "bias5",
@@ -227,13 +229,12 @@ public class ArffFormat {
 	}
 
 	// 创建评估模型的arff结构（预测值-实际值）
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static Instances CreateEvalInstances() {
 		Attribute pred = new Attribute("pred_shouyilv");
-		Attribute shouyilv = new Attribute("shouyilv");
-		FastVector fvWekaAttributes = new FastVector(2);
-		fvWekaAttributes.addElement(pred);
-		fvWekaAttributes.addElement(shouyilv);
+		Attribute shouyilv = new Attribute(SHOUYILV);
+		ArrayList<Attribute> fvWekaAttributes = new ArrayList<Attribute>(2);
+		fvWekaAttributes.add(pred);
+		fvWekaAttributes.add(shouyilv);
 		Instances structure = new Instances("predictions", fvWekaAttributes, 0);
 
 		structure.setClassIndex(structure.numAttributes() - 1);
