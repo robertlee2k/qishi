@@ -67,10 +67,10 @@ public class ProcessData {
 		
 			//用最新的单次交易数据，更新原始的交易数据文件
 			int refreshedYear=2016;
-			refreshArffFileForYear(refreshedYear,"C:\\Users\\robert\\Desktop\\提升均线策略\\单次收益率20160101-20160430.txt");
-
-			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
-			processHistoryFile();
+//			refreshArffFileForYear(refreshedYear,"C:\\Users\\robert\\Desktop\\提升均线策略\\单次收益率20160101-20160430.txt");
+//
+//			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
+//			processHistoryFile();
 			compareRefreshedInstancesForYear(refreshedYear);
 		} catch (Exception e) {
 			

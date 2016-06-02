@@ -85,9 +85,9 @@ public class FormatUtility {
 		double compare=0;
 		//如果first second都是NaN，认为二者相等
 		if((Double.isNaN(first) && Double.isNaN(second))==false){
-			if (second!=0){
+			if (second>=1 || second<=-1){ //绝对值大于1时按照比值比较
 				compare=first/second-1;
-			}else{
+			}else{//绝对值大于1时按照差值比较
 				compare=first-second;
 			}
 			if (compare>=LOWER_LIMIT && compare<=UPPER_LIMIT){
