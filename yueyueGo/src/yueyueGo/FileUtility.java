@@ -39,14 +39,15 @@ public class FileUtility {
 		loader.setSource(new File(fileName));
 
 		
-//		// 在这里才能设置读取的哪个字段是nominal， 永远别把数据文件里的ID变成Nominal的，否则读出来的ID就变成相对偏移量了
-//		loader.setNominalAttributes("2,48-56"); 不要这么直接设nominal！
+//		 永远别把数据文件里的ID变成Nominal的，否则读出来的ID就变成相对偏移量了
 		
-		loader.setNumericAttributes("87");//把收益率设为numeric
 		Instances datasrc = loader.getDataSet();
 		
-		//全部读进来之后再转nominal，否则直接加载， nominal的值的顺序会和文件顺序有关，造成数据不对！！！
+		//全部读进来之后再转nominal，这里读入的数据可能只是子集，所以nominal的index值会不对，所以后续会用calibrateAttributes处理
 		datasrc=FilterData.numToNominal(datasrc, "2,48-56");
+		
+		//读入数据后最后一行加上为空的收益率
+		datasrc = FilterData.AddAttribute(datasrc, ArffFormat.SHOUYILV,datasrc.numAttributes());
 		
 		// 把读入的数据改名 以适应内部训练的arff格式，注意读入的数据里多了第一列的ID
 		datasrc=ArffFormat.trainingAttribMapper(datasrc,ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT,1);

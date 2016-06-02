@@ -29,29 +29,30 @@ public class DBAccess  {
 	}
 	
 	public static Instances LoadDataFromDB() throws Exception{
-//		MyDatabaseLoader loader = new MyDatabaseLoader();
+//		DatabaseLoader loader = new DatabaseLoader();
 //		loader.setUrl(URL);
 //		loader.setUser(USER);
 //		loader.setPassword(PASSWORD);
-//		loader.setQuery(QUERY_DATA); 
+//		String queryData=generateQueryData();
+//		loader.setQuery(queryData); 
 //		Instances data=loader.getDataSet();
-//
-//		
-//		// Create nominal attribute "position" 
-//		Attribute position = new Attribute("position", my_nominal_values);
-//		data=FilterData.nomToString(data, "2,48-56");
+
 		
-		// load data from database that needs predicting
+		//load data from database that needs predicting
 		InstanceQuery query = new InstanceQuery();
 		query.setDatabaseURL(URL);
 		query.setUsername(USER);
 		query.setPassword(PASSWORD);
 		String queryData=generateQueryData();
 		query.setQuery(queryData); 
+
 		Instances data = query.retrieveInstances();
-//		//全部读进来之后再转nominal，否则直接加载， nominal的值的顺序会和文件顺序有关，造成数据不对！！！
+		//全部读进来之后再转nominal，这里读入的数据可能只是子集，所以nominal的index值会不对，所以后续会用calibrateAttributes处理
 		data=FilterData.numToNominal(data, "2,48-56");
 
+		//读入数据后最后一行加上为空的收益率
+		data = FilterData.AddAttribute(data, ArffFormat.SHOUYILV,data.numAttributes());
+		
 		//把读入的数据改名 以适应内部训练的arff格式,读入的数据里多了第一列的ID
 		data=ArffFormat.trainingAttribMapper(data,ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT,1);
 		data.setClassIndex(data.numAttributes()-1);

@@ -24,7 +24,7 @@ public class FilterData {
 		return newData;
 	}
 	
-	// 转换numeric为String
+	// 转换Nominal为String
 	public static Instances NominalToString(Instances data, String attribPos)
 			throws Exception {
 		String[] options = new String[2];
@@ -67,6 +67,7 @@ public class FilterData {
 		return output;
 	}
 
+	
 	//在position的位置插入新的属性 （position从0开始） ，这个方法会创建新的instances后再插入，所以似乎可以直接调用原有instances中的insertAttributeAt方法
 	public static Instances AddAttribute(Instances data, String attributeName,
 			int position) {

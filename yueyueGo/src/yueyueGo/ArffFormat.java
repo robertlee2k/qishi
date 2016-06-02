@@ -92,8 +92,8 @@ public class ArffFormat {
 			"zhishu_bias20_preday_dif", "zhishu_bias30_preday_dif",
 			"zhishu_bias60_preday_dif", "zhishu_bias5_pre2day_dif",
 			"zhishu_bias10_pre2day_dif", "zhishu_bias20_pre2day_dif",
-			"zhishu_bias30_pre2day_dif", "zhishu_bias60_pre2day_dif",
-			"shouyilv" 
+			"zhishu_bias30_pre2day_dif", "zhishu_bias60_pre2day_dif"
+			//"shouyilv"  //收益率这个字段在每日预测的输入数据中并没有，是loadfromDB或CSV方法中加的空字段。
 	};
 
 	// 读取的数据源（每日预测数据和单次收益率数据）中的日期格式

@@ -41,15 +41,15 @@ public class ProcessData {
 			
 			
 
-			////预测模型的工作目录
-//			String	 predictPathName="C:\\Users\\robert\\Desktop\\提升均线策略\\03-预测模型\\";
-//			//用二分类模型预测每日增量数据
-//			MLPClassifier nModel=new MLPClassifier();
-//			predictWithDB(nModel,predictPathName);
-//			//用连续模型预测每日增量数据
-//			M5PClassifier cModel=new M5PClassifier();
-//			//读取数据库预测
-//			predictWithDB(cModel,predictPathName);
+			//预测模型的工作目录
+			String	 predictPathName="C:\\Users\\robert\\Desktop\\提升均线策略\\03-预测模型\\";
+			//用二分类模型预测每日增量数据
+			MLPClassifier nModel=new MLPClassifier();
+			predictWithDB(nModel,predictPathName);
+			//用连续模型预测每日增量数据
+			M5PClassifier cModel=new M5PClassifier();
+			//读取数据库预测
+			predictWithDB(cModel,predictPathName);
 
 			
 //			//使用文件预测
@@ -65,13 +65,13 @@ public class ProcessData {
 //			testBackward(cModel);
 
 		
-			//用最新的单次交易数据，更新原始的交易数据文件
-			int refreshedYear=2016;
-			refreshArffFileForYear(refreshedYear,"C:\\Users\\robert\\Desktop\\提升均线策略\\t_stock_avgline_onceyield_160101-160430.txt");
-
-			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
-			processHistoryFile();
-			compareRefreshedInstancesForYear(refreshedYear);
+//			//用最新的单次交易数据，更新原始的交易数据文件
+//			int refreshedYear=2016;
+//			refreshArffFileForYear(refreshedYear,"C:\\Users\\robert\\Desktop\\提升均线策略\\t_stock_avgline_onceyield_160101-160430.txt");
+//
+//			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
+//			processHistoryFile();
+//			compareRefreshedInstancesForYear(refreshedYear);
 		} catch (Exception e) {
 			
 			e.printStackTrace();
@@ -113,8 +113,6 @@ public class ProcessData {
 		Instance refreshedRow=null;
 		String tradeDate=null;
 		String code=null;
-		double originMa=0;
-		double refreshedMa=0;
 		int cursor=0;
 		int rowCompare=0;
 		int rowDiffer=0;
@@ -152,53 +150,9 @@ public class ProcessData {
 					if (originDailyDataSize>0){ //新旧数据同时存在，比较新旧数据
 						originRow=originDailyData.instance(i);
 						refreshedRow=refreshedDailyData.instance(i);
-						originMa=originRow.value(maIndex-1);
-						refreshedMa=refreshedRow.value(maIndex-1);
-						if (originMa!=refreshedMa){
-							System.out.println("--------------------------probabily original data error---------------------------");
-							System.out.println("daily origin and refreshed MA are not same on date "+tradeDate+" for code:"+code+" origin/refreshed MA= "+originMa+" vs. "+refreshedMa);
-							System.out.println(originRow.toString());
-							System.out.println(refreshedRow.toString());
+						if (compareRefreshedRow(maIndex, originRow,refreshedRow, tradeDate, code)==false){
 							rowDiffer++;
-						}else{
-							for (int n = 10; n < originRow.numAttributes() ; n++) { //跳过左边的值 
-
-								Attribute originAtt = originRow.attribute(n);
-								Attribute refresedAtt=refreshedRow.attribute(n);
-								if (originAtt.isNominal() || originAtt.isString()) {
-									String originValue=originRow.stringValue(n);
-									String refreshedValue=refreshedRow.stringValue(n);
-									if (originValue.equals(refreshedValue)==false){
-										String originAttName=originAtt.name();
-										String refreshedAttName=refresedAtt.name();
-										System.out.println("@"+tradeDate+"@"+code+" Attribute value is not the same. value= "+ originValue+" vs."+refreshedValue+" @ "+originAttName + " & "+ refreshedAttName);;
-										rowDiffer++;
-										System.out.println(originRow.toString());
-										System.out.println(refreshedRow.toString());
-										break;
-									}
-								} else if (originAtt.isNumeric()) {
-									double originValue=originRow.value(n);
-									double refreshedValue=refreshedRow.value(n);
-									double difference=FormatUtility.compareDouble(originValue,refreshedValue);
-
-									if ( difference!=0 ){
-										String originAttName=originAtt.name();
-										String refreshedAttName=refresedAtt.name();
-										System.out.println("@"+tradeDate+"@"+code+" Attribute value is not the same. value= "+ originValue+" vs."+refreshedValue+" @ "+originAttName + " & "+ refreshedAttName+ " difference= "+difference);;
-										rowDiffer++;
-										//TODO临时屏蔽换手率 收益率的详细错误输出
-										if (("换手率".equals(originAttName) || "shouyilv".equals(originAttName))==false){
-											System.out.println(originRow.toString());
-											System.out.println(refreshedRow.toString());										
-											break;
-										}
-									}
-								} else {
-									throw new IllegalStateException("Unhandled attribute type!");
-								}
-							}//end for n;
-						}//end else
+						}
 						rowCompare++;
 						if ((rowCompare % 1000)==0) {
 							System.out.println("number of instances compared : "+rowCompare);
@@ -221,6 +175,73 @@ public class ProcessData {
 		System.out.println("mission completed, rowSame="+(rowCompare-rowDiffer) +"row differ="+rowDiffer+"row Added="+rowAdded);
 		System.out.println("number of original data="+originDataSize+ " vs. rowCompared"+(rowCompare));
 		System.out.println("number of refreshed data="+refreshedDataSize+ " vs. rowCompared+rowAdded"+(rowCompare+rowAdded));
+	}
+
+
+	/**
+	 * @param maIndex
+	 * @param originRow
+	 * @param refreshedRow
+	 * @param tradeDate
+	 * @param code
+	 * @param rowDiffer
+	 * @return
+	 * @throws IllegalStateException
+	 */
+	private static boolean compareRefreshedRow(int maIndex, Instance originRow,
+			Instance refreshedRow, String tradeDate, String code)
+			throws IllegalStateException {
+		boolean rowSame=true;
+		double originMa;
+		double refreshedMa;
+		originMa=originRow.value(maIndex-1);
+		refreshedMa=refreshedRow.value(maIndex-1);
+		if (originMa!=refreshedMa){
+			System.out.println("--------------------------probabily original data error---------------------------");
+			System.out.println("daily origin and refreshed MA are not same on date "+tradeDate+" for code:"+code+" origin/refreshed MA= "+originMa+" vs. "+refreshedMa);
+			System.out.println(originRow.toString());
+			System.out.println(refreshedRow.toString());
+			rowSame=false;
+		}else{
+			for (int n = 10; n < originRow.numAttributes() ; n++) { //跳过左边的值 
+
+				Attribute originAtt = originRow.attribute(n);
+				Attribute refresedAtt=refreshedRow.attribute(n);
+				if (originAtt.isNominal() || originAtt.isString()) {
+					String originValue=originRow.stringValue(n);
+					String refreshedValue=refreshedRow.stringValue(n);
+					if (originValue.equals(refreshedValue)==false){
+						String originAttName=originAtt.name();
+						String refreshedAttName=refresedAtt.name();
+						System.out.println("@"+tradeDate+"@"+code+" Attribute value is not the same. value= "+ originValue+" vs."+refreshedValue+" @ "+originAttName + " & "+ refreshedAttName);;
+						rowSame=false;
+//										System.out.println(originRow.toString());
+//										System.out.println(refreshedRow.toString());
+//										break;
+					}
+				} else if (originAtt.isNumeric()) {
+					double originValue=originRow.value(n);
+					double refreshedValue=refreshedRow.value(n);
+					double difference=FormatUtility.compareDouble(originValue,refreshedValue);
+
+					if ( difference!=0 ){
+						String originAttName=originAtt.name();
+						String refreshedAttName=refresedAtt.name();
+						System.out.println("@"+tradeDate+"@"+code+" Attribute value is not the same. value= "+ originValue+" vs."+refreshedValue+" @ "+originAttName + " & "+ refreshedAttName+ " difference= "+difference);;
+						rowSame=false;
+//										//临时屏蔽换手率 收益率的详细错误输出
+//										if (("换手率".equals(originAttName) || "shouyilv".equals(originAttName))==false){
+//											System.out.println(originRow.toString());
+//											System.out.println(refreshedRow.toString());										
+//											break;
+//										}
+					}
+				} else {
+					throw new IllegalStateException("Unhandled attribute type!");
+				}
+			}//end for n;
+		}//end else
+		return rowSame;
 	}
 	
 	//这里是用最近一年的数据刷新最原始的文件，调整完再用processHistoryData生成有计算字段之后的数据
@@ -408,9 +429,9 @@ public class ProcessData {
 						+ "\\交易分析2005-2016 by month-new-mlp-201603 MA " + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
 			}else{
 				modelFileName = pathName+"\\"+clModel.classifierName
-						+ "\\交易分析2005-2016 by month-new-m5p-201603 MA " + clModel.m_policySubGroup[j]	;
+						+ "\\交易分析2005-2016 by month-new-m5p-201604 MA " + clModel.m_policySubGroup[j]	;
 				evalFileName = pathName+"\\"+clModel.classifierName
-						+ "\\交易分析2005-2016 by month-new-m5p-201603 MA " + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
+						+ "\\交易分析2005-2016 by month-new-m5p-201604 MA " + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
 			}
 
 			clModel.setModelFileName(modelFileName);
