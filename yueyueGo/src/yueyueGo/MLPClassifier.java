@@ -17,7 +17,7 @@ public class MLPClassifier extends NominalClassifier {
 	
 	
 	//*******当前选择的模型
-	//4. HS300 2008-2016 10-20单元格12%;中证500 20/30/50  6%;全市场20/30/50  12-9% 但全市场因为2008年起步亏损大(2008净值最差0.55），累计净值不高;  全市场整体胜率 38096/97811
+	//4. HS300 2008-2016 10-20单元格13%;中证500 20/30/50  6%;全市场20/30/50  12-9% 但全市场因为2008年起步亏损大(2008净值最差0.55），累计净值不高;  全市场整体胜率 38,105/98,447
 	// 参数：  eval 0.7 / 单独评估阀值/ TP——FP RATIO { 1.8, 1.5, 1.2, 1.2, 1.2 }, UPPer{ 0.07, 0.09, 0.1, 0.13, 0.15 } TP_FP_BOTTOM_LINE=0.8
 	// lower_limit  { 0.01, 0.01, 0.01, 0.01,0.01 } DEFAULT_THRESHOLD=0.7
 	
@@ -29,7 +29,7 @@ public class MLPClassifier extends NominalClassifier {
 		classifierName="mlp";
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = true;
-		m_skipEvalInBacktest = false;
+		m_skipEvalInBacktest = true;
 		
 		EVAL_RECENT_PORTION = 0.7; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
 		m_sepeperate_eval_HS300=true;//单独为HS300评估阀值
