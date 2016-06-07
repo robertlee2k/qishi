@@ -19,8 +19,10 @@ public class ArffFormat {
 	public static final String VALUE_YES = "1";
 	public static final String VALUE_NO = "0";
 
-	public static final String RESULT_PREDICTED_VALUE = "PredictedValue";
+		
+	public static final String RESULT_PREDICTED_PROFIT = "PredictedProfit";
 	public static final String RESULT_SELECTED = "selected";
+	public static final String RESULT_PREDICTED_WIN_RATE="PredictedWinRate";
 
 	public static final String TRADE_DATE = "tradeDate"; // 之所以定义这个字段，是因为所有的数据都要以它排序
 	public static final String SELL_DATE = "mc_date";

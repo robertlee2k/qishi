@@ -15,7 +15,7 @@ public class ContinousClassifier extends MyClassifier {
 
 	public ContinousClassifier() {
 		super();
-		WORK_PATH = "C:\\Users\\robert\\Desktop\\提升均线策略\\02-连续分类器\\";
+		WORK_PATH = ProcessData.CONTINOUS_CLASSIFIER_DIR;
 		WORK_FILE_PREFIX = WORK_PATH + "交易分析2005-2016 by month-new";
 	}
 

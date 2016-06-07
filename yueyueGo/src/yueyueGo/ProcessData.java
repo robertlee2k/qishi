@@ -34,6 +34,13 @@ import weka.core.Instances;
 
 public class ProcessData {
 
+	
+	public static final String C_ROOT_DIRECTORY = "C:\\Users\\robert\\Desktop\\提升均线策略\\";
+	public static final String NOMINAL_CLASSIFIER_DIR = C_ROOT_DIRECTORY+"01-二分类器\\";
+	public static final String CONTINOUS_CLASSIFIER_DIR = C_ROOT_DIRECTORY+"02-连续分类器\\";
+	public static final String PREDICT_WORK_DIR=C_ROOT_DIRECTORY+"03-预测模型\\";
+	private static final String ALL_TRANSACTION_LEFT_ARFF = "AllTransaction20052016-left.arff";
+	
 	public static final String[] splitYear ={
 		  "200801","200802","200803","200804","200805","200806","200807","200808","200809","200810","200811","200812","200901","200902","200903","200904","200905","200906","200907","200908","200909","200910","200911","200912","201001","201002","201003","201004","201005","201006","201007","201008","201009","201010","201011","201012","201101","201102","201103","201104","201105","201106","201107","201108","201109","201110","201111","201112","201201","201202","201203","201204","201205","201206","201207","201208","201209","201210","201211","201212","201301","201302","201303","201304","201305","201306","201307","201308","201309","201310","201311","201312","201401","201402","201403","201404","201405","201406","201407","201408","201409","201410","201411","201412","201501","201502","201503","201504","201505","201506","201507","201508","201509","201510","201511","201512","201601","201602","201603","201604","201605"
 		};
@@ -43,33 +50,32 @@ public class ProcessData {
 			
 			
 
-			//预测模型的工作目录
-			String	 predictPathName="C:\\Users\\robert\\Desktop\\提升均线策略\\03-预测模型\\";
-			//用二分类模型预测每日增量数据
-			MLPClassifier nModel=new MLPClassifier();
-			predictWithDB(nModel,predictPathName);
-			//用连续模型预测每日增量数据
-			M5PClassifier cModel=new M5PClassifier();
-			//读取数据库预测
-			predictWithDB(cModel,predictPathName);
+
+//			//用二分类模型预测每日增量数据
+//			MLPClassifier nModel=new MLPClassifier();
+//			predictWithDB(nModel,PREDICT_WORK_DIR);
+//			//用连续模型预测每日增量数据
+//			M5PClassifier cModel=new M5PClassifier();
+//			//读取数据库预测
+//			predictWithDB(cModel,PREDICT_WORK_DIR);
 
 			
 //			//使用文件预测
 //			String dataFileName=("zengliang"+FormatUtility.getDateStringFor(1)).trim();
-//			predictWithFile(clModel,predictPathName,dataFileName);
+//			predictWithFile(clModel,PREDICT_WORK_DIR,dataFileName);
 
-//			//按二分类器回测历史数据
-//			MLPClassifier nModel = new MLPClassifier();
-//			testBackward(nModel);
-//			
+			//按二分类器回测历史数据
+			MLPClassifier nModel = new MLPClassifier();
+			testBackward(nModel);
+			
 			//按连续分类器回测历史数据
-//			M5PClassifier cModel=new M5PClassifier();
-//			testBackward(cModel);
+			M5PClassifier cModel=new M5PClassifier();
+			testBackward(cModel);
 
 		
 //			//用最新的单次交易数据，更新原始的交易数据文件
-//			int refreshedYear=2016;
-//			refreshArffFileForYear(refreshedYear,"C:\\Users\\robert\\Desktop\\提升均线策略\\onceyield20160101_20160531.txt");
+//			int refreshedYear=2012;
+//			refreshArffFileForYear(refreshedYear,C_ROOT_DIRECTORY+"onceyield"+refreshedYear+".txt");
 //
 //			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
 //			processHistoryFile();
@@ -81,13 +87,15 @@ public class ProcessData {
 	}
 
 
+	@Deprecated 
+	// replaced by compareRefreshedInstances which is more effecient 
 	//此方法用于比较原始文件和refreshed文件之间的差异
 	// 根据原始文件的格式ORIGINAL_TRANSACTION_ARFF_FORMAT
 	//TRADE_DATE （2）,"code"（3） 和 SELECTED_MA（9） 是唯一性键值
 	protected static void compareRefreshedInstancesForYear(int year) throws Exception {
 		
 		String splitSampleClause = "( ATT" + ArffFormat.YEAR_MONTH_INDEX + " >= " + year + "01) and ( ATT" + ArffFormat.YEAR_MONTH_INDEX+ " <= "	+ year + "12) ";
-		String filePrefix="C:\\Users\\robert\\Desktop\\提升均线策略\\AllTransaction20052016";
+		String filePrefix=C_ROOT_DIRECTORY+"AllTransaction20052016";
 		Instances originData=FileUtility.loadDataFromFile(filePrefix+"-origin.arff");
 		originData=FilterData.getInstancesSubset(originData, splitSampleClause);
 		
@@ -179,7 +187,28 @@ public class ProcessData {
 		System.out.println("number of refreshed data="+refreshedDataSize+ " vs. rowCompared+rowAdded"+(rowCompare+rowAdded));
 	}
 
+	protected static void compareRefreshedInstances() throws Exception {
+		
+		String filePrefix=C_ROOT_DIRECTORY+"AllTransaction20052016";
+		Instances originData=FileUtility.loadDataFromFile(filePrefix+"-origin.arff");
+		int originDataSize=originData.numInstances();
+		System.out.println("loaded original file into memory, number= "+originDataSize);
+		
+//		Attribute dateCodeMA
+//		originData.insertAttributeAt(, position);
+		for (int i=0;i<originDataSize;i++){
+			
+		}
 
+		
+		Instances refreshedData=FileUtility.loadDataFromFile(filePrefix+".arff");
+		int refreshedDataSize=refreshedData.numInstances();
+		System.out.println("loaded refreshed file into memory, number= "+refreshedDataSize);
+		System.out.println("compare originData and newData header,result is :"+originData.equalHeadersMsg(refreshedData));
+		
+		
+		
+	}
 	/**
 	 * @param maIndex
 	 * @param originRow
@@ -249,7 +278,7 @@ public class ProcessData {
 	//这里是用最近一年的数据刷新最原始的文件，调整完再用processHistoryData生成有计算字段之后的数据
 	protected static void refreshArffFileForYear(int year, String newDataFile) throws Exception {
 		System.out.println("loading original history file into memory "  );
-		String originFileName="C:\\Users\\robert\\Desktop\\提升均线策略\\AllTransaction20052016";
+		String originFileName=C_ROOT_DIRECTORY+"AllTransaction20052016";
 		Instances originData = FileUtility.loadDataFromFile(originFileName+"-origin.arff");
 		
 		//做这个处理是因为不知为何有时id之前会出现全角空格
@@ -316,7 +345,7 @@ public class ProcessData {
 		filteredData.sort(2);
 		System.out.println("new arff file sorted, start to save....");
 		FileUtility.SaveDataIntoFile(filteredData, originFileName+".arff");
-		System.out.println("new arff file saved, mission completed.");
+		System.out.println("new arff file saved.");
 
 		//取出前半年的旧数据和当年的新数据作为验证的sample数据
 		String splitSampleClause = "( ATT" + ArffFormat.YEAR_MONTH_INDEX + " >= " + (year-1) + "06) and ( ATT" + ArffFormat.YEAR_MONTH_INDEX+ " <= "	+ year + "12) ";
@@ -328,7 +357,7 @@ public class ProcessData {
 
 	protected static void processHistoryFile() throws Exception {
 		System.out.println("loading history file into memory "  );
-		String originFileName="C:\\Users\\robert\\Desktop\\提升均线策略\\AllTransaction20052016";
+		String originFileName=C_ROOT_DIRECTORY+"AllTransaction20052016";
 		Instances fullSetData = FileUtility.loadDataFromFile(originFileName+".arff");
 		System.out.println("finish  loading fullset File  row : "+ fullSetData.numInstances() + " column:"+ fullSetData.numAttributes());
 		// 去除与训练无关的字段
@@ -343,7 +372,7 @@ public class ProcessData {
 		
 		// 存下用于计算收益率的数据
 		Instances left=ArffFormat.getTransLeftPartFromAllTransaction(fullSetData);
-		FileUtility.SaveDataIntoFile(left, originFileName+"-left.arff");
+		FileUtility.SaveDataIntoFile(left, C_ROOT_DIRECTORY+ALL_TRANSACTION_LEFT_ARFF);
 		System.out.println("history Data left File saved "  );
 	}
 
@@ -445,8 +474,13 @@ public class ProcessData {
 				Instances header = new Instances(newData, 0);
 				result = FilterData.removeAttribs(header,
 						"4-" + String.valueOf(header.numAttributes() - 1)); 
-				result = FilterData.AddAttribute(result, ArffFormat.RESULT_PREDICTED_VALUE,
+				if (clModel instanceof NominalClassifier ){
+					result = FilterData.AddAttribute(result, ArffFormat.RESULT_PREDICTED_WIN_RATE,
+							result.numAttributes());
+				}else{
+					result = FilterData.AddAttribute(result, ArffFormat.RESULT_PREDICTED_PROFIT,
 						result.numAttributes());
+				}
 				result = FilterData.AddAttribute(result, ArffFormat.RESULT_SELECTED,
 						result.numAttributes());
 
@@ -487,7 +521,7 @@ public class ProcessData {
 			if (fullSetData == null) {
 
 				System.out.println("start to load File for fullset "  );
-				fullSetData = FileUtility.loadDataFromFile( "C:\\Users\\robert\\Desktop\\提升均线策略\\"+ArffFormat.ARFF_FILE);
+				fullSetData = FileUtility.loadDataFromFile( C_ROOT_DIRECTORY+ArffFormat.ARFF_FILE);
 				System.out.println("finish  loading fullset File  row : "+ fullSetData.numInstances() + " column:"+ fullSetData.numAttributes());
 				System.out.println("file loaded into memory "  );
 				if (clModel instanceof NominalClassifier ){
@@ -507,9 +541,14 @@ public class ProcessData {
 				// 去除不必要的字段，保留ID（第1），均线策略（第3）、bias5（第4）、收益率（最后一列）、增加预测值、是否被选择。
 				result = FilterData.removeAttribs(header, ArffFormat.YEAR_MONTH_INDEX + ",5-"
 						+ (header.numAttributes() - 1));
-				result = FilterData.AddAttribute(result, "PredictedValue",
+				if (clModel instanceof NominalClassifier ){
+					result = FilterData.AddAttribute(result, ArffFormat.RESULT_PREDICTED_WIN_RATE,
+							result.numAttributes());
+				}else{
+					result = FilterData.AddAttribute(result, ArffFormat.RESULT_PREDICTED_PROFIT,
 						result.numAttributes());
-				result = FilterData.AddAttribute(result, "selected",
+				}
+				result = FilterData.AddAttribute(result, ArffFormat.RESULT_SELECTED,
 						result.numAttributes());
 
 			}
@@ -580,7 +619,7 @@ public class ProcessData {
 		clModel.saveResultFile(result);
 		
 		//输出用于计算收益率的CSV文件
-		Instances fullOutput=mergeResultWithTransactionData(result,"C:\\Users\\robert\\Desktop\\提升均线策略\\AllTransaction20052016-left.arff");
+		Instances fullOutput=mergeResultWithTransactionData(result,ArffFormat.RESULT_PREDICTED_PROFIT);
 		clModel.saveSelectedFileForMarkets(fullOutput);
 		System.out.println("file saved and mission completed.");
 	}
@@ -747,14 +786,15 @@ public class ProcessData {
 //	}
 	
 	
-	public static Instances mergeResultWithTransactionData(Instances right,String leftArffFile) throws Exception{
+	protected static Instances mergeResultWithTransactionData(Instances right,String dataToAdd) throws Exception{
 		//读取磁盘上预先保存的左侧数据
-		Instances left=FileUtility.loadDataFromFile(leftArffFile);
+		Instances left=FileUtility.loadDataFromFile(C_ROOT_DIRECTORY+ALL_TRANSACTION_LEFT_ARFF);
 
 
 	    // 创建输出结果
 	    Instances mergedResult = new Instances(left, 0);
-	    mergedResult=FilterData.AddAttribute(mergedResult,ArffFormat.RESULT_PREDICTED_VALUE, mergedResult.numAttributes());
+	    mergedResult=FilterData.AddAttribute(mergedResult,ArffFormat.RESULT_PREDICTED_WIN_RATE, mergedResult.numAttributes());
+	    mergedResult=FilterData.AddAttribute(mergedResult,ArffFormat.RESULT_PREDICTED_PROFIT, mergedResult.numAttributes());
 	    mergedResult=FilterData.AddAttribute(mergedResult,ArffFormat.RESULT_SELECTED, mergedResult.numAttributes());
 
 		
@@ -766,8 +806,12 @@ public class ProcessData {
 		Attribute rightMA=right.attribute(ArffFormat.SELECTED_MA);
 		Attribute leftBias5=left.attribute("bias5");
 		Attribute rightBias5=right.attribute("bias5");
-		Attribute rightPredict=right.attribute(ArffFormat.RESULT_PREDICTED_VALUE);
+		Attribute rightPredict=right.attribute(ArffFormat.RESULT_PREDICTED_PROFIT);
 		Attribute rightSelected=right.attribute(ArffFormat.RESULT_SELECTED);
+		
+		Attribute resultPredictAtt=mergedResult.attribute(ArffFormat.RESULT_PREDICTED_PROFIT);
+		Attribute resultSelectedAtt=mergedResult.attribute(ArffFormat.RESULT_SELECTED);
+		
 		
 		//传入的结果集right不是排序的,而left的数据是按tradeDate日期排序的， 所以都先按ID排序。
 		left.sort(ArffFormat.ID_POSITION-1);
@@ -799,8 +843,10 @@ public class ProcessData {
 							}
 						}
 					}
-					newData.setValue(mergedResult.numAttributes()-2, rightCurr.value(rightPredict));
-					newData.setValue(mergedResult.numAttributes()-1, rightCurr.value(rightSelected));
+					;
+//					newData.setValue(resultPredict2Att, -1); //设个缺省值-1
+					newData.setValue(resultPredictAtt, rightCurr.value(rightPredict));
+					newData.setValue(resultSelectedAtt, rightCurr.value(rightSelected));
 					mergedResult.add(newData);
 					processed++;
 					if (processed % 100000 ==0){
@@ -827,7 +873,7 @@ public class ProcessData {
 		//输出前改名
 		mergedResult.renameAttribute(mergedResult.attribute(ArffFormat.SELECTED_MA), ArffFormat.SELECTED_MA_IN_OTHER_SYSTEM);
 		//给mergedResult瘦身。
-		mergedResult=FilterData.removeAttribs(mergedResult, "1-2,6-9,11");
+		mergedResult=FilterData.removeAttribs(mergedResult, "2,6-9,11");
 
 
 		return mergedResult;
