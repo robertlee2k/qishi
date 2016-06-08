@@ -23,10 +23,12 @@ public abstract class MyClassifier {
 	public static final String WEKA_MODEL_EXTENSION = "-WEKA.model";
 	public static final String MODEL_FILE_EXTENSION = ".mdl";
 	
+	
 	//子类定义的工作路径
 	public String classifierName;	
 	public String WORK_PATH ;
 	public String WORK_FILE_PREFIX;
+	public String ARFF_FILE = "AllTransaction20052016-new.arff";
 	
 	//用于策略分组
     public String[] m_policySubGroup;//在子类构造函数中赋值覆盖 = {"5","10","20","30","60" };

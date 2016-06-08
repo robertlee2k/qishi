@@ -8,7 +8,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 public class ArffFormat {
-	public static final String ARFF_FILE = "AllTransaction20052016-new.arff";
+	
 	public static final String SELECTED_MA = "均线策略";
 	public static final String SELECTED_MA_IN_OTHER_SYSTEM = "selected_avgline"; // 输入输出文件中的“均线策略”名称
 	public static final String IS_HS300 = "属沪深300指数";
