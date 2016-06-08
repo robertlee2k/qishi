@@ -131,14 +131,15 @@ public abstract class MyClassifier {
 		@SuppressWarnings("unchecked")
 		Vector<Object> v_threshold = loadEvaluationFromFile();
 		double thresholdMin = ((Double) v_threshold.get(0)).doubleValue();
-		double thresholdMax = ((Double) v_threshold.get(1)).doubleValue();
+		//TODO 是否真的要设置上限需要评估
+		double thresholdMax = 8888;//((Double) v_threshold.get(1)).doubleValue();
 		System.out.println("full market thresholding value：between "	+ thresholdMin + " , "+ thresholdMax);		
 		double thresholdMin_hs300=-1;
 		double thresholdMax_hs300=-1;
 		if (m_seperate_classify_HS300==true){
 			thresholdMin_hs300=((Double) v_threshold.get(2)).doubleValue();
-			//TODO 是否真的要设置上限需要评估9999;//
-			thresholdMax_hs300=((Double) v_threshold.get(3)).doubleValue();
+			//TODO 是否真的要设置上限需要评估
+			thresholdMax_hs300=8888;//((Double) v_threshold.get(3)).doubleValue();
 			System.out.println("HS300 index thresholding value：between "	+ thresholdMin_hs300 + " , "+ thresholdMax_hs300);
 		}
 		// There is additional ID attribute in test instances, so we should save it and remove before doing prediction
@@ -290,6 +291,9 @@ public abstract class MyClassifier {
 		System.out.println("selected_LIFT mean : "+FormatUtility.formatDouble(summary_lift.getMean()));
 		System.out.println("selected_positive summary: "+FormatUtility.formatDouble(summary_selected_positive.getSum(),8,0));
 		System.out.println("selected_count summary: "+FormatUtility.formatDouble(summary_selected_count.getSum(),8,0));
+		if(summary_selected_count.getSum()>0){
+			System.out.println("selected positive rate: "+FormatUtility.formatPercent(summary_selected_positive.getSum()/summary_selected_count.getSum()));
+		}
 		System.out.println("summary_judge_result summary: good number= "+FormatUtility.formatDouble(summary_judge_result.getSum(),8,0) + " bad number=" +FormatUtility.formatDouble((summary_judge_result.getN()-summary_judge_result.getSum()),8,0));
 	}
 	

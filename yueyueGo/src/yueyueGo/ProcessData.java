@@ -47,9 +47,6 @@ public class ProcessData {
 
 	public static void main(String[] args) {
 		try {
-			
-			
-
 
 //			//用二分类模型预测每日增量数据
 //			MLPClassifier nModel=new MLPClassifier();
@@ -58,28 +55,33 @@ public class ProcessData {
 //			M5PClassifier cModel=new M5PClassifier();
 //			//读取数据库预测
 //			predictWithDB(cModel,PREDICT_WORK_DIR);
-
-			
+		
 //			//使用文件预测
 //			String dataFileName=("zengliang"+FormatUtility.getDateStringFor(1)).trim();
 //			predictWithFile(clModel,PREDICT_WORK_DIR,dataFileName);
 
 			//按二分类器回测历史数据
 			MLPClassifier nModel = new MLPClassifier();
-			testBackward(nModel);
+			Instances mlpResult=testBackward(nModel);
 			
 			//按连续分类器回测历史数据
 			M5PClassifier cModel=new M5PClassifier();
-			testBackward(cModel);
+			Instances m5pResult=testBackward(cModel);
 
-		
+			//输出用于计算收益率的CSV文件
+			Instances m5pOutput=mergeResultWithData(m5pResult,mlpResult,ArffFormat.RESULT_PREDICTED_WIN_RATE);
+			cModel.saveSelectedFileForMarkets(m5pOutput);
+			Instances mlpOutput=mergeResultWithData(mlpResult,m5pResult,ArffFormat.RESULT_PREDICTED_PROFIT);
+			nModel.saveSelectedFileForMarkets(mlpOutput);
+			
 //			//用最新的单次交易数据，更新原始的交易数据文件
 //			int refreshedYear=2012;
 //			refreshArffFileForYear(refreshedYear,C_ROOT_DIRECTORY+"onceyield"+refreshedYear+".txt");
-//
-//			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
-//			processHistoryFile();
 //			compareRefreshedInstancesForYear(refreshedYear);
+
+			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
+//			processHistoryFile();
+
 		} catch (Exception e) {
 			
 			e.printStackTrace();
@@ -505,7 +507,7 @@ public class ProcessData {
 
 
 	//历史回测
-	protected static void testBackward(MyClassifier clModel) throws Exception,
+	protected static Instances testBackward(MyClassifier clModel) throws Exception,
 			IOException {
 		Instances fullSetData = null;
 		Instances result = null;
@@ -618,10 +620,8 @@ public class ProcessData {
 		}		
 		clModel.saveResultFile(result);
 		
-		//输出用于计算收益率的CSV文件
-		Instances fullOutput=mergeResultWithTransactionData(result,ArffFormat.RESULT_PREDICTED_PROFIT);
-		clModel.saveSelectedFileForMarkets(fullOutput);
-		System.out.println("file saved and mission completed.");
+		System.out.println(clModel.classifierName+" test result file saved.");
+		return result;
 	}
 
 	protected static Instances doOneModel(MyClassifier clModel,
@@ -786,42 +786,46 @@ public class ProcessData {
 //	}
 	
 	
-	protected static Instances mergeResultWithTransactionData(Instances right,String dataToAdd) throws Exception{
+	protected static Instances mergeResultWithData(Instances resultData,Instances referenceData,String dataToAdd) throws Exception{
 		//读取磁盘上预先保存的左侧数据
 		Instances left=FileUtility.loadDataFromFile(C_ROOT_DIRECTORY+ALL_TRANSACTION_LEFT_ARFF);
 
 
 	    // 创建输出结果
 	    Instances mergedResult = new Instances(left, 0);
-	    mergedResult=FilterData.AddAttribute(mergedResult,ArffFormat.RESULT_PREDICTED_WIN_RATE, mergedResult.numAttributes());
 	    mergedResult=FilterData.AddAttribute(mergedResult,ArffFormat.RESULT_PREDICTED_PROFIT, mergedResult.numAttributes());
+	    mergedResult=FilterData.AddAttribute(mergedResult,ArffFormat.RESULT_PREDICTED_WIN_RATE, mergedResult.numAttributes());
 	    mergedResult=FilterData.AddAttribute(mergedResult,ArffFormat.RESULT_SELECTED, mergedResult.numAttributes());
 
 		
 		int processed=0;
 		Instance leftCurr;
-		Instance rightCurr;
+		Instance resultCurr;
+		Instance referenceCurr;
 		Instance newData;
 		Attribute leftMA=left.attribute(ArffFormat.SELECTED_MA);
-		Attribute rightMA=right.attribute(ArffFormat.SELECTED_MA);
+		Attribute resultMA=resultData.attribute(ArffFormat.SELECTED_MA);
 		Attribute leftBias5=left.attribute("bias5");
-		Attribute rightBias5=right.attribute("bias5");
-		Attribute rightPredict=right.attribute(ArffFormat.RESULT_PREDICTED_PROFIT);
-		Attribute rightSelected=right.attribute(ArffFormat.RESULT_SELECTED);
+		Attribute resultBias5=resultData.attribute("bias5");
+		Attribute resultSelectedAtt=resultData.attribute(ArffFormat.RESULT_SELECTED);
+		Attribute outputSelectedAtt=mergedResult.attribute(ArffFormat.RESULT_SELECTED);
+		Attribute outputPredictAtt=mergedResult.attribute(ArffFormat.RESULT_PREDICTED_PROFIT);
+		Attribute outputWinrateAtt=mergedResult.attribute(ArffFormat.RESULT_PREDICTED_WIN_RATE);
+				
 		
-		Attribute resultPredictAtt=mergedResult.attribute(ArffFormat.RESULT_PREDICTED_PROFIT);
-		Attribute resultSelectedAtt=mergedResult.attribute(ArffFormat.RESULT_SELECTED);
 		
-		
-		//传入的结果集right不是排序的,而left的数据是按tradeDate日期排序的， 所以都先按ID排序。
+		//传入的结果集result不是排序的,而left的数据是按tradeDate日期排序的， 所以都先按ID排序。
 		left.sort(ArffFormat.ID_POSITION-1);
-		right.sort(ArffFormat.ID_POSITION-1);
-		
+		resultData.sort(ArffFormat.ID_POSITION-1);
+		referenceData.sort(ArffFormat.ID_POSITION-1);
+
+
 		for (int i=0;i<left.numInstances();i++){	
 			leftCurr=left.instance(i);
-			rightCurr=right.instance(processed);
-			if (leftCurr.value(0)==rightCurr.value(0)){//找到相同ID的记录了，接下来做冗余字段的数据校验
-				if ( checkSumBeforeMerge(leftCurr, rightCurr, leftMA, rightMA,leftBias5, rightBias5)) {
+			resultCurr=resultData.instance(processed);
+			referenceCurr=referenceData.instance(processed);
+			if (leftCurr.value(0)==resultCurr.value(0)){//找到相同ID的记录了，接下来做冗余字段的数据校验
+				if ( checkSumBeforeMerge(leftCurr, resultCurr, leftMA, resultMA,leftBias5, resultBias5)) {
 					newData=new DenseInstance(mergedResult.numAttributes());
 					newData.setDataset(mergedResult);
 					for (int n = 0; n < leftCurr.numAttributes(); n++) { 
@@ -843,25 +847,40 @@ public class ProcessData {
 							}
 						}
 					}
-					;
-//					newData.setValue(resultPredict2Att, -1); //设个缺省值-1
-					newData.setValue(resultPredictAtt, rightCurr.value(rightPredict));
-					newData.setValue(resultSelectedAtt, rightCurr.value(rightSelected));
+
+					//根据传入的参数判断需要当前有什么，需要补充的数据是什么
+					double profit;
+					double winrate;
+					if (dataToAdd.equals(ArffFormat.RESULT_PREDICTED_WIN_RATE)){
+						//当前结果集里有什么数据
+						profit=resultCurr.value(resultData.attribute(ArffFormat.RESULT_PREDICTED_PROFIT));
+						//需要添加参考集里的什么数据
+						winrate=referenceCurr.value(referenceData.attribute(ArffFormat.RESULT_PREDICTED_WIN_RATE));
+					}else{
+						//当前结果集里有什么数据
+						winrate=resultCurr.value(resultData.attribute(ArffFormat.RESULT_PREDICTED_WIN_RATE));
+						//需要添加参考集里的什么数据
+						profit=referenceCurr.value(referenceData.attribute(ArffFormat.RESULT_PREDICTED_PROFIT));
+					}
+
+					newData.setValue(outputPredictAtt, profit);
+					newData.setValue(outputWinrateAtt, winrate);
+					newData.setValue(outputSelectedAtt, resultCurr.value(resultSelectedAtt));
 					mergedResult.add(newData);
 					processed++;
 					if (processed % 100000 ==0){
 						System.out.println("number of results processed:"+ processed);
 					}
-					if (processed>=right.numInstances()){
+					if (processed>=resultData.numInstances()){
 						break;
 					}
 				}else {
-					throw new Exception("data value in header data and result data does not equal "+leftCurr.value(leftMA)+" = "+rightCurr.value(rightMA)+ " / "+leftCurr.value(leftBias5) + " = "+rightCurr.value(rightBias5));
+					throw new Exception("data value in header data and result data does not equal "+leftCurr.value(leftMA)+" = "+resultCurr.value(resultMA)+ " / "+leftCurr.value(leftBias5) + " = "+resultCurr.value(resultBias5));
 				}
 			}
 		}// end left processed
-		if (processed!=right.numInstances()){
-			throw new Exception("not all data in result have been processed , processed= "+processed+" ,while total result="+right.numInstances());
+		if (processed!=resultData.numInstances()){
+			throw new Exception("not all data in result have been processed , processed= "+processed+" ,while total result="+resultData.numInstances());
 		}else {
 			System.out.println("number of results merged and processed: "+ processed);
 		}
