@@ -43,7 +43,7 @@ public class ProcessData {
 	private static final String ALL_TRANSACTION_LEFT_ARFF = "AllTransaction20052016-left.arff";
 	
 	public static final String[] splitYear ={
-		"201604","201605"
+		"2008","2009","2010","2011","2012","2013","2014","2015","2016"
 //		  "200801","200802","200803","200804","200805","200806","200807","200808","200809","200810","200811","200812","200901","200902","200903","200904","200905","200906","200907","200908","200909","200910","200911","200912","201001","201002","201003","201004","201005","201006","201007","201008","201009","201010","201011","201012","201101","201102","201103","201104","201105","201106","201107","201108","201109","201110","201111","201112","201201","201202","201203","201204","201205","201206","201207","201208","201209","201210","201211","201212","201301","201302","201303","201304","201305","201306","201307","201308","201309","201310","201311","201312","201401","201402","201403","201404","201405","201406","201407","201408","201409","201410","201411","201412","201501","201502","201503","201504","201505","201506","201507","201508","201509","201510","201511","201512","201601","201602","201603","201604","201605"
 		};
 
@@ -67,8 +67,8 @@ public class ProcessData {
 //			Instances mlpResult=testBackward(nModel);
 //			
 			//按连续分类器回测历史数据
-			M5PClassifier cModel=new M5PClassifier();
-			Instances m5pResult=testBackward(cModel);
+//			M5PClassifier cModel=new M5PClassifier();
+//			Instances m5pResult=testBackward(cModel);
 //
 //			//输出用于计算收益率的CSV文件
 //			Instances m5pOutput=mergeResultWithData(m5pResult,mlpResult,ArffFormat.RESULT_PREDICTED_WIN_RATE);
@@ -84,7 +84,7 @@ public class ProcessData {
 //			compareRefreshedInstancesForYear(2015,100);
 
 			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
-//			processHistoryFile();
+			processHistoryFile();
 
 		} catch (Exception e) {
 			
@@ -398,8 +398,9 @@ public class ProcessData {
 		Instances result=ArffFormat.processAllTransaction(fullSetData);
 //		//保存训练用的format，用于做日后的校验 
 		Instances format=new Instances(result,0);
-		FileUtility.SaveDataIntoFile(format, originFileName+"-format.arff");		
-		
+		FileUtility.SaveDataIntoFile(format, originFileName+"-format.arff");	
+		//保存短格式
+		FileUtility.SaveDataIntoFile(result, originFileName+"-short.arff");
 		result=ArffFormat.addCalculateAttribute(result);
 		FileUtility.SaveDataIntoFile(result, originFileName+"-new.arff");
 		System.out.println("full Set Data File saved "  );

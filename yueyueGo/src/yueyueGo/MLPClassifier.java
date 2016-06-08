@@ -27,7 +27,7 @@ public class MLPClassifier extends NominalClassifier {
 	public MLPClassifier() {
 		super();
 		classifierName="mlp";
-		ARFF_FILE = "AllTransaction20052016.arff"; //这个模型是用短格式的 		
+		ARFF_FILE = "AllTransaction20052016-short.arff"; //这个模型是用短格式的 		
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = false;
 		m_skipEvalInBacktest = false;
