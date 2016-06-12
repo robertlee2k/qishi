@@ -44,7 +44,7 @@ public class NominalClassifier extends MyClassifier{
 			MultilayerPerceptron mlp=new MultilayerPerceptron();
 			mlp.setBatchSize(batchSize);
 			mlp.setNumDecimalPlaces(6);
-			mlp.setHiddenLayers("a");
+			mlp.setHiddenLayers("a,a");
 			model=mlp;
 		}else if ("lmt".equals(this.classifierName)){
 			LMT lmt=new LMT();

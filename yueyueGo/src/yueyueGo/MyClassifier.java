@@ -70,13 +70,19 @@ public abstract class MyClassifier {
 	protected DescriptiveStatistics summary_selected_count;
 	protected DescriptiveStatistics summary_judge_result;
 	
-	
+	protected DescriptiveStatistics summary_selectedShouyilv;
+	protected DescriptiveStatistics summary_totalShouyilv;
 	public MyClassifier() {
 		summary_selected_TPR= new DescriptiveStatistics();
 		summary_selected_positive= new DescriptiveStatistics();
 		summary_lift= new DescriptiveStatistics();
 		summary_selected_count=new DescriptiveStatistics();
 		summary_judge_result=new DescriptiveStatistics();
+		
+		summary_selectedShouyilv= new DescriptiveStatistics();
+		summary_totalShouyilv= new DescriptiveStatistics();
+
+		
 	}
 	
 	//一系列需要子类实现的抽象方法
@@ -154,12 +160,19 @@ public abstract class MyClassifier {
 		//开始用分类模型和阀值进行预测
 		System.out.println("actual -> predicted....... ");
 		
-		int positive=0;
-		int negative=0;
-		int selectedCount = 0;
-		int selectedPositive=0;
-		int selectedNegative=0;
+//		int positive=0;
+//		int negative=0;
+//		int selectedCount = 0;
+//		int selectedPositive=0;
+//		int selectedNegative=0;
 		int testInstancesNum=test.numInstances();
+		DescriptiveStatistics totalPositiveShouyilv=new DescriptiveStatistics();
+		DescriptiveStatistics totalNegativeShouyilv=new DescriptiveStatistics();
+		DescriptiveStatistics selectedPositiveShouyilv=new DescriptiveStatistics();
+		DescriptiveStatistics selectedNegativeShouyilv=new DescriptiveStatistics();			
+		
+		
+		
 		for (int i = 0; i < testInstancesNum; i++) {
 			Instance curr = (Instance) test.instance(i).copy();
 //			double id = curr.value(ProcessData.ID_POSITION - 1);
@@ -193,13 +206,14 @@ public abstract class MyClassifier {
 			}
 
 			inst.setValue(result.numAttributes() - 3, curr.classValue());
+			inst.setValue(result.numAttributes() - 2, pred);
 
 			if (curr.classValue()>0){
-				positive++;
+				totalPositiveShouyilv.addValue(curr.classValue());
 			}else {
-				negative++;
+				totalNegativeShouyilv.addValue(curr.classValue());
 			}
-			inst.setValue(result.numAttributes() - 2, pred);
+
 
 			double t_min=thresholdMin;
 			double t_max=thresholdMax;
@@ -213,19 +227,18 @@ public abstract class MyClassifier {
 			
 			if (pred >=t_min  && pred <= t_max) {
 				selected = 1.0;
-				selectedCount++;
+
 				if (curr.classValue()>0){
-					selectedPositive++;
+					selectedPositiveShouyilv.addValue(curr.classValue());
 				}else {
-					selectedNegative++;
+					selectedNegativeShouyilv.addValue(curr.classValue());
 				}
 			}
 			
 			inst.setValue(result.numAttributes() - 1, selected);
 			result.add(inst);
 		}
-		evaluateResults(positive, negative, selectedCount, selectedPositive,
-				selectedNegative, testInstancesNum);
+		evaluateResults(totalPositiveShouyilv,totalNegativeShouyilv,selectedPositiveShouyilv,selectedNegativeShouyilv);
 		return result;
 	}
 
@@ -238,41 +251,70 @@ public abstract class MyClassifier {
 	//2. 市场小牛市时（量化定义为total_TPR介于0.33与0.5之间)， 应提升胜率（final_lift>1），且保持机会， 以20单元格5均线为例。单月机会(selectedCount）应该大于20/5
 	//3. 市场小熊市时（量化定义为total_TPR介于0.2到0.33之间)，  应提升绝对胜率（selected_TPR>0.33）或 选择少于半仓 selectedCount小于20/4/2
 	//3. 市场小熊市时（量化定义为total_TPR<0.2)，  应提升绝对胜率（selected_TPR>0.33）或 选择少于2成仓 selectedCount小于20/4/5
-	protected void evaluateResults(int positive, int negative,
-			int selectedCount, int selectedPositive, int selectedNegative,
-			int testInstancesNum) {
+	protected void evaluateResults(DescriptiveStatistics totalPositiveShouyilv,DescriptiveStatistics totalNegativeShouyilv,DescriptiveStatistics selectedPositiveShouyilv,DescriptiveStatistics selectedNegativeShouyilv) {
 		double selected_TPR=0;
 		double total_TPR=0;
-		double final_lift=0;
-		if (selectedCount>0) 
-			selected_TPR=(double)selectedPositive/selectedCount;
-		if (testInstancesNum>0) 
-			total_TPR=(double)positive/testInstancesNum;
-		if (total_TPR>0) 
-			final_lift=(double)selected_TPR/total_TPR;	
-		System.out.println("*** selected count= " + selectedCount + " selected positive: " +selectedPositive + "  selected negative: "+selectedNegative); 
-		System.out.println("*** total    count= "	+ testInstancesNum+ " actual positive: "+ positive + " actual negtive: "+ negative);
-		System.out.println("*** selected TPR= " + FormatUtility.formatPercent(selected_TPR) + " total TPR= " +FormatUtility.formatPercent(total_TPR) + "  lift up= "+FormatUtility.formatDouble(final_lift)); 
+		double tpr_lift=0;
+		double selectedShouyilv=0.0;
+		double totalShouyilv=0.0;
+		double shouyilv_lift=0.0;
+		long selectedPositive=selectedPositiveShouyilv.getN();
+		long selectedNegative=selectedNegativeShouyilv.getN();
+		long selectedCount=selectedPositive+selectedNegative;
+		long positive=totalPositiveShouyilv.getN();
+		long negative=totalNegativeShouyilv.getN();
+		long totalCount=positive+negative;
 
+		
+		if (selectedCount>0) {
+			selected_TPR=(double)selectedPositive/selectedCount;
+			selectedShouyilv=(selectedPositiveShouyilv.getSum()+selectedNegativeShouyilv.getSum())/selectedCount;
+		}
+		if (totalCount>0) {
+			total_TPR=(double)positive/totalCount;
+			totalShouyilv=(totalPositiveShouyilv.getSum()+totalNegativeShouyilv.getSum())/totalCount;
+		}
+		if (total_TPR>0) {
+			tpr_lift=selected_TPR/total_TPR;
+		}
+
+		shouyilv_lift=selectedShouyilv-totalShouyilv;
+
+		System.out.println("*** selected count= " + selectedCount + " selected positive: " +selectedPositive + "  selected negative: "+selectedNegative); 
+		System.out.println("*** total    count= "	+ totalCount+ " actual positive: "+ positive + " actual negtive: "+ negative);
+		System.out.println("*** selected TPR= " + FormatUtility.formatPercent(selected_TPR) + " total TPR= " +FormatUtility.formatPercent(total_TPR) + "  lift up= "+FormatUtility.formatDouble(tpr_lift));
+		
+		System.out.println("*** selected average Shouyilv= " + FormatUtility.formatPercent(selectedShouyilv) + " total average Shouyilv= " +FormatUtility.formatPercent(totalShouyilv)+ "  lift difference= "+FormatUtility.formatPercent(shouyilv_lift) );
+		
+		
 		int resultJudgement=0;
+		
+		// 评估收益率是否有提升是按照选择平均收益率*可买入机会数 是否大于总体平均收益率*20（按20单元格单均线情况计算）
+		long buyableCount=0;
+		if (selectedCount>20){
+			buyableCount=20;
+		}else {
+			buyableCount=selectedCount;
+		}
+		
 		//评估此次成功与否
 		if (total_TPR>=0.5){
-			if (selected_TPR>=0.5 && selectedCount>=2*20)
+			if (selected_TPR>=0.5 && selectedShouyilv*buyableCount>=totalShouyilv*20)
 				resultJudgement=1;
 			else 
 				resultJudgement=0;
 		}else if (total_TPR>=0.33 && total_TPR<0.5){
-			if (final_lift>=1&& selectedCount>=20)
+			if (tpr_lift>=1&& selectedShouyilv*buyableCount>=totalShouyilv*20)
 				resultJudgement=1;
 			else 
 				resultJudgement=0;
 		}else if (total_TPR>=0.2 && total_TPR<0.33){
-			if (selected_TPR>0.33 || selectedCount<=20/2)
+			if (selected_TPR>0.33 || selectedShouyilv*buyableCount>=totalShouyilv*20)
 				resultJudgement=1;
 			else
 				resultJudgement=0;
 		}else {
-			if (selected_TPR>0.33 || selectedCount<=20/5)
+			if (selected_TPR>0.33 || selectedShouyilv*buyableCount>=totalShouyilv*20)
 				resultJudgement=1;
 			else
 				resultJudgement=0;
@@ -282,21 +324,28 @@ public abstract class MyClassifier {
 		summary_selected_TPR.addValue(selected_TPR);
 		summary_selected_positive.addValue(selectedPositive);
 		summary_selected_count.addValue(selectedCount);
-		summary_lift.addValue(final_lift);
+		
+		if (tpr_lift!=0){ //如果tpr lift 有意义时计算它
+			summary_lift.addValue(tpr_lift);
+		}
+		summary_selectedShouyilv.addValue(selectedShouyilv);
+		summary_totalShouyilv.addValue(totalShouyilv);
 		System.out.println("Predicting finished!");
 	}
 
 
 	public void outputClassifySummary(){
 		
-		System.out.println("selected_TPR mean: "+FormatUtility.formatPercent(summary_selected_TPR.getMean()));
-		System.out.println("selected_LIFT mean : "+FormatUtility.formatDouble(summary_lift.getMean()));
-		System.out.println("selected_positive summary: "+FormatUtility.formatDouble(summary_selected_positive.getSum(),8,0));
-		System.out.println("selected_count summary: "+FormatUtility.formatDouble(summary_selected_count.getSum(),8,0));
+		System.out.println("Monthly selected_TPR mean: "+FormatUtility.formatPercent(summary_selected_TPR.getMean())+" standard deviation="+FormatUtility.formatPercent(summary_selected_TPR.getStandardDeviation())+" Skewness="+FormatUtility.formatPercent(summary_selected_TPR.getSkewness())+" Kurtosis="+FormatUtility.formatPercent(summary_selected_TPR.getKurtosis()));
+		System.out.println("Monthly selected_LIFT mean : "+FormatUtility.formatDouble(summary_lift.getMean()));
+		System.out.println("Monthly selected_positive summary: "+FormatUtility.formatDouble(summary_selected_positive.getSum(),8,0));
+		System.out.println("Monthly selected_count summary: "+FormatUtility.formatDouble(summary_selected_count.getSum(),8,0));
+		System.out.println("Monthly selected_shouyilv average: "+FormatUtility.formatPercent(summary_selectedShouyilv.getMean())+" standard deviation="+FormatUtility.formatPercent(summary_selectedShouyilv.getStandardDeviation())+" Skewness="+FormatUtility.formatPercent(summary_selectedShouyilv.getSkewness())+" Kurtosis="+FormatUtility.formatPercent(summary_selectedShouyilv.getKurtosis()));
+		System.out.println("Monthly total_shouyilv average: "+FormatUtility.formatPercent(summary_totalShouyilv.getMean())+" standard deviation="+FormatUtility.formatPercent(summary_totalShouyilv.getStandardDeviation())+" Skewness="+FormatUtility.formatPercent(summary_totalShouyilv.getSkewness())+" Kurtosis="+FormatUtility.formatPercent(summary_totalShouyilv.getKurtosis()));
 		if(summary_selected_count.getSum()>0){
-			System.out.println("selected positive rate: "+FormatUtility.formatPercent(summary_selected_positive.getSum()/summary_selected_count.getSum()));
+			System.out.println("mixed selected positive rate: "+FormatUtility.formatPercent(summary_selected_positive.getSum()/summary_selected_count.getSum()));
 		}
-		System.out.println("summary_judge_result summary: good number= "+FormatUtility.formatDouble(summary_judge_result.getSum(),8,0) + " bad number=" +FormatUtility.formatDouble((summary_judge_result.getN()-summary_judge_result.getSum()),8,0));
+		System.out.println("Monthly summary_judge_result summary: good number= "+FormatUtility.formatDouble(summary_judge_result.getSum(),8,0) + " bad number=" +FormatUtility.formatDouble((summary_judge_result.getN()-summary_judge_result.getSum()),8,0));
 	}
 	
 	public String getModelFileName() {
