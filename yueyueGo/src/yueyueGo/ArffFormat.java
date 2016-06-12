@@ -1,13 +1,14 @@
 package yueyueGo;
 
-import java.util.ArrayList;
-
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
 public class ArffFormat {
+	public static final String LONG_ARFF_FILE = "AllTransaction20052016-new.arff"; // 包含计算字段的ARFF格式，这是提供给各输入属性独立的分类器使用的，如分类树
+	public static final String SHORT_ARFF_FILE = "AllTransaction20052016-short.arff";// 不包含计算字段的ARFF格式，这是提供给各输入属性独立的分类器使用的，如神经网络
+	
 	
 	public static final String SELECTED_MA = "均线策略";
 	public static final String SELECTED_MA_IN_OTHER_SYSTEM = "selected_avgline"; // 输入输出文件中的“均线策略”名称
@@ -230,18 +231,6 @@ public class ArffFormat {
 		return data;
 	}
 
-	// 创建评估模型的arff结构（预测值-实际值）
-	public static Instances CreateEvalInstances() {
-		Attribute pred = new Attribute("pred_shouyilv");
-		Attribute shouyilv = new Attribute(SHOUYILV);
-		ArrayList<Attribute> fvWekaAttributes = new ArrayList<Attribute>(2);
-		fvWekaAttributes.add(pred);
-		fvWekaAttributes.add(shouyilv);
-		Instances structure = new Instances("predictions", fvWekaAttributes, 0);
-
-		structure.setClassIndex(structure.numAttributes() - 1);
-		return structure;
-	}
 
 	// 判断是否为沪深300、中证500、上证50
 	protected static boolean belongToIndex(Instance curr, String indexName) {

@@ -28,8 +28,10 @@ public abstract class MyClassifier {
 	public String classifierName;	
 	public String WORK_PATH ;
 	public String WORK_FILE_PREFIX;
-	public String ARFF_FILE = "AllTransaction20052016-new.arff";
 	
+
+	public boolean inputAttShouldBeIndependent=false;  //缺省情况下，不限制输入文件中的计算字段 （在子类中覆盖）
+
 	//用于策略分组
     public String[] m_policySubGroup;//在子类构造函数中赋值覆盖 = {"5","10","20","30","60" };
     public boolean NO_SUB_GROUP = false; //缺省为false，除非想测试混合不分组策略
@@ -160,11 +162,7 @@ public abstract class MyClassifier {
 		//开始用分类模型和阀值进行预测
 		System.out.println("actual -> predicted....... ");
 		
-//		int positive=0;
-//		int negative=0;
-//		int selectedCount = 0;
-//		int selectedPositive=0;
-//		int selectedNegative=0;
+
 		int testInstancesNum=test.numInstances();
 		DescriptiveStatistics totalPositiveShouyilv=new DescriptiveStatistics();
 		DescriptiveStatistics totalNegativeShouyilv=new DescriptiveStatistics();
@@ -175,13 +173,7 @@ public abstract class MyClassifier {
 		
 		for (int i = 0; i < testInstancesNum; i++) {
 			Instance curr = (Instance) test.instance(i).copy();
-//			double id = curr.value(ProcessData.ID_POSITION - 1);
-//			curr.setDataset(null);
-//			curr.deleteAttributeAt(ProcessData.ID_POSITION - 1); // delete id
-//			curr.setDataset(header); // set back data set for prediction use
-
 			double pred=classify(model,curr);  //调用子类的分类函数
-
 			Instance inst = new DenseInstance(result.numAttributes());
 			inst.setDataset(result);
 			//将相应的ID赋值回去
@@ -207,11 +199,13 @@ public abstract class MyClassifier {
 
 			inst.setValue(result.numAttributes() - 3, curr.classValue());
 			inst.setValue(result.numAttributes() - 2, pred);
-
-			if (curr.classValue()>0){
-				totalPositiveShouyilv.addValue(curr.classValue());
+			
+			double shouyilv=getShouyilv(i,ids[i],curr.classValue());
+			
+			if (shouyilv>0){
+				totalPositiveShouyilv.addValue(shouyilv);
 			}else {
-				totalNegativeShouyilv.addValue(curr.classValue());
+				totalNegativeShouyilv.addValue(shouyilv);
 			}
 
 
@@ -228,10 +222,10 @@ public abstract class MyClassifier {
 			if (pred >=t_min  && pred <= t_max) {
 				selected = 1.0;
 
-				if (curr.classValue()>0){
-					selectedPositiveShouyilv.addValue(curr.classValue());
+				if (shouyilv>0){
+					selectedPositiveShouyilv.addValue(shouyilv);
 				}else {
-					selectedNegativeShouyilv.addValue(curr.classValue());
+					selectedNegativeShouyilv.addValue(shouyilv);
 				}
 			}
 			
@@ -242,8 +236,18 @@ public abstract class MyClassifier {
 		return result;
 	}
 
+	// 对于连续分类器， 收益率就是classvalue，缺省直接返回， 对于nominal分类器，调用子类的方法获取暂存的收益率
+	protected double getShouyilv(int index,double id, double newClassValue) throws Exception{
+		return newClassValue;
+	}
+
 	protected void verifyDataFormat(Instances test, Instances header) throws Exception {
-		System.out.println("compare model and testing data structure. Here is the difference(null means the same): "+header.equalHeadersMsg(test));
+		String result=header.equalHeadersMsg(test);
+		if (result!=null){
+			throw new Exception("fatal error! model and testing data structure is not the same. Here is the difference: "+result);
+		}else {
+			System.out.println("model and testing data structure compared");
+		}
 	}
 
 	//用于评估单次分类的效果。 对于回测来说，评估的规则有以下几条：

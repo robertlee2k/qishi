@@ -12,11 +12,13 @@ import weka.classifiers.trees.J48;
 import weka.classifiers.trees.LMT;
 import weka.classifiers.trees.REPTree;
 import weka.core.Attribute;
+import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
 public class NominalClassifier extends MyClassifier{
 	protected double DEFAULT_THRESHOLD=0.7; // 找不出threshold时缺省值。
+	protected Instances cachedOldClassInstances=null;
 
 
 	public NominalClassifier() {
@@ -28,6 +30,7 @@ public class NominalClassifier extends MyClassifier{
 
 	@Override
 	public  Classifier trainData(Instances train) throws Exception {
+		cachedOldClassInstances=null; 
 		int minNumObj=train.numInstances()/300;
 		if (minNumObj<1000){
 			minNumObj=1000; //防止树过大
@@ -44,7 +47,7 @@ public class NominalClassifier extends MyClassifier{
 			MultilayerPerceptron mlp=new MultilayerPerceptron();
 			mlp.setBatchSize(batchSize);
 			mlp.setNumDecimalPlaces(6);
-			mlp.setHiddenLayers("a,a");
+			mlp.setHiddenLayers("a");//("a,a");
 			model=mlp;
 		}else if ("lmt".equals(this.classifierName)){
 			LMT lmt=new LMT();
@@ -82,6 +85,8 @@ public class NominalClassifier extends MyClassifier{
 	public Vector<Double> evaluateModel(Instances train, Classifier model,
 			double sample_limit, double sample_upper, double tp_fp_ratio)
 			throws Exception {
+		
+		cachedOldClassInstances=null; 
 		
 		System.out.println(" -----------evaluating for FULL Market....");
 		Vector<Double> v = doModelEvaluation(train, model, sample_limit,sample_upper, tp_fp_ratio);
@@ -203,16 +208,25 @@ public class NominalClassifier extends MyClassifier{
 	}
 	
 	//将原始数据变换为nominal Classifier需要的形式（更换class 变量等等）
-	public Instances processDataForNominalClassifier(Instances inData) throws Exception{
-		//Attribute oldClassAtt=inData.attribute(ArffFormat.SHOUYILV);
+	public Instances processDataForNominalClassifier(Instances inData, boolean cacheOldClassValue) throws Exception{
+
+		int oldClassIndex=inData.classIndex();
+		if (oldClassIndex!=(inData.numAttributes()-1)){
+			throw new Exception("fatal error! class index should be at the last column");
+		}
 		ArrayList<String> values=new ArrayList<String>();
 		values.add(ArffFormat.VALUE_NO);
 		values.add(ArffFormat.VALUE_YES);
 		Attribute newClassAtt=new Attribute(ArffFormat.IS_POSITIVE,values);
-		//在classValue之前插入positve,然后记录下它的新位置index
-		inData.insertAttributeAt(newClassAtt, inData.numAttributes()-1);
+		//在classValue之前插入positive,然后记录下它的新位置index
+		inData.insertAttributeAt(newClassAtt,inData.numAttributes()-1);
 		int newClassIndex=inData.numAttributes()-2;
 		double shouyilv=0;
+		
+		if (cacheOldClassValue==true){
+			cachedOldClassInstances=CreateCachedOldClassInstances();
+		}
+		
 		for (int i=0;i<inData.numInstances();i++){
 			shouyilv=inData.instance(i).classValue();
 			if (shouyilv>0){
@@ -220,16 +234,52 @@ public class NominalClassifier extends MyClassifier{
 			}else {
 				inData.instance(i).setValue(newClassIndex, ArffFormat.VALUE_NO);
 			}
+			
+			//暂存收益率
+			if (cacheOldClassValue==true){
+				double id=inData.instance(i).value(0);
+				Instance cacheRow=new DenseInstance(cachedOldClassInstances.numAttributes());
+				cacheRow.setDataset(cachedOldClassInstances);
+				cacheRow.setValue(0, id);
+				cacheRow.setValue(1, shouyilv);
+				cachedOldClassInstances.add(cacheRow);
+			}
 		}
 		//删除shouyilv
 		inData=FilterData.removeAttribs(inData, ""+inData.numAttributes());
 		//设置新属性的位置
 		inData.setClassIndex(inData.numAttributes()-1);
-		
-		
 		System.out.println("class value replaced for nominal classifier");
 		return inData;
 	}
 	
+	
+	// 创建暂存oldClassValue（目前情况下为暂存收益率）的arff结构（id-收益率）
+	protected Instances CreateCachedOldClassInstances() {
+		Attribute pred = new Attribute(ArffFormat.ID);
+		Attribute shouyilv = new Attribute(ArffFormat.SHOUYILV);
+		ArrayList<Attribute> fvWekaAttributes = new ArrayList<Attribute>(2);
+		fvWekaAttributes.add(pred);
+		fvWekaAttributes.add(shouyilv);
+		Instances structure = new Instances("cachedOldClass", fvWekaAttributes, 0);
+		structure.setClassIndex(structure.numAttributes() - 1);
+		return structure;
+	}
+	
+	@Override
+	protected double getShouyilv(int index,double id, double newClassValue) throws Exception{
+		if (cachedOldClassInstances==null || index>=cachedOldClassInstances.numInstances()){
+			throw new Exception("Old Class Value has not been cached for index: "+ index );
+		}
+		double cachedID=cachedOldClassInstances.instance(index).value(0);
+		if(cachedID!=id){
+			throw new Exception("Data inconsistent error! Cached old class value id = "+cachedID+" while incoming id ="+id+" for index: "+ index );
+		}
+		double shouyilv=cachedOldClassInstances.instance(index).classValue();
+		if (newClassValue==0 && shouyilv>0 || newClassValue==1 && shouyilv<=0){ 
+			throw new Exception("Data inconsistent error! Cached old class value id = "+shouyilv+" while incoming newClassValue ="+newClassValue+" for index: "+ index );
+		}
+		return shouyilv;
+	}
 
 }

@@ -27,7 +27,7 @@ public class MLPClassifier extends NominalClassifier {
 	public MLPClassifier() {
 		super();
 		classifierName="mlp";
-		ARFF_FILE = "AllTransaction20052016-short.arff"; //这个模型是用短格式的 		
+		inputAttShouldBeIndependent=true; //这个模型是用短格式的 		
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = true;
 		m_skipEvalInBacktest = true;
@@ -47,6 +47,9 @@ public class MLPClassifier extends NominalClassifier {
 	public Classifier loadModel(String yearSplit, String policySplit) throws Exception{
 		//TODO 这是为MLP单独准备的模型，模型文件是按年读取，但evaluation文件不变仍按月
 		int inputYear=Integer.parseInt(yearSplit.substring(0,4));
+		//TODO 临时处理
+		if (inputYear>=2014 )
+			inputYear=2014;
 //		String modelYear=null;
 //		if (inputYear>=2008 && inputYear<2010)
 //			modelYear="2008";

@@ -40,7 +40,7 @@ public class M5PClassifier extends ContinousClassifier {
 		classifierName = "m5p";
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = true;
-		m_skipEvalInBacktest = false;
+		m_skipEvalInBacktest = true;
 		m_sepeperate_eval_HS300=true;//单独为HS300评估阀值
 		m_seperate_classify_HS300=true;
 		

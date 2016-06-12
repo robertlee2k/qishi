@@ -63,19 +63,19 @@ public class ProcessData {
 //			String dataFileName=("zengliang"+FormatUtility.getDateStringFor(1)).trim();
 //			predictWithFile(clModel,PREDICT_WORK_DIR,dataFileName);
 
-//			//按二分类器回测历史数据
-//			MLPClassifier nModel = new MLPClassifier();
-//			Instances mlpResult=testBackward(nModel);
-//			
+			//按二分类器回测历史数据
+			MLPClassifier nModel = new MLPClassifier();
+			Instances mlpResult=testBackward(nModel);
+			
 			//按连续分类器回测历史数据
 			M5PClassifier cModel=new M5PClassifier();
 			Instances m5pResult=testBackward(cModel);
-//
-//			//输出用于计算收益率的CSV文件
-//			Instances m5pOutput=mergeResultWithData(m5pResult,mlpResult,ArffFormat.RESULT_PREDICTED_WIN_RATE);
-//			cModel.saveSelectedFileForMarkets(m5pOutput);
-//			Instances mlpOutput=mergeResultWithData(mlpResult,m5pResult,ArffFormat.RESULT_PREDICTED_PROFIT);
-//			nModel.saveSelectedFileForMarkets(mlpOutput);
+
+			//输出用于计算收益率的CSV文件
+			Instances m5pOutput=mergeResultWithData(m5pResult,mlpResult,ArffFormat.RESULT_PREDICTED_WIN_RATE);
+			cModel.saveSelectedFileForMarkets(m5pOutput);
+			Instances mlpOutput=mergeResultWithData(mlpResult,m5pResult,ArffFormat.RESULT_PREDICTED_PROFIT);
+			nModel.saveSelectedFileForMarkets(mlpOutput);
 			
 			//用最新的单次交易数据，更新原始的交易数据文件
 //			int startYear=2005;
@@ -451,20 +451,20 @@ public class ProcessData {
 		Instances newData = null;
 		Instances result = null;
 
-		//TODO 调整nominal属性
 		Instances fullData=calibrateAttributesForDailyData(pathName, inData);
 	
-		//把计算字段加上
-		fullData=ArffFormat.addCalculateAttribute(fullData);		
+		//如果模型需要计算字段，则把计算字段加上
+		if (clModel.inputAttShouldBeIndependent==false){
+			fullData=ArffFormat.addCalculateAttribute(fullData);		
+		}
 		
 		FileUtility.SaveDataIntoFile(fullData, pathName+FormatUtility.getDateStringFor(1)+"dailyInput-new116.arff");
 		
 		//获得”均线策略"的位置属性
 		int maIndex=FilterData.findATTPosition(fullData,ArffFormat.SELECTED_MA);
 
-		//FileUtility.SaveDataIntoFile(fullData, pathName+"data-new116.csv");
 		if (clModel instanceof NominalClassifier ){
-			fullData=((NominalClassifier)clModel).processDataForNominalClassifier(fullData);
+			fullData=((NominalClassifier)clModel).processDataForNominalClassifier(fullData,true);
 			//TODO 因为历史原因，201605018之前build的二分类器模型 “均线策略" 都叫"policy"，所以调用模型前先改一下名，调用模型后再改回来
 			fullData.renameAttribute(maIndex-1, "policy");
 		}
@@ -556,19 +556,24 @@ public class ProcessData {
 			// 加载原始arff文件
 			if (fullSetData == null) {
 
-				System.out.println("start to load File for fullset from File: "+ clModel.ARFF_FILE  );
-				fullSetData = FileUtility.loadDataFromFile( C_ROOT_DIRECTORY+clModel.ARFF_FILE);
+				// 根据模型来决定是否要使用有计算字段的ARFF
+				String arffFile=null;
+				if (clModel.inputAttShouldBeIndependent==true){
+					arffFile=ArffFormat.SHORT_ARFF_FILE;
+				}else{
+					arffFile=ArffFormat.LONG_ARFF_FILE;
+				}
+
+				System.out.println("start to load File for fullset from File: "+ arffFile  );
+				fullSetData = FileUtility.loadDataFromFile( C_ROOT_DIRECTORY+arffFile);
 				System.out.println("finish loading fullset Data. row : "+ fullSetData.numInstances() + " column:"+ fullSetData.numAttributes());
+
 				if (clModel instanceof NominalClassifier ){
-				//	fullSetData=FilterData.getInstancesSubset(fullSetData, "ATT2>201601");
-					
-					fullSetData=((NominalClassifier)clModel).processDataForNominalClassifier(fullSetData);
 					//TODO 因为历史原因，201605018之前build的二分类器模型 “均线策略" 都叫"policy"，所以调用模型前先改一下名，调用模型后再改回来
+					//获得”均线策略"的位置属性
 					int maIndex=FilterData.findATTPosition(fullSetData,ArffFormat.SELECTED_MA);
 					fullSetData.renameAttribute(maIndex-1, "policy");
 				}
-
-		
 			}
 			// 准备输出数据格式
 			if (result == null) {// initialize result instances
@@ -674,6 +679,11 @@ public class ProcessData {
 			trainingData = FilterData.getInstancesSubset(fullSetData,
 					splitTrainClause);
 			trainingData = FilterData.removeAttribs(trainingData,  Integer.toString(ArffFormat.ID_POSITION)+","+ArffFormat.YEAR_MONTH_INDEX);
+			
+			//对于二分类器，这里要把输入的收益率转换为分类变量
+			if (clModel instanceof NominalClassifier ){
+				trainingData=((NominalClassifier)clModel).processDataForNominalClassifier(trainingData,false);
+			}
 			System.out.println(" training data size , row : "
 					+ trainingData.numInstances() + " column: "
 					+ trainingData.numAttributes());
@@ -682,26 +692,15 @@ public class ProcessData {
 			}
 		}
 		
+		//是否需要重做训练阶段
 		if (clModel.m_skipTrainInBacktest == false) { 
-
 			System.out.println("start to build model");
 			model = clModel.trainData(trainingData);
 		} else {
 			model = clModel.loadModel(yearSplit,policySplit);
 		}
+		//是否需要重做评估阶段
 		if (clModel.m_skipEvalInBacktest == false) {
-			// System.out.println("start to split validate data set");
-			// validateData = FilterData.splitTrainAndTest(fullSetData,
-			// "(ATT2 >= " + splitYear[i-3]+ ") and (ATT2 <= " +splitYear[i-1] +
-			// ") and (ATT3 is '" + splitPolicy[j] + "')");
-			// validateData = FilterData.removeAttribs(validateData,
-			// yearPosition);
-			// validateData = FilterData.removeAttribs(validateData,
-			// Integer.toString(ID_POSITION));
-			// System.out.println(" validateData data size , row : " +
-			// validateData.numInstances() + " column: "
-			// + validateData.numAttributes());
-
 			clModel.evaluateModel(trainingData, model, lower_limit,
 					upper_limit,tp_fp_ratio);
 		}
@@ -711,6 +710,10 @@ public class ProcessData {
 		System.out.println("start to split testing set");
 		testingData = FilterData
 				.getInstancesSubset(fullSetData, splitTestClause);
+		//对于二分类器，这里要把输入的收益率转换为分类变量
+		if (clModel instanceof NominalClassifier ){
+			testingData=((NominalClassifier)clModel).processDataForNominalClassifier(testingData,true);
+		}
 		testingData = FilterData.removeAttribs(testingData, ArffFormat.YEAR_MONTH_INDEX);
 		System.out.println("testing data size, row: "
 				+ testingData.numInstances() + " column: "
@@ -783,40 +786,7 @@ public class ProcessData {
 			output.add(inst);
 		}
 	}
-	
-//	//这是对增量数据nominal label的处理 （因为增量数据中的nominal数据，label会可能不全）
-//	private static void calibrateNominalAttributes(String pathName, Instances incomingData) throws Exception {
-//
-//		//与本地格式数据比较，这地方基本上会有nominal数据的label不一致，临时处理办法就是先替换掉
-//		Instances format=FileUtility.loadDataFromFile(pathName+"AllTransaction20052016-format.arff");
-//		format=FilterData.removeAttribs(format, "2");
-//		System.out.println("!!!!!verifying input data format , you should read this .... "+ format.equalHeadersMsg(incomingData));
-//		for (int n = 0; n < incomingData.numAttributes() - 1; n++) { 
-//			Attribute incomingAtt = incomingData.attribute(n);
-//			Attribute formatAtt=format.attribute(n);
-//			String formatAttName=formatAtt.name();
-//			String incomingAttName=incomingAtt.name();
-//			if (formatAtt.isNominal()) {
-//				if (formatAttName.equals(incomingAttName)){
-//					System.out.println("processing incoming attribute: "+incomingAttName+ " using format attribute: "+formatAttName);
-//					Enumeration enu=formatAtt.enumerateValues();
-//					List<String> list = Collections.list(enu);
-//					
-//
-//					for (String label : list) {
-//						int index=formatAtt.indexOfValue(label);
-//						String value=String.valueOf(index);
-//						System.out.println("index:label= " + value+" : "+label);
-////						incomingData.renameAttributeValue(incomingAtt, value, label);
-//					}
-//				}else {
-//					//throw new Exception("Attribute order error! "+ incomingAttName + " vs. "+ formatAttName);
-//					System.out.println("Attribute order error! "+ incomingAttName + " vs. "+ formatAttName);
-//				}
-//			}
-//
-//		}
-//	}
+
 	
 	
 	protected static Instances mergeResultWithData(Instances resultData,Instances referenceData,String dataToAdd) throws Exception{

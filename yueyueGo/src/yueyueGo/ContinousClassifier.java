@@ -1,11 +1,13 @@
 package yueyueGo;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.trees.M5P;
+import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -77,7 +79,7 @@ public class ContinousClassifier extends MyClassifier {
 		DescriptiveStatistics stat_pred = new DescriptiveStatistics();
 		double pred = 0.0;
 		//新创建的Instances对象，用于存放预测值和实际值
-		Instances predictions = ArffFormat.CreateEvalInstances();
+		Instances predictions = CreateEvalInstances();
 
 		System.out.println(" model evaluation classifying using training data.....");
 		
@@ -236,6 +238,18 @@ public class ContinousClassifier extends MyClassifier {
 		double pred =  model.classifyInstance(curr);;
 		return pred;
 	}
-	
+
+	// 创建评估模型的arff结构（预测值-实际值）
+	protected Instances CreateEvalInstances() {
+		Attribute pred = new Attribute(ArffFormat.RESULT_PREDICTED_PROFIT);
+		Attribute shouyilv = new Attribute(ArffFormat.SHOUYILV);
+		ArrayList<Attribute> fvWekaAttributes = new ArrayList<Attribute>(2);
+		fvWekaAttributes.add(pred);
+		fvWekaAttributes.add(shouyilv);
+		Instances structure = new Instances("predictions", fvWekaAttributes, 0);
+
+		structure.setClassIndex(structure.numAttributes() - 1);
+		return structure;
+	}
 
 }
