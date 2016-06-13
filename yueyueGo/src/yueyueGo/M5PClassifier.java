@@ -8,7 +8,7 @@ public class M5PClassifier extends ContinousClassifier {
 	// 1. 全市场 2008-2016最优10单元格年均14% （20单元格11%），中证500 10-20都是14%，30-50都是12%（均为不单独评估），hs300 10格有13% （20格9%） 29941/82650
 	// 参数：  eval 0.1 / 沪深单独评估阀值/ TP——FP RATIO { 1.6, 1.4, 1.3, 1.1, 0.9 }, UPPer { 0.1, 0.1, 0.1, 0.1, 0.1 }TP_FP_BOTTOM_LINE=0.5
 	
-	// 2. 全市场2008-2016最优10单元格年均16% （20格15%，30格12%），中证500 最优10格19% 20格15%，30格13%（均为不单独评估），hs300 10格有13% （20格12% 30格11%） 23504/63522 ----- 选择这个参数作为模型20160524
+	// 2. 全市场2008-2016 20单元格年均13% （不单独评估16%）（30格15%，不单独评估14%），中证500 最优 20格17%，30格16%（均为不单独评估），hs300单独评估 20格7% （30格8%）  ----- 选择这个参数作为模型20160524
 	// 参数：  eval 0.5 / 沪深单独评估阀值/ TP——FP RATIO { 1.6, 1.4, 1.3, 1.1, 0.9 }, UPPer { 0.07, 0.09, 0.1, 0.1, 0.1 }TP_FP_BOTTOM_LINE=0.5     
 	//运行结果	Monthly selected_TPR mean: 26.9% standard deviation=23.9% Skewness=89.6% Kurtosis=32.8%
 	//			Monthly selected_LIFT mean : 1.06
@@ -19,7 +19,7 @@ public class M5PClassifier extends ContinousClassifier {
 	//			mixed selected positive rate: 34.9%
 	//			Monthly summary_judge_result summary: good number= 237 bad number=268
 
-	//3. 
+	//3. 全市场2008-2016最优20单元格年均12%，zz500 20格有13.7% ,hs300 20格5%  
 	// 参数：  eval 0.9 / 沪深单独评估阀值/ TP——FP RATIO { 1.6, 1.4, 1.3, 1.1, 0.9 }, UPPer { 0.1, 0.1, 0.1, 0.1, 0.1 }TP_FP_BOTTOM_LINE=0.5
 	//运行结果	Monthly selected_TPR mean: 24.6% standard deviation=26.3% Skewness=99.8% Kurtosis=29.5%
 	//			Monthly selected_LIFT mean : 1.16
@@ -41,24 +41,16 @@ public class M5PClassifier extends ContinousClassifier {
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = true;
 		m_skipEvalInBacktest = true;
-		m_sepeperate_eval_HS300=true;//单独为HS300评估阀值
-		m_seperate_classify_HS300=true;
+		m_sepeperate_eval_HS300=false;//单独为HS300评估阀值
+		m_seperate_classify_HS300=false; //M5P不适用沪深300，缺省不单独评估HS300
 		
-		EVAL_RECENT_PORTION = 0.9; //0.5; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
+		EVAL_RECENT_PORTION = 0.9; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
 		SAMPLE_LOWER_LIMIT = new double[]{ 0.01, 0.01, 0.02, 0.02, 0.02 }; // 各条均线选择样本的下限 
 				
-		SAMPLE_UPPER_LIMIT = new double[] {0.1, 0.1, 0.1, 0.1, 0.1 };
+		SAMPLE_UPPER_LIMIT = new double[] {0.07, 0.09, 0.1, 0.1, 0.1 };
 		TP_FP_RATIO_LIMIT = new double[]  { 1.6, 1.4, 1.3, 1.1, 0.9 };//选择样本阀值时TP FP RATIO到了何种值就可以停止了。
 		TP_FP_BOTTOM_LINE=0.5; //TP/FP的下限
 	}
 	
-//	public Classifier loadModel(String yearSplit, String policySplit) throws Exception{
-//	//TODO 这是临时做的读取年初的数据
-//	//全年都取同一个的模型
-//	if(yearSplit.length()==6){
-//		String filename=WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + yearSplit.substring(0, 4) + MA_PREFIX + policySplit;
-//		this.setModelFileName(filename);
-//	}
-//	return loadModelFromFile();
-//}
+
 }

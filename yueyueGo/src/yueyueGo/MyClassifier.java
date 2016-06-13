@@ -56,15 +56,8 @@ public abstract class MyClassifier {
 	
 	protected String model_filename;
 	protected String evaluation_filename;
-	
-	public String getEvaluationFilename() {
-		return evaluation_filename;
-	}
-
-	public void setEvaluationFilename(String evaluation_filename) {
-		this.evaluation_filename = evaluation_filename;
-	}
-
+//	protected String m_yearSplit; //仅供统计使用
+//	protected String m_policySplit; //仅供统计使用
 	//统计信息
 	protected DescriptiveStatistics summary_selected_TPR;
 	protected DescriptiveStatistics summary_selected_positive;
@@ -73,7 +66,16 @@ public abstract class MyClassifier {
 	protected DescriptiveStatistics summary_judge_result;
 	
 	protected DescriptiveStatistics summary_selectedShouyilv;
-	protected DescriptiveStatistics summary_totalShouyilv;
+	protected DescriptiveStatistics summary_totalShouyilv;	
+	public String getEvaluationFilename() {
+		return evaluation_filename;
+	}
+
+	public void setEvaluationFilename(String evaluation_filename) {
+		this.evaluation_filename = evaluation_filename;
+	}
+
+
 	public MyClassifier() {
 		summary_selected_TPR= new DescriptiveStatistics();
 		summary_selected_positive= new DescriptiveStatistics();
@@ -329,8 +331,10 @@ public abstract class MyClassifier {
 		summary_selected_positive.addValue(selectedPositive);
 		summary_selected_count.addValue(selectedCount);
 		
-		if (tpr_lift!=0){ //如果tpr lift 有意义时计算它
+		if (total_TPR!=0){ 
 			summary_lift.addValue(tpr_lift);
+		}else{//如果整体TPR为0则假定lift为1.
+			summary_lift.addValue(1);
 		}
 		summary_selectedShouyilv.addValue(selectedShouyilv);
 		summary_totalShouyilv.addValue(totalShouyilv);
@@ -338,18 +342,57 @@ public abstract class MyClassifier {
 	}
 
 
-	public void outputClassifySummary(){
+	public void outputClassifySummary(boolean writeFile) throws Exception{
+		String selected_TPR_mean=FormatUtility.formatPercent(summary_selected_TPR.getMean());
+		String selected_TPR_SD=FormatUtility.formatPercent(summary_selected_TPR.getStandardDeviation());
+		String selected_TPR_SKW=FormatUtility.formatPercent(summary_selected_TPR.getSkewness());
+		String selected_TPR_Kur=FormatUtility.formatPercent(summary_selected_TPR.getKurtosis());
+		String lift_mean=FormatUtility.formatDouble(summary_lift.getMean());
+		String selected_positive_sum=FormatUtility.formatDouble(summary_selected_positive.getSum(),8,0);
+		String selected_count_sum=FormatUtility.formatDouble(summary_selected_count.getSum(),8,0);
+		String selectedShouyilvMean = FormatUtility.formatPercent(summary_selectedShouyilv.getMean());
+		String selectedShouyilvSD = FormatUtility.formatPercent(summary_selectedShouyilv.getStandardDeviation());
+		String selectedShouyilvSKW = FormatUtility.formatPercent(summary_selectedShouyilv.getSkewness());
+		String selectedShouyilvKUR = FormatUtility.formatPercent(summary_selectedShouyilv.getKurtosis());
+		String totalShouyilvMean = FormatUtility.formatPercent(summary_totalShouyilv.getMean());
+		String totalShouyilvSD = FormatUtility.formatPercent(summary_totalShouyilv.getStandardDeviation());
+		String totalShouyilvSKW = FormatUtility.formatPercent(summary_totalShouyilv.getSkewness());
+		String totalShouyilvKUR = FormatUtility.formatPercent(summary_totalShouyilv.getKurtosis());
 		
-		System.out.println("Monthly selected_TPR mean: "+FormatUtility.formatPercent(summary_selected_TPR.getMean())+" standard deviation="+FormatUtility.formatPercent(summary_selected_TPR.getStandardDeviation())+" Skewness="+FormatUtility.formatPercent(summary_selected_TPR.getSkewness())+" Kurtosis="+FormatUtility.formatPercent(summary_selected_TPR.getKurtosis()));
-		System.out.println("Monthly selected_LIFT mean : "+FormatUtility.formatDouble(summary_lift.getMean()));
-		System.out.println("Monthly selected_positive summary: "+FormatUtility.formatDouble(summary_selected_positive.getSum(),8,0));
-		System.out.println("Monthly selected_count summary: "+FormatUtility.formatDouble(summary_selected_count.getSum(),8,0));
-		System.out.println("Monthly selected_shouyilv average: "+FormatUtility.formatPercent(summary_selectedShouyilv.getMean())+" standard deviation="+FormatUtility.formatPercent(summary_selectedShouyilv.getStandardDeviation())+" Skewness="+FormatUtility.formatPercent(summary_selectedShouyilv.getSkewness())+" Kurtosis="+FormatUtility.formatPercent(summary_selectedShouyilv.getKurtosis()));
-		System.out.println("Monthly total_shouyilv average: "+FormatUtility.formatPercent(summary_totalShouyilv.getMean())+" standard deviation="+FormatUtility.formatPercent(summary_totalShouyilv.getStandardDeviation())+" Skewness="+FormatUtility.formatPercent(summary_totalShouyilv.getSkewness())+" Kurtosis="+FormatUtility.formatPercent(summary_totalShouyilv.getKurtosis()));
+		System.out.println("Monthly selected_TPR mean: "+selected_TPR_mean+" standard deviation="+selected_TPR_SD+" Skewness="+selected_TPR_SKW+" Kurtosis="+selected_TPR_Kur);
+		System.out.println("Monthly selected_LIFT mean : "+lift_mean);
+		System.out.println("Monthly selected_positive summary: "+selected_positive_sum);
+		System.out.println("Monthly selected_count summary: "+selected_count_sum);
+		System.out.println("Monthly selected_shouyilv average: "+selectedShouyilvMean+" standard deviation="+selectedShouyilvSD+" Skewness="+selectedShouyilvSKW+" Kurtosis="+selectedShouyilvKUR);
+		System.out.println("Monthly total_shouyilv average: "+totalShouyilvMean+" standard deviation="+totalShouyilvSD+" Skewness="+totalShouyilvSKW+" Kurtosis="+totalShouyilvKUR);
 		if(summary_selected_count.getSum()>0){
 			System.out.println("mixed selected positive rate: "+FormatUtility.formatPercent(summary_selected_positive.getSum()/summary_selected_count.getSum()));
 		}
 		System.out.println("Monthly summary_judge_result summary: good number= "+FormatUtility.formatDouble(summary_judge_result.getSum(),8,0) + " bad number=" +FormatUtility.formatDouble((summary_judge_result.getN()-summary_judge_result.getSum()),8,0));
+		
+
+		if (writeFile==true){
+			String header = "selected_TPR,LIFT,selected_positive,selected_count,selectedShouyilv,totalShouyilv,shouyilvDifference\r\n";
+			StringBuffer strBuff = new StringBuffer();
+			long size=summary_totalShouyilv.getN();
+			for (int i = 0; i < size; i++) {
+				strBuff.append(summary_selected_TPR.getElement(i));
+				strBuff.append(",");
+				strBuff.append(summary_lift.getElement(i));
+				strBuff.append(",");
+				strBuff.append(summary_selected_positive.getElement(i));
+				strBuff.append(",");
+				strBuff.append(summary_selected_count.getElement(i));
+				strBuff.append(",");
+				strBuff.append(summary_selectedShouyilv.getElement(i));
+				strBuff.append(",");
+				strBuff.append(summary_totalShouyilv.getElement(i));
+				strBuff.append(",");
+				strBuff.append(summary_selectedShouyilv.getElement(i)-summary_totalShouyilv.getElement(i));
+				strBuff.append("\r\n");
+			}
+			FileUtility.write(WORK_PATH+this.WORK_FILE_PREFIX+"monthlySummary.csv", header+strBuff, "UTF-8");
+		}
 	}
 	
 	public String getModelFileName() {
@@ -362,6 +405,8 @@ public abstract class MyClassifier {
 	
 	//生成回测时使用的model文件和eval文件名称
 	public void generateModelAndEvalFileName(String yearSplit,String policySplit) {
+//		this.m_policySplit=policySplit;
+//		this.m_yearSplit=yearSplit;
 		String modelFile=this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + yearSplit + MA_PREFIX + policySplit;
 		setModelFileName(modelFile);
 		setEvaluationFilename(modelFile+THRESHOLD_EXTENSION);

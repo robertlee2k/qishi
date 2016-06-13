@@ -45,7 +45,8 @@ public class ProcessData {
 	public static final String[] splitYear ={
 //		"2008","2009","2010","2011","2012","2013","2014","2015","2016"
 		  "200801","200802","200803","200804","200805","200806","200807","200808","200809","200810","200811","200812","200901","200902","200903","200904","200905","200906","200907","200908","200909","200910","200911","200912","201001","201002","201003","201004","201005","201006","201007","201008","201009","201010","201011","201012","201101","201102","201103","201104","201105","201106","201107","201108","201109","201110","201111","201112","201201","201202","201203","201204","201205","201206","201207","201208","201209","201210","201211","201212","201301","201302","201303","201304","201305","201306","201307","201308","201309","201310","201311","201312","201401","201402","201403","201404","201405","201406","201407","201408","201409","201410","201411","201412","201501","201502","201503","201504","201505","201506","201507","201508","201509","201510","201511","201512","201601","201602","201603","201604","201605"
-//		"201508","201509","201510","201511","201512","201601","201602","201603","201604","201605"
+//		"201407","201507"
+//		"2015"
 		};
 
 	public static void main(String[] args) {
@@ -496,9 +497,9 @@ public class ProcessData {
 						+ "\\交易分析2005-2016 by month-new-mlp-201605 MA " + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
 			}else{
 				modelFileName = pathName+"\\"+clModel.classifierName
-						+ "\\交易分析2005-2016 by month-new-m5p-201604 MA " + clModel.m_policySubGroup[j]	;
+						+ "\\交易分析2005-2016 by month-new-m5p-201605 MA " + clModel.m_policySubGroup[j]	;
 				evalFileName = pathName+"\\"+clModel.classifierName
-						+ "\\交易分析2005-2016 by month-new-m5p-201604 MA " + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
+						+ "\\交易分析2005-2016 by month-new-m5p-201605 MA " + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
 			}
 
 			clModel.setModelFileName(modelFileName);
@@ -532,7 +533,7 @@ public class ProcessData {
 		
 		result.renameAttribute(1, ArffFormat.SELECTED_MA_IN_OTHER_SYSTEM); //输出文件的“均线策略”名字不一样
 		FileUtility.saveCSVFile(result, pathName + clModel.classifierName+"Selected Result"+FormatUtility.getDateStringFor(1)+".csv");		
-		clModel.outputClassifySummary();
+		clModel.outputClassifySummary(false);
 		return result;
 	}
 
@@ -650,7 +651,7 @@ public class ProcessData {
 			System.out.println(" ");
 		}
 		
-		clModel.outputClassifySummary();
+		clModel.outputClassifySummary(true);
 		if (clModel instanceof NominalClassifier ){
 			//TODO 因为历史原因，201605018之前build的二分类器模型 “均线策略" 都叫"policy"，所以调用模型前先改一下名，调用模型后再改回来
 			int maIndex=FilterData.findATTPosition(result,"policy");
@@ -735,7 +736,7 @@ public class ProcessData {
 	private static Instances calibrateAttributesForDailyData(String pathName,Instances incomingData) throws Exception {
 		
 		//与本地格式数据比较，这地方基本上会有nominal数据的label不一致，临时处理办法就是先替换掉
-		Instances format=FileUtility.loadDataFromFile(pathName+"AllTransaction20052016-format.arff");
+		Instances format=FileUtility.loadDataFromFile(C_ROOT_DIRECTORY+"AllTransaction20052016-format.arff");
 		format=FilterData.removeAttribs(format, "2");
 		System.out.println("!!!!!verifying input data format , you should read this .... "+ format.equalHeadersMsg(incomingData));
 		calibrateAttributes(incomingData, format);
