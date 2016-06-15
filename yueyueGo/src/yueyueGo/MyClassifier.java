@@ -391,7 +391,7 @@ public abstract class MyClassifier {
 				strBuff.append(summary_selectedShouyilv.getElement(i)-summary_totalShouyilv.getElement(i));
 				strBuff.append("\r\n");
 			}
-			FileUtility.write(WORK_PATH+this.WORK_FILE_PREFIX+"monthlySummary.csv", header+strBuff, "UTF-8");
+			FileUtility.write(WORK_FILE_PREFIX+"monthlySummary.csv", header+strBuff, "UTF-8");
 		}
 	}
 	

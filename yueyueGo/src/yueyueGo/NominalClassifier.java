@@ -225,6 +225,8 @@ public class NominalClassifier extends MyClassifier{
 		
 		if (cacheOldClassValue==true){
 			cachedOldClassInstances=CreateCachedOldClassInstances();
+		}else{
+			cachedOldClassInstances=null;
 		}
 		
 		for (int i=0;i<inData.numInstances();i++){
@@ -268,7 +270,10 @@ public class NominalClassifier extends MyClassifier{
 	
 	@Override
 	protected double getShouyilv(int index,double id, double newClassValue) throws Exception{
-		if (cachedOldClassInstances==null || index>=cachedOldClassInstances.numInstances()){
+		if (cachedOldClassInstances==null) {
+			return Double.NaN;
+		}
+		if ( index>=cachedOldClassInstances.numInstances()){
 			throw new Exception("Old Class Value has not been cached for index: "+ index );
 		}
 		double cachedID=cachedOldClassInstances.instance(index).value(0);

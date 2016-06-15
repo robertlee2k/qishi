@@ -45,8 +45,7 @@ public class ProcessData {
 	public static final String[] splitYear ={
 //		"2008","2009","2010","2011","2012","2013","2014","2015","2016"
 		  "200801","200802","200803","200804","200805","200806","200807","200808","200809","200810","200811","200812","200901","200902","200903","200904","200905","200906","200907","200908","200909","200910","200911","200912","201001","201002","201003","201004","201005","201006","201007","201008","201009","201010","201011","201012","201101","201102","201103","201104","201105","201106","201107","201108","201109","201110","201111","201112","201201","201202","201203","201204","201205","201206","201207","201208","201209","201210","201211","201212","201301","201302","201303","201304","201305","201306","201307","201308","201309","201310","201311","201312","201401","201402","201403","201404","201405","201406","201407","201408","201409","201410","201411","201412","201501","201502","201503","201504","201505","201506","201507","201508","201509","201510","201511","201512","201601","201602","201603","201604","201605"
-//		"201407","201507"
-//		"2015"
+//		"201407"
 		};
 
 	public static void main(String[] args) {
@@ -67,7 +66,6 @@ public class ProcessData {
 			//按二分类器回测历史数据
 			MLPClassifier nModel = new MLPClassifier();
 			Instances mlpResult=testBackward(nModel);
-			
 			//按连续分类器回测历史数据
 			M5PClassifier cModel=new M5PClassifier();
 			Instances m5pResult=testBackward(cModel);
@@ -465,7 +463,7 @@ public class ProcessData {
 		int maIndex=FilterData.findATTPosition(fullData,ArffFormat.SELECTED_MA);
 
 		if (clModel instanceof NominalClassifier ){
-			fullData=((NominalClassifier)clModel).processDataForNominalClassifier(fullData,true);
+			fullData=((NominalClassifier)clModel).processDataForNominalClassifier(fullData,false);
 			//TODO 因为历史原因，201605018之前build的二分类器模型 “均线策略" 都叫"policy"，所以调用模型前先改一下名，调用模型后再改回来
 			fullData.renameAttribute(maIndex-1, "policy");
 		}
@@ -484,13 +482,12 @@ public class ProcessData {
 			}
 			
 			newData = FilterData.getInstancesSubset(fullData, expression);
-			System.out.println(" new data size , row : "
-					+ newData.numInstances() + " column: "
-					+ newData.numAttributes());
+
 			
 			String modelFileName;
 			String evalFileName;
 			if (clModel instanceof NominalClassifier ){
+
 				modelFileName = pathName+"\\"+clModel.classifierName
 						+ "\\交易分析2005-2016 by month-new-mlp-2016 MA " + clModel.m_policySubGroup[j]	;				
 				evalFileName = pathName+"\\"+clModel.classifierName
@@ -505,7 +502,7 @@ public class ProcessData {
 			clModel.setModelFileName(modelFileName);
 			clModel.setEvaluationFilename(evalFileName);
 	
-
+			System.out.println(" new data size , row : "+ newData.numInstances() + " column: "	+ newData.numAttributes());
 			if (result == null) {// initialize result instances
 				// remove unnecessary data,leave 均线策略 & shouyilv alone
 				Instances header = new Instances(newData, 0);
