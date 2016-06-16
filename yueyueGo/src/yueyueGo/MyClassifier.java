@@ -17,7 +17,6 @@ public abstract class MyClassifier {
 	//统一常量
 	public static final String MA_PREFIX = " MA ";
 	public static final String ARFF_EXTENSION = ".arff";
-	public static final String RESULT_EXTENSION = "-Test Result.csv";
 	public static final String THRESHOLD_EXTENSION = ".eval";
 	public static final String TXT_EXTENSION = ".txt";
 	public static final String WEKA_MODEL_EXTENSION = "-WEKA.model";
@@ -304,27 +303,31 @@ public abstract class MyClassifier {
 		}
 		
 		//评估此次成功与否
-		if (total_TPR>=0.5){
-			if (selected_TPR>=0.5 && selectedShouyilv*buyableCount>=totalShouyilv*20)
-				resultJudgement=1;
-			else 
-				resultJudgement=0;
-		}else if (total_TPR>=0.33 && total_TPR<0.5){
-			if (tpr_lift>=1&& selectedShouyilv*buyableCount>=totalShouyilv*20)
-				resultJudgement=1;
-			else 
-				resultJudgement=0;
-		}else if (total_TPR>=0.2 && total_TPR<0.33){
-			if (selected_TPR>0.33 || selectedShouyilv*buyableCount>=totalShouyilv*20)
-				resultJudgement=1;
-			else
-				resultJudgement=0;
-		}else {
-			if (selected_TPR>0.33 || selectedShouyilv*buyableCount>=totalShouyilv*20)
-				resultJudgement=1;
-			else
-				resultJudgement=0;
-		}
+		if (selectedShouyilv*buyableCount>=totalShouyilv*20)
+			resultJudgement=1;
+		else 
+			resultJudgement=0;
+//		if (total_TPR>=0.5){
+//			if (selected_TPR>=0.5 && selectedShouyilv*buyableCount>=totalShouyilv*20)
+//				resultJudgement=1;
+//			else 
+//				resultJudgement=0;
+//		}else if (total_TPR>=0.33 && total_TPR<0.5){
+//			if (tpr_lift>=1&& selectedShouyilv*buyableCount>=totalShouyilv*20)
+//				resultJudgement=1;
+//			else 
+//				resultJudgement=0;
+//		}else if (total_TPR>=0.2 && total_TPR<0.33){
+//			if (selected_TPR>0.33 || selectedShouyilv*buyableCount>=totalShouyilv*20)
+//				resultJudgement=1;
+//			else
+//				resultJudgement=0;
+//		}else {
+//			if (selected_TPR>0.33 || selectedShouyilv*buyableCount>=totalShouyilv*20)
+//				resultJudgement=1;
+//			else
+//				resultJudgement=0;
+//		}
 		System.out.println("*** evaluation result for this period :"+resultJudgement);
 		summary_judge_result.addValue(resultJudgement);
 		summary_selected_TPR.addValue(selected_TPR);
@@ -391,7 +394,7 @@ public abstract class MyClassifier {
 				strBuff.append(summary_selectedShouyilv.getElement(i)-summary_totalShouyilv.getElement(i));
 				strBuff.append("\r\n");
 			}
-			FileUtility.write(WORK_FILE_PREFIX+"monthlySummary.csv", header+strBuff, "UTF-8");
+			FileUtility.write(ProcessData.C_ROOT_DIRECTORY+"回测结果-"+this.classifierName+"-monthlySummary.csv", header+strBuff, "UTF-8");
 		}
 	}
 	
@@ -433,7 +436,7 @@ public abstract class MyClassifier {
 		String modelFileName=this.getModelFileName();
 		FileUtility.write(modelFileName+"-"+this.classifierName+TXT_EXTENSION, model.toString(), "utf-8");
 		SerializationHelper.write(modelFileName+MODEL_FILE_EXTENSION, v);
-		SerializationHelper.write(modelFileName+WEKA_MODEL_EXTENSION, model);
+//		SerializationHelper.write(modelFileName+WEKA_MODEL_EXTENSION, model);
 		System.out.println("models saved to :"+ modelFileName);
 	}
 	
@@ -450,21 +453,7 @@ public abstract class MyClassifier {
 		return (Vector) SerializationHelper.read( evalFileName);
 	}
 	
-	public void saveResultFile(Instances result) throws IOException{
-		FileUtility.saveCSVFile(result, this.WORK_FILE_PREFIX+"-"+ this.classifierName + RESULT_EXTENSION);
-	}
-	
-	public void saveSelectedFileForMarkets(Instances fullOutput) throws Exception{
-		//输出全市场结果
-		Instances fullMarketSelected=FilterData.getInstancesSubset(fullOutput, FilterData.WEKA_ATT_PREFIX +fullOutput.numAttributes()+" = 1");
-		FileUtility.saveCSVFile(fullMarketSelected, this.WORK_FILE_PREFIX+"-"+ this.classifierName+"-full" + RESULT_EXTENSION );
-		//输出沪深300
-		Instances subsetMarketSelected=FilterData.filterDataForIndex(fullMarketSelected,ArffFormat.IS_HS300);
-		FileUtility.saveCSVFile(subsetMarketSelected, this.WORK_FILE_PREFIX+"-"+ this.classifierName+"-hs300" + RESULT_EXTENSION );
-		//输出中证300
-		subsetMarketSelected=FilterData.filterDataForIndex(fullMarketSelected,ArffFormat.IS_ZZ500);
-		FileUtility.saveCSVFile(subsetMarketSelected, this.WORK_FILE_PREFIX+"-"+ this.classifierName+"-zz500" + RESULT_EXTENSION );
-	}
+
 	
 	// arffType="train" or "test" or "eval"
 	public void saveArffFile(Instances trainingData,String arffType,String yearSplit,String policySplit) throws IOException{

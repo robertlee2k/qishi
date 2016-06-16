@@ -37,10 +37,17 @@ public class ProcessData {
 
 	
 	public static final String C_ROOT_DIRECTORY = "C:\\Users\\robert\\Desktop\\提升均线策略\\";
-	public static final String NOMINAL_CLASSIFIER_DIR = C_ROOT_DIRECTORY+"01-二分类器\\";
-	public static final String CONTINOUS_CLASSIFIER_DIR = C_ROOT_DIRECTORY+"02-连续分类器\\";
+	public static final String NOMINAL_CLASSIFIER_DIR = C_ROOT_DIRECTORY+"models\\01-二分类器\\";
+	public static final String CONTINOUS_CLASSIFIER_DIR = C_ROOT_DIRECTORY+"models\\02-连续分类器\\";
 	public static final String PREDICT_WORK_DIR=C_ROOT_DIRECTORY+"03-预测模型\\";
 	private static final String ALL_TRANSACTION_LEFT_ARFF = "AllTransaction20052016-left.arff";
+	public static final String RESULT_EXTENSION = "-Test Result.csv";
+	
+	public static final String MLP_PREDICT_MODEL= "\\交易分析2005-2016 by month-new-mlp-201605 MA ";
+	public static final String MLP_EVAL_MODEL= "\\交易分析2005-2016 by month-new-mlp-201605 MA ";
+	public static final String M5P_PREDICT_MODEL="\\交易分析2005-2016 by month-new-m5p-201605 MA ";
+	public static final String M5P_EVAL_MODEL="\\交易分析2005-2016 by month-new-m5p-201605 MA ";
+	
 	
 	public static final String[] splitYear ={
 //		"2008","2009","2010","2011","2012","2013","2014","2015","2016"
@@ -65,15 +72,15 @@ public class ProcessData {
 			//按二分类器回测历史数据
 			MLPClassifier nModel = new MLPClassifier();
 			Instances mlpResult=testBackward(nModel);
-//			//按连续分类器回测历史数据
-//			M5PClassifier cModel=new M5PClassifier();
-//			Instances m5pResult=testBackward(cModel);
-//
-//			//输出用于计算收益率的CSV文件
-//			Instances m5pOutput=mergeResultWithData(m5pResult,mlpResult,ArffFormat.RESULT_PREDICTED_WIN_RATE);
-//			cModel.saveSelectedFileForMarkets(m5pOutput);
-//			Instances mlpOutput=mergeResultWithData(mlpResult,m5pResult,ArffFormat.RESULT_PREDICTED_PROFIT);
-//			nModel.saveSelectedFileForMarkets(mlpOutput);
+			//按连续分类器回测历史数据
+			M5PClassifier cModel=new M5PClassifier();
+			Instances m5pResult=testBackward(cModel);
+
+			//输出用于计算收益率的CSV文件
+			Instances m5pOutput=mergeResultWithData(m5pResult,mlpResult,ArffFormat.RESULT_PREDICTED_WIN_RATE);
+			saveSelectedFileForMarkets(m5pOutput,cModel.classifierName);
+			Instances mlpOutput=mergeResultWithData(mlpResult,m5pResult,ArffFormat.RESULT_PREDICTED_PROFIT);
+			saveSelectedFileForMarkets(mlpOutput,nModel.classifierName);
 			
 			//用最新的单次交易数据，更新原始的交易数据文件
 //			int startYear=2005;
@@ -485,17 +492,19 @@ public class ProcessData {
 			
 			String modelFileName;
 			String evalFileName;
-			if (clModel instanceof NominalClassifier ){
+			if (clModel instanceof MLPClassifier ){
 
-				modelFileName = pathName+"\\"+clModel.classifierName
-						+ "\\交易分析2005-2016 by month-new-mlp-2016 MA " + clModel.m_policySubGroup[j]	;				
-				evalFileName = pathName+"\\"+clModel.classifierName
-						+ "\\交易分析2005-2016 by month-new-mlp-201605 MA " + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
-			}else{
-				modelFileName = pathName+"\\"+clModel.classifierName
-						+ "\\交易分析2005-2016 by month-new-m5p-201605 MA " + clModel.m_policySubGroup[j]	;
-				evalFileName = pathName+"\\"+clModel.classifierName
-						+ "\\交易分析2005-2016 by month-new-m5p-201605 MA " + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
+				modelFileName = pathName+"\\"+clModel.classifierName+ MLP_PREDICT_MODEL
+						+ clModel.m_policySubGroup[j]	;				
+				evalFileName = pathName+"\\"+clModel.classifierName+MLP_EVAL_MODEL
+						 + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
+			}else if (clModel instanceof M5PClassifier ){
+				modelFileName = pathName+"\\"+clModel.classifierName+M5P_PREDICT_MODEL
+						+  clModel.m_policySubGroup[j]	;
+				evalFileName = pathName+"\\"+clModel.classifierName+M5P_EVAL_MODEL
+						 + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
+			}else {
+				throw new Exception("undefined predict model");
 			}
 
 			clModel.setModelFileName(modelFileName);
@@ -653,7 +662,7 @@ public class ProcessData {
 			int maIndex=FilterData.findATTPosition(result,"policy");
 			result.renameAttribute(maIndex-1, ArffFormat.SELECTED_MA);
 		}		
-		clModel.saveResultFile(result);
+		saveResultFile(result,clModel.classifierName);
 		
 		System.out.println(clModel.classifierName+" test result file saved.");
 		return result;
@@ -917,4 +926,20 @@ private static boolean checkSumBeforeMerge(Instance leftCurr,
 	}
 	return result;
 }	
+
+private static void saveResultFile(Instances result,String classiferName) throws IOException{
+	FileUtility.saveCSVFile(result, C_ROOT_DIRECTORY+"回测结果-"+ classiferName + RESULT_EXTENSION);
+}
+
+private static void saveSelectedFileForMarkets(Instances fullOutput,String classiferName) throws Exception{
+	//输出全市场结果
+	Instances fullMarketSelected=FilterData.getInstancesSubset(fullOutput, FilterData.WEKA_ATT_PREFIX +fullOutput.numAttributes()+" = 1");
+	FileUtility.saveCSVFile(fullMarketSelected, C_ROOT_DIRECTORY+"回测选股-"+ classiferName+"-full" + RESULT_EXTENSION );
+	//输出沪深300
+	Instances subsetMarketSelected=FilterData.filterDataForIndex(fullMarketSelected,ArffFormat.IS_HS300);
+	FileUtility.saveCSVFile(subsetMarketSelected, C_ROOT_DIRECTORY+"回测选股-"+ classiferName+"-hs300" + RESULT_EXTENSION );
+	//输出中证300
+	subsetMarketSelected=FilterData.filterDataForIndex(fullMarketSelected,ArffFormat.IS_ZZ500);
+	FileUtility.saveCSVFile(subsetMarketSelected, C_ROOT_DIRECTORY+"回测选股-"+ classiferName+"-zz500" + RESULT_EXTENSION );
+}
 }
