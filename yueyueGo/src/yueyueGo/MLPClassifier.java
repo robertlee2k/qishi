@@ -28,6 +28,16 @@ public class MLPClassifier extends NominalClassifier {
 	// 6
 	//SAMPLE_UPPER_LIMIT  {0.07, 0.09, 0.1, 0.1, 0.1 }; TP_FP_RATIO_LIMIT {  1.6, 1.4, 1.3, 1.1, 0.9 };TP_FP_BOTTOM_LINE=0.7
 	//DEFAULT_THRESHOLD=0.6;EVAL_RECENT_PORTION = 0.7; 
+	//	===============================output summary=====================================
+	//			Monthly selected_TPR mean: 32.17% standard deviation=25.79% Skewness=0.75 Kurtosis=-0.14
+	//			Monthly selected_LIFT mean : 1.16
+	//			Monthly selected_positive summary: 33,380
+	//			Monthly selected_count summary: 83,342
+	//			Monthly selected_shouyilv average: 1.19% standard deviation=8.70% Skewness=736.71% Kurtosis=705.85%
+	//			Monthly total_shouyilv average: 1.00% standard deviation=6.18% Skewness=300.76% Kurtosis=509.10%
+	//			mixed selected positive rate: 40.05%
+	//			Monthly summary_judge_result summary: good number= 265 bad number=240
+	//			===============================end of summary=====================================	
 	public MLPClassifier() {
 		super();
 		classifierName="mlp";

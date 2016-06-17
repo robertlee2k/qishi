@@ -19,16 +19,18 @@ public class M5PClassifier extends ContinousClassifier {
 	//			mixed selected positive rate: 34.9%
 	//			Monthly summary_judge_result summary: good number= 237 bad number=268
 
-	//3.激进策略（收益率优先）全市场2008-2016 20单元格年均15% （不单独评估hs300）（30格15%，不单独评估14%），中证500 最优 20格14%，30格14%（均为不单独评估，保守策略更高），hs300不单独评估 20格7% （30格8%）  ----- 选择这个参数作为模型20160524
+	//3.激进策略（收益率优先）全市场2008-2016 20单元格年均15% （不单独评估hs300）（30格15%，不单独评估14%），中证500 最优 20格14%，30格14%（均为不单独评估，保守策略更高），hs300不单独评估 20格7% （30格8%）  ----- 选择这个参数作为模型20160616
 	// 参数：  eval 0.9 / 沪深单独评估阀值/ TP——FP RATIO { 1.6, 1.4, 1.3, 1.1, 0.9 }, UPPer { 0.1, 0.1, 0.1, 0.1, 0.1 }TP_FP_BOTTOM_LINE=0.5
-	//运行结果	Monthly selected_TPR mean: 24.6% standard deviation=26.3% Skewness=99.8% Kurtosis=29.5%
-	//			Monthly selected_LIFT mean : 1.16
-	//			Monthly selected_positive summary: 20,732
-	//			Monthly selected_count summary: 56,795
-	//			Monthly selected_shouyilv average: 1.1% standard deviation=8.4% Skewness=67.7% Kurtosis=13.9%
-	//			Monthly total_shouyilv average: 1.0% standard deviation=6.2% Skewness=00.8% Kurtosis=09.1%
-	//			mixed selected positive rate: 36.5%
-	//			Monthly summary_judge_result summary: good number= 268 bad number=237
+	//	===============================output summary=====================================
+	//			Monthly selected_TPR mean: 25.67% standard deviation=25.12% Skewness=0.95 Kurtosis=0.32
+	//			Monthly selected_LIFT mean : 0.81
+	//			Monthly selected_positive summary: 19,580
+	//			Monthly selected_count summary: 55,336
+	//			Monthly selected_shouyilv average: 1.18% standard deviation=9.06% Skewness=728.20% Kurtosis=166.04%
+	//			Monthly total_shouyilv average: 1.00% standard deviation=6.18% Skewness=300.76% Kurtosis=509.10%
+	//			mixed selected positive rate: 35.38%
+	//			Monthly summary_judge_result summary: good number= 255 bad number=250
+	//			===============================end of summary=====================================
 	
 
 	// 4.  中证5002008-2016 10单元格年均 18%（20格 13%），全市场10单元15%，hs300 10格7% （单独评估）  18357/47673

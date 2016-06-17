@@ -3,6 +3,7 @@ package yueyueGo;
 import java.io.IOException;
 import java.util.Vector;
 
+import org.apache.commons.math3.ode.ODEIntegrator;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import weka.classifiers.Classifier;
@@ -348,20 +349,30 @@ public abstract class MyClassifier {
 	public void outputClassifySummary(boolean writeFile) throws Exception{
 		String selected_TPR_mean=FormatUtility.formatPercent(summary_selected_TPR.getMean());
 		String selected_TPR_SD=FormatUtility.formatPercent(summary_selected_TPR.getStandardDeviation());
-		String selected_TPR_SKW=FormatUtility.formatPercent(summary_selected_TPR.getSkewness());
-		String selected_TPR_Kur=FormatUtility.formatPercent(summary_selected_TPR.getKurtosis());
+		String selected_TPR_SKW=FormatUtility.formatDouble(summary_selected_TPR.getSkewness());
+		String selected_TPR_Kur=FormatUtility.formatDouble(summary_selected_TPR.getKurtosis());
 		String lift_mean=FormatUtility.formatDouble(summary_lift.getMean());
 		String selected_positive_sum=FormatUtility.formatDouble(summary_selected_positive.getSum(),8,0);
 		String selected_count_sum=FormatUtility.formatDouble(summary_selected_count.getSum(),8,0);
 		String selectedShouyilvMean = FormatUtility.formatPercent(summary_selectedShouyilv.getMean());
 		String selectedShouyilvSD = FormatUtility.formatPercent(summary_selectedShouyilv.getStandardDeviation());
-		String selectedShouyilvSKW = FormatUtility.formatPercent(summary_selectedShouyilv.getSkewness());
-		String selectedShouyilvKUR = FormatUtility.formatPercent(summary_selectedShouyilv.getKurtosis());
+		String selectedShouyilvSKW = FormatUtility.formatDouble(summary_selectedShouyilv.getSkewness());
+		String selectedShouyilvKUR = FormatUtility.formatDouble(summary_selectedShouyilv.getKurtosis());
 		String totalShouyilvMean = FormatUtility.formatPercent(summary_totalShouyilv.getMean());
 		String totalShouyilvSD = FormatUtility.formatPercent(summary_totalShouyilv.getStandardDeviation());
-		String totalShouyilvSKW = FormatUtility.formatPercent(summary_totalShouyilv.getSkewness());
-		String totalShouyilvKUR = FormatUtility.formatPercent(summary_totalShouyilv.getKurtosis());
+		String totalShouyilvSKW = FormatUtility.formatDouble(summary_totalShouyilv.getSkewness());
+		String totalShouyilvKUR = FormatUtility.formatDouble(summary_totalShouyilv.getKurtosis());
 		
+		
+		System.out.println("......................");
+		System.out.println("......................");
+		System.out.println("......................");
+		System.out.println("......................");
+		System.out.println("......................");
+		System.out.println("......................");
+		System.out.println("......................");
+		System.out.println("......................");
+		System.out.println("===============================output summary=====================================");
 		System.out.println("Monthly selected_TPR mean: "+selected_TPR_mean+" standard deviation="+selected_TPR_SD+" Skewness="+selected_TPR_SKW+" Kurtosis="+selected_TPR_Kur);
 		System.out.println("Monthly selected_LIFT mean : "+lift_mean);
 		System.out.println("Monthly selected_positive summary: "+selected_positive_sum);
@@ -372,7 +383,15 @@ public abstract class MyClassifier {
 			System.out.println("mixed selected positive rate: "+FormatUtility.formatPercent(summary_selected_positive.getSum()/summary_selected_count.getSum()));
 		}
 		System.out.println("Monthly summary_judge_result summary: good number= "+FormatUtility.formatDouble(summary_judge_result.getSum(),8,0) + " bad number=" +FormatUtility.formatDouble((summary_judge_result.getN()-summary_judge_result.getSum()),8,0));
-		
+		System.out.println("===============================end of summary=====================================");
+		System.out.println("......................");
+		System.out.println("......................");
+		System.out.println("......................");
+		System.out.println("......................");
+		System.out.println("......................");
+		System.out.println("......................");
+		System.out.println("......................");
+		System.out.println("......................");
 
 		if (writeFile==true){
 			String header = "selected_TPR,LIFT,selected_positive,selected_count,selectedShouyilv,totalShouyilv,shouyilvDifference\r\n";

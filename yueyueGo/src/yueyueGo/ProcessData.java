@@ -942,4 +942,125 @@ private static void saveSelectedFileForMarkets(Instances fullOutput,String class
 	subsetMarketSelected=FilterData.filterDataForIndex(fullMarketSelected,ArffFormat.IS_ZZ500);
 	FileUtility.saveCSVFile(subsetMarketSelected, C_ROOT_DIRECTORY+"回测选股-"+ classiferName+"-zz500" + RESULT_EXTENSION );
 }
+
+
+//protected static Instances mergeTransactionWithExtension(Instances transData,Instances extData) throws Exception{
+//
+//	//将两边数据以ID排序
+//	transData.sort(ArffFormat.ID_POSITION-1);
+//	extData.sort(ArffFormat.ID_POSITION-1);
+//
+//	
+//
+//	
+//    // 创建输出结果
+//    Instances mergedResult = mergedResult.mergeInstances(transData, extData);
+//
+//    mergedResult=FilterData.AddAttribute(mergedResult,ArffFormat.RESULT_PREDICTED_PROFIT, mergedResult.numAttributes());
+//    mergedResult=FilterData.AddAttribute(mergedResult,ArffFormat.RESULT_PREDICTED_WIN_RATE, mergedResult.numAttributes());
+//    mergedResult=FilterData.AddAttribute(mergedResult,ArffFormat.RESULT_SELECTED, mergedResult.numAttributes());
+//
+//	
+//	int processed=0;
+//	Instance leftCurr;
+//	Instance resultCurr;
+//	Instance referenceCurr;
+//	Instance newData;
+//	Attribute leftMA=left.attribute(ArffFormat.SELECTED_MA);
+//	Attribute resultMA=resultData.attribute(ArffFormat.SELECTED_MA);
+//	Attribute leftBias5=left.attribute("bias5");
+//	Attribute resultBias5=resultData.attribute("bias5");
+//	Attribute resultSelectedAtt=resultData.attribute(ArffFormat.RESULT_SELECTED);
+//	Attribute outputSelectedAtt=mergedResult.attribute(ArffFormat.RESULT_SELECTED);
+//	Attribute outputPredictAtt=mergedResult.attribute(ArffFormat.RESULT_PREDICTED_PROFIT);
+//	Attribute outputWinrateAtt=mergedResult.attribute(ArffFormat.RESULT_PREDICTED_WIN_RATE);
+//			
+//	
+//	
+//	//传入的结果集result不是排序的,而left的数据是按tradeDate日期排序的， 所以都先按ID排序。
+//	left.sort(ArffFormat.ID_POSITION-1);
+//	resultData.sort(ArffFormat.ID_POSITION-1);
+//	referenceData.sort(ArffFormat.ID_POSITION-1);
+//
+//
+//	for (int i=0;i<left.numInstances();i++){	
+//		leftCurr=left.instance(i);
+//		resultCurr=resultData.instance(processed);
+//		referenceCurr=referenceData.instance(processed);
+//		if (leftCurr.value(0)==resultCurr.value(0)){//找到相同ID的记录了，接下来做冗余字段的数据校验
+//			if ( checkSumBeforeMerge(leftCurr, resultCurr, leftMA, resultMA,leftBias5, resultBias5)) {
+//				newData=new DenseInstance(mergedResult.numAttributes());
+//				newData.setDataset(mergedResult);
+//				for (int n = 0; n < leftCurr.numAttributes(); n++) { 
+//					Attribute att = leftCurr.attribute(n);
+//					if (att != null) {
+//						if (att.isNominal()) {
+//							String label = leftCurr.stringValue(att);
+//							int index = att.indexOfValue(label);
+//							if (index != -1) {
+//								newData.setValue(n, index);
+//							} //这里如果left里面的数据没有值，也就不必设值了
+//						} else if (att.isNumeric()) {
+//							newData.setValue(n, leftCurr.value(att));
+//						} else if (att.isString()) {
+//							String label = leftCurr.stringValue(att);
+//							newData.setValue(n, label);
+//						} else {
+//							throw new IllegalStateException("Unhandled attribute type!");
+//						}
+//					}
+//				}
+//
+//				//根据传入的参数判断需要当前有什么，需要补充的数据是什么
+//				double profit;
+//				double winrate;
+//				if (dataToAdd.equals(ArffFormat.RESULT_PREDICTED_WIN_RATE)){
+//					//当前结果集里有什么数据
+//					profit=resultCurr.value(resultData.attribute(ArffFormat.RESULT_PREDICTED_PROFIT));
+//					//需要添加参考集里的什么数据
+//					winrate=referenceCurr.value(referenceData.attribute(ArffFormat.RESULT_PREDICTED_WIN_RATE));
+//				}else{
+//					//当前结果集里有什么数据
+//					winrate=resultCurr.value(resultData.attribute(ArffFormat.RESULT_PREDICTED_WIN_RATE));
+//					//需要添加参考集里的什么数据
+//					profit=referenceCurr.value(referenceData.attribute(ArffFormat.RESULT_PREDICTED_PROFIT));
+//				}
+//
+//				newData.setValue(outputPredictAtt, profit);
+//				newData.setValue(outputWinrateAtt, winrate);
+//				newData.setValue(outputSelectedAtt, resultCurr.value(resultSelectedAtt));
+//				mergedResult.add(newData);
+//				processed++;
+//				if (processed % 100000 ==0){
+//					System.out.println("number of results processed:"+ processed);
+//				}
+//				if (processed>=resultData.numInstances()){
+//					break;
+//				}
+//			}else {
+//				throw new Exception("data value in header data and result data does not equal "+leftCurr.value(leftMA)+" = "+resultCurr.value(resultMA)+ " / "+leftCurr.value(leftBias5) + " = "+resultCurr.value(resultBias5));
+//			}
+//		}
+//	}// end left processed
+//	if (processed!=resultData.numInstances()){
+//		throw new Exception("not all data in result have been processed , processed= "+processed+" ,while total result="+resultData.numInstances());
+//	}else {
+//		System.out.println("number of results merged and processed: "+ processed);
+//	}
+//	
+//	//返回结果之前需要按TradeDate重新排序
+//	int tradeDateIndex=FilterData.findATTPosition(mergedResult, ArffFormat.TRADE_DATE);
+//	mergedResult.sort(tradeDateIndex-1);
+//	
+//	//输出前改名
+//	mergedResult.renameAttribute(mergedResult.attribute(ArffFormat.SELECTED_MA), ArffFormat.SELECTED_MA_IN_OTHER_SYSTEM);
+//	//给mergedResult瘦身。
+//	mergedResult=FilterData.removeAttribs(mergedResult, "2,6-9,11");
+//
+//
+//	return mergedResult;
+//}
+//
+//
+
 }

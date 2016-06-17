@@ -34,8 +34,8 @@ public class ArffFormat {
 	public static final String YEAR_MONTH_INDEX = "2"; // yearmonth所处位置，理论上说可以不用这个定义，用findAttPosition查找，暂时保留吧
 
 
-	// 用于training的数据顺序
-	public static final String[] TRAINING_ARFF_FORMAT = { SELECTED_MA, "bias5",
+	// 用于training的数据顺序（最短格式，无计算字段的）
+	public static final String[] TRAINING_ARFF_SHORT_FORMAT = { SELECTED_MA, "bias5",
 			"bias10", "bias20", "bias30", "bias60", "bias5前日差", "bias10前日差",
 			"bias20前日差", "bias30前日差", "bias60前日差", "bias5二日差", "bias10二日差",
 			"bias20二日差", "bias30二日差", "bias60二日差", "ma5前日比", "ma10前日比",
@@ -55,6 +55,12 @@ public class ArffFormat {
 	// "shouyilv" 最后一个可能是shouyilv也有可能是positive
 	};
 
+	//单次交易收益率的扩展ARFF格式
+	public static final String[] INCREMENTAL_EXT_ARFF_FORMAT= {
+		ID,TRADE_DATE,"code",SELL_DATE,DATA_DATE,SELECTED_MA_IN_OTHER_SYSTEM,"bias5_preday_dif","zhishu_code",
+		"zhishu_quantity_preday_perc","zhishu_quantity_pre2day_perc","zhishu_quantity_pre3day_perc","zhishu_ma5_indicator","zhishu_ma10_indicator","zhishu_ma20_indicator","zhishu_ma30_indicator","zhishu_ma60_indicator","sw_ma5_indicator","sw_ma10_indicator","sw_ma20_indicator","sw_ma30_indicator","sw_ma60_indicator","ma5_signal_scale","ma10_signal_scale","ma20_signal_scale","ma30_signal_scale","ma60_signal_scale"
+	};
+	
 	// 交易ARFF数据全集数据的格式 （从ID到均线策略，后面都和trainingarff的相同了）， 总共10个字段
 	public static final String[] ORIGINAL_TRANSACTION_ARFF_FORMAT = { ID,
 			"yearmonth", TRADE_DATE, "code", SELL_DATE, "股票名称", "year",
@@ -119,10 +125,10 @@ public class ArffFormat {
 		int bias10Index = left_column_number + 2;
 		int codeBegin = 0;
 		int codeEnd = 0;
-		for (int i = 0; i < TRAINING_ARFF_FORMAT.length; i++) {
-			if (IS_SZ50.equals(TRAINING_ARFF_FORMAT[i])) {
+		for (int i = 0; i < TRAINING_ARFF_SHORT_FORMAT.length; i++) {
+			if (IS_SZ50.equals(TRAINING_ARFF_SHORT_FORMAT[i])) {
 				codeBegin = left_column_number + i - 1;
-			} else if (IS_ZZ500.equals(TRAINING_ARFF_FORMAT[i])) {
+			} else if (IS_ZZ500.equals(TRAINING_ARFF_SHORT_FORMAT[i])) {
 				codeEnd = left_column_number + i + 1;
 			}
 		}
@@ -214,15 +220,15 @@ public class ArffFormat {
 			int bypassColumnCount) throws Exception {
 		// 把读入的数据改名 以适应内部训练的arff格式
 		String incomingColumnName=null;
-		for (int i = 0; i < TRAINING_ARFF_FORMAT.length; i++) {
+		for (int i = 0; i < TRAINING_ARFF_SHORT_FORMAT.length; i++) {
 			incomingColumnName=data.attribute(i + bypassColumnCount).name();
 			if (incomingColumnName.equals(validInputColumns[i+1])){
 				System.out.println("rename input db column name ["
 						+ data.attribute(i + bypassColumnCount).name()
 						+ "] to training attribuate name ["
-						+ ArffFormat.TRAINING_ARFF_FORMAT[i] + "]");
+						+ ArffFormat.TRAINING_ARFF_SHORT_FORMAT[i] + "]");
 				data.renameAttribute(i + bypassColumnCount,
-						TRAINING_ARFF_FORMAT[i]);
+						TRAINING_ARFF_SHORT_FORMAT[i]);
 
 			}else {
 				throw new Exception("input data column name is invalid! input column="+incomingColumnName+ " valid column should be:"+validInputColumns[i+1]);

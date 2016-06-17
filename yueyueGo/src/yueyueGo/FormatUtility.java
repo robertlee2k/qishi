@@ -33,9 +33,9 @@ public class FormatUtility {
 		return str;
 	}
 
-	// 缺省保留百分号小数点前两位，后一位
+	// 缺省保留百分号小数点前3位，后2位
 	public static String formatPercent(double d) {
-		return formatPercent(d, 2, 1);
+		return formatPercent(d, 3, 2);
 	}
 
 	// 缺省保留小数点后二位
