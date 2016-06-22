@@ -25,7 +25,7 @@ public class NominalClassifier extends MyClassifier{
 		super();
 		//"voted";//"j48";//"rep";//"lmt";//"mlp";
 		WORK_PATH = ProcessData.NOMINAL_CLASSIFIER_DIR;
-		WORK_FILE_PREFIX = WORK_PATH + "交易分析2005-2016 by month-new";		
+		WORK_FILE_PREFIX = "交易分析2005-2016 by month-new";		
 	}
 
 	@Override

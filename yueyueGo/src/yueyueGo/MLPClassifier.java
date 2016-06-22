@@ -41,6 +41,7 @@ public class MLPClassifier extends NominalClassifier {
 	public MLPClassifier() {
 		super();
 		classifierName="mlp";
+		WORK_PATH =WORK_PATH+classifierName+"\\";
 		inputAttShouldBeIndependent=true; //这个模型是用短格式的 		
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = true;
@@ -82,7 +83,7 @@ public class MLPClassifier extends NominalClassifier {
 //			modelYear="2015";
 //		else if (inputYear>=2016)
 //			modelYear="2016";
-		String filename=this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + inputYear + MA_PREFIX + policySplit;//如果使用固定模型
+		String filename=this.WORK_PATH+this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + inputYear + MA_PREFIX + policySplit;//如果使用固定模型
 		
 		this.setModelFileName(filename);
 

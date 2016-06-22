@@ -18,7 +18,7 @@ public class ContinousClassifier extends MyClassifier {
 	public ContinousClassifier() {
 		super();
 		WORK_PATH = ProcessData.CONTINOUS_CLASSIFIER_DIR;
-		WORK_FILE_PREFIX = WORK_PATH + "交易分析2005-2016 by month-new";
+		WORK_FILE_PREFIX = "交易分析2005-2016 by month-new";
 	}
 
 	public Classifier trainData(Instances train)

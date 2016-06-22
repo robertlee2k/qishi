@@ -452,7 +452,7 @@ public abstract class MyClassifier {
 	public void generateModelAndEvalFileName(String yearSplit,String policySplit) {
 //		this.m_policySplit=policySplit;
 //		this.m_yearSplit=yearSplit;
-		String modelFile=this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + yearSplit + MA_PREFIX + policySplit;
+		String modelFile=this.WORK_PATH+this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + yearSplit + MA_PREFIX + policySplit;
 		setModelFileName(modelFile);
 		setEvaluationFilename(modelFile+THRESHOLD_EXTENSION);
 	}
@@ -499,7 +499,7 @@ public abstract class MyClassifier {
 	
 	// arffType="train" or "test" or "eval"
 	public void saveArffFile(Instances trainingData,String arffType,String yearSplit,String policySplit) throws IOException{
-		String trainingFileName = this.WORK_FILE_PREFIX + " "+arffType+" " + yearSplit + MA_PREFIX+ policySplit + ARFF_EXTENSION;
+		String trainingFileName = this.WORK_PATH+this.WORK_FILE_PREFIX + " "+arffType+" " + yearSplit + MA_PREFIX+ policySplit + ARFF_EXTENSION;
 		FileUtility.SaveDataIntoFile(trainingData, trainingFileName);
 	}
 	
