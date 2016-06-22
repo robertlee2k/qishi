@@ -50,7 +50,7 @@ public class REPTreeClassifier extends NominalClassifier {
 		// TODO Auto-generated constructor stub
 		super();
 		classifierName="rep";
-		inputAttShouldBeIndependent=false; //这个模型是用短格式的 		
+		inputAttShouldBeIndependent=false; //这个模型是用长格式的 		
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = true;
 		m_skipEvalInBacktest = true;
