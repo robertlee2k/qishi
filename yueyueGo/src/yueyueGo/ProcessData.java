@@ -74,8 +74,11 @@ public class ProcessData {
 //			M5PClassifier cModel=new M5PClassifier();
 //			predictWithFile(cModel,PREDICT_WORK_DIR,dataFileName);
 
-			REPTreeClassifier nModel = new REPTreeClassifier();
+			VotedPerceptionClassifier nModel = new VotedPerceptionClassifier();
 			Instances nominalResult=testBackward(nModel);
+			
+//			REPTreeClassifier nModel = new REPTreeClassifier();
+//			Instances nominalResult=testBackward(nModel);
 
 //			//按二分类器回测历史数据
 //			MLPClassifier nModel = new MLPClassifier();

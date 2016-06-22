@@ -47,7 +47,6 @@ package yueyueGo;
 public class REPTreeClassifier extends NominalClassifier {
 
 	public REPTreeClassifier() {
-		// TODO Auto-generated constructor stub
 		super();
 		classifierName="rep";
 		WORK_PATH =WORK_PATH+classifierName+"\\";
