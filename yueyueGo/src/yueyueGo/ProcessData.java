@@ -69,18 +69,21 @@ public class ProcessData {
 //			String dataFileName=("zengliang"+FormatUtility.getDateStringFor(1)).trim();
 //			predictWithFile(clModel,PREDICT_WORK_DIR,dataFileName);
 
-			//按二分类器回测历史数据
-			MLPClassifier nModel = new MLPClassifier();
+			REPTreeClassifier nModel = new REPTreeClassifier();
 			Instances mlpResult=testBackward(nModel);
-			//按连续分类器回测历史数据
-			M5PClassifier cModel=new M5PClassifier();
-			Instances m5pResult=testBackward(cModel);
 
-			//输出用于计算收益率的CSV文件
-			Instances m5pOutput=mergeResultWithData(m5pResult,mlpResult,ArffFormat.RESULT_PREDICTED_WIN_RATE);
-			saveSelectedFileForMarkets(m5pOutput,cModel.classifierName);
-			Instances mlpOutput=mergeResultWithData(mlpResult,m5pResult,ArffFormat.RESULT_PREDICTED_PROFIT);
-			saveSelectedFileForMarkets(mlpOutput,nModel.classifierName);
+//			//按二分类器回测历史数据
+//			MLPClassifier nModel = new MLPClassifier();
+//			Instances mlpResult=testBackward(nModel);
+//			//按连续分类器回测历史数据
+//			M5PClassifier cModel=new M5PClassifier();
+//			Instances m5pResult=testBackward(cModel);
+//
+//			//输出用于计算收益率的CSV文件
+//			Instances m5pOutput=mergeResultWithData(m5pResult,mlpResult,ArffFormat.RESULT_PREDICTED_WIN_RATE);
+//			saveSelectedFileForMarkets(m5pOutput,cModel.classifierName);
+//			Instances mlpOutput=mergeResultWithData(mlpResult,m5pResult,ArffFormat.RESULT_PREDICTED_PROFIT);
+//			saveSelectedFileForMarkets(mlpOutput,nModel.classifierName);
 			
 			//用最新的单次交易数据，更新原始的交易数据文件
 //			int startYear=2005;
