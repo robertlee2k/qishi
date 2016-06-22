@@ -129,15 +129,6 @@ public abstract class MyClassifier {
 	public  Instances predictData(Instances test, Instances result)
 			throws Exception {
 
-		
-		// read classify model and header
-		String modelFileName=this.getModelFileName()+MODEL_FILE_EXTENSION;
-		@SuppressWarnings("unchecked")
-		Vector<Object> v = (Vector<Object>) SerializationHelper.read(modelFileName);
-		Classifier model = (Classifier) v.get(0);
-		Instances header = (Instances) v.get(1);
-		System.out.println("Classifier Model Loaded From: "+ modelFileName);
-
 		//读取Threshold数据文件
 		@SuppressWarnings("unchecked")
 		Vector<Object> v_threshold = loadEvaluationFromFile();
@@ -153,6 +144,39 @@ public abstract class MyClassifier {
 			thresholdMax_hs300=8888;//((Double) v_threshold.get(3)).doubleValue();
 			System.out.println("HS300 index thresholding value：between "	+ thresholdMin_hs300 + " , "+ thresholdMax_hs300);
 		}
+		
+//		//20160622临时放开预测阀值
+//		if (thresholdMin>=0.218369919967342 && thresholdMin<0.22) thresholdMin=0.2;
+		
+		
+		return predictWithThresHolds(test, result, thresholdMin, thresholdMax,
+				thresholdMin_hs300, thresholdMax_hs300);
+	}
+
+	/**
+	 * @param test
+	 * @param result
+	 * @param thresholdMin
+	 * @param thresholdMax
+	 * @param thresholdMin_hs300
+	 * @param thresholdMax_hs300
+	 * @return
+	 * @throws Exception
+	 * @throws IllegalStateException
+	 */
+	private Instances predictWithThresHolds(Instances test, Instances result,
+			double thresholdMin, double thresholdMax,
+			double thresholdMin_hs300, double thresholdMax_hs300)
+			throws Exception, IllegalStateException {
+		// read classify model and header
+		String modelFileName=this.getModelFileName()+MODEL_FILE_EXTENSION;
+		@SuppressWarnings("unchecked")
+		Vector<Object> v = (Vector<Object>) SerializationHelper.read(modelFileName);
+		Classifier model = (Classifier) v.get(0);
+		Instances header = (Instances) v.get(1);
+		System.out.println("Classifier Model Loaded From: "+ modelFileName);
+
+
 		// There is additional ID attribute in test instances, so we should save it and remove before doing prediction
 		double[] ids=test.attributeToDoubleArray(ArffFormat.ID_POSITION - 1);  
 		//删除已保存的ID 列，让待分类数据与模型数据一致 （此处的index是从1开始）
