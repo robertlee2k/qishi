@@ -17,6 +17,19 @@ package yueyueGo;
 //Monthly summary_judge_result summary: good number= 272 bad number=233
 //===============================end of summary=====================================
 
+//2. 
+//参数：  eval 0.9 / 单独评估阀值/ TP——FP RATIO { 1.6, 1.4, 1.3, 1.1, 1.0 }, UPPer{ 0.07, 0.09, 0.12, 0.12, 0.2 } TP_FP_BOTTOM_LINE=0.5
+//lower_limit  { 0.01, 0.01,0.02, 0.02, 0.02 } DEFAULT_THRESHOLD=0.6
+//===============================output summary=====================================
+//Monthly selected_TPR mean: 16.27% standard deviation=23.91% Skewness=1.41 Kurtosis=1
+//Monthly selected_LIFT mean : 0.49
+//Monthly selected_positive summary: 22,273
+//Monthly selected_count summary: 53,959
+//Monthly selected_shouyilv average: 0.82% standard deviation=5.24% Skewness=3.91 Kurtosis=23.43
+//Monthly total_shouyilv average: 1.00% standard deviation=6.18% Skewness=3.01 Kurtosis=15.09
+//mixed selected positive rate: 41.28%
+//Monthly summary_judge_result summary: good number= 275 bad number=230
+//===============================end of summary=====================================
 public class REPTreeClassifier extends NominalClassifier {
 
 	public REPTreeClassifier() {
@@ -33,8 +46,8 @@ public class REPTreeClassifier extends NominalClassifier {
 		m_seperate_classify_HS300=true;
 		
 		SAMPLE_LOWER_LIMIT =new double[] { 0.01, 0.01, 0.02, 0.02, 0.02 }; // 各条均线选择样本的下限
-		SAMPLE_UPPER_LIMIT =new double[] {0.07, 0.09, 0.12, 0.12, 0.2 }; // 各条均线选择样本的上限
-		TP_FP_RATIO_LIMIT=new double[] {  1.6, 1.4, 1.3, 1.1, 1.0 };//选择样本阀值时TP FP RATIO从何开始
+		SAMPLE_UPPER_LIMIT =new double[] {0.07, 0.09, 0.12, 0.15, 0.2 }; // 各条均线选择样本的上限
+		TP_FP_RATIO_LIMIT=new double[] {  1.6, 1.4, 1.3, 1.2, 1.1 };//选择样本阀值时TP FP RATIO从何开始
 		TP_FP_BOTTOM_LINE=0.5; //TP/FP的下限
 		DEFAULT_THRESHOLD=0.6; // 找不出threshold时缺省值。
 

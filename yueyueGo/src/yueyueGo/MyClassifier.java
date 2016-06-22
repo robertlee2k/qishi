@@ -3,7 +3,6 @@ package yueyueGo;
 import java.io.IOException;
 import java.util.Vector;
 
-import org.apache.commons.math3.ode.ODEIntegrator;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import weka.classifiers.Classifier;

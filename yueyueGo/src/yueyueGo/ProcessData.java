@@ -66,24 +66,29 @@ public class ProcessData {
 //			predictWithDB(cModel,PREDICT_WORK_DIR);
 		
 //			//使用文件预测
-//			String dataFileName=("zengliang"+FormatUtility.getDateStringFor(1)).trim();
-//			predictWithFile(clModel,PREDICT_WORK_DIR,dataFileName);
+//			String dataFileName=("t_stock_avgline_increment_zuixin_v"+FormatUtility.getDateStringFor(-1)).trim();
+//			//用二分类模型预测每日增量数据
+//			MLPClassifier nModel=new MLPClassifier();
+//			predictWithFile(nModel,PREDICT_WORK_DIR,dataFileName);
+//			//用连续模型预测每日增量数据
+//			M5PClassifier cModel=new M5PClassifier();
+//			predictWithFile(cModel,PREDICT_WORK_DIR,dataFileName);
 
 			REPTreeClassifier nModel = new REPTreeClassifier();
-			Instances mlpResult=testBackward(nModel);
+			Instances nominalResult=testBackward(nModel);
 
 //			//按二分类器回测历史数据
 //			MLPClassifier nModel = new MLPClassifier();
-//			Instances mlpResult=testBackward(nModel);
-//			//按连续分类器回测历史数据
-//			M5PClassifier cModel=new M5PClassifier();
-//			Instances m5pResult=testBackward(cModel);
-//
-//			//输出用于计算收益率的CSV文件
-//			Instances m5pOutput=mergeResultWithData(m5pResult,mlpResult,ArffFormat.RESULT_PREDICTED_WIN_RATE);
-//			saveSelectedFileForMarkets(m5pOutput,cModel.classifierName);
-//			Instances mlpOutput=mergeResultWithData(mlpResult,m5pResult,ArffFormat.RESULT_PREDICTED_PROFIT);
-//			saveSelectedFileForMarkets(mlpOutput,nModel.classifierName);
+//			Instances nominalResult=testBackward(nModel);
+			//按连续分类器回测历史数据
+			M5PClassifier cModel=new M5PClassifier();
+			Instances continuousResult=testBackward(cModel);
+
+			//输出用于计算收益率的CSV文件
+			Instances m5pOutput=mergeResultWithData(continuousResult,nominalResult,ArffFormat.RESULT_PREDICTED_WIN_RATE);
+			saveSelectedFileForMarkets(m5pOutput,cModel.classifierName);
+			Instances mlpOutput=mergeResultWithData(nominalResult,continuousResult,ArffFormat.RESULT_PREDICTED_PROFIT);
+			saveSelectedFileForMarkets(mlpOutput,nModel.classifierName);
 			
 			//用最新的单次交易数据，更新原始的交易数据文件
 //			int startYear=2005;
@@ -953,16 +958,13 @@ private static void saveSelectedFileForMarkets(Instances fullOutput,String class
 //	transData.sort(ArffFormat.ID_POSITION-1);
 //	extData.sort(ArffFormat.ID_POSITION-1);
 //
-//	
-//
+//	//删除extData中的不需要字段
+//  extData=FilterData.removeAttribs(extData,"1-8");
 //	
 //    // 创建输出结果
 //    Instances mergedResult = mergedResult.mergeInstances(transData, extData);
 //
-//    mergedResult=FilterData.AddAttribute(mergedResult,ArffFormat.RESULT_PREDICTED_PROFIT, mergedResult.numAttributes());
-//    mergedResult=FilterData.AddAttribute(mergedResult,ArffFormat.RESULT_PREDICTED_WIN_RATE, mergedResult.numAttributes());
-//    mergedResult=FilterData.AddAttribute(mergedResult,ArffFormat.RESULT_SELECTED, mergedResult.numAttributes());
-//
+//  
 //	
 //	int processed=0;
 //	Instance leftCurr;
