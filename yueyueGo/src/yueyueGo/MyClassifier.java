@@ -55,8 +55,8 @@ public abstract class MyClassifier {
 	
 	protected String model_filename;
 	protected String evaluation_filename;
-//	protected String m_yearSplit; //仅供统计使用
-//	protected String m_policySplit; //仅供统计使用
+	protected String m_yearSplit; //当前回测数据的时间段
+	protected String m_policySplit; //当前的均线类别
 	//统计信息
 	protected DescriptiveStatistics summary_selected_TPR;
 	protected DescriptiveStatistics summary_selected_positive;

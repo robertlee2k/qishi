@@ -11,9 +11,9 @@ public class VotedPerceptionClassifier extends NominalClassifier {
 		inputAttShouldBeIndependent=false; //这个模型是用长格式的 		
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = true;
-		m_skipEvalInBacktest = false;
+		m_skipEvalInBacktest = true;
 		
-		EVAL_RECENT_PORTION = 0.9; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
+		EVAL_RECENT_PORTION = 0.7; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
 		m_sepeperate_eval_HS300=false;//不单独为HS300评估阀值
 		m_seperate_classify_HS300=false;
 		
@@ -26,12 +26,13 @@ public class VotedPerceptionClassifier extends NominalClassifier {
 	}
 	@Override
 	public Classifier loadModel(String yearSplit, String policySplit) throws Exception{
-		//TODO 这是单独准备的模型，模型文件是按年读取，但evaluation文件不变仍按月
+		//这是单独准备的模型，模型文件和evaluation都是按年读取
 		int inputYear=Integer.parseInt(yearSplit.substring(0,4));
-		String filename=this.WORK_PATH+this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + inputYear + MA_PREFIX + policySplit;//如果使用固定模型
+		String filename=this.WORK_PATH+this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + inputYear + MA_PREFIX + policySplit;
+		String evalFileName=this.WORK_PATH+this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + inputYear + MA_PREFIX + policySplit+THRESHOLD_EXTENSION;
 		
 		this.setModelFileName(filename);
-
+		this.setEvaluationFilename(evalFileName);
 	
 		return loadModelFromFile();
 	}
