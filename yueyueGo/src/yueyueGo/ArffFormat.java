@@ -55,10 +55,17 @@ public class ArffFormat {
 	// "shouyilv" 最后一个可能是shouyilv也有可能是positive
 	};
 
-	//单次交易收益率的扩展ARFF格式
-	public static final String[] INCREMENTAL_EXT_ARFF_FORMAT= {
+	//单次交易收益率的扩展ARFF格式之校验位
+	public static final String[] INCREMENTAL_EXT_ARFF_LEFT= {
 		ID,TRADE_DATE,"code",SELL_DATE,DATA_DATE,SELECTED_MA_IN_OTHER_SYSTEM,"bias5_preday_dif","zhishu_code",
+	};
+	//单次交易收益率的扩展ARFF格式之第二批数据
+	public static final String[] INCREMENTAL_EXT_ARFF_RIGHT= {
 		"zhishu_quantity_preday_perc","zhishu_quantity_pre2day_perc","zhishu_quantity_pre3day_perc","zhishu_ma5_indicator","zhishu_ma10_indicator","zhishu_ma20_indicator","zhishu_ma30_indicator","zhishu_ma60_indicator","sw_ma5_indicator","sw_ma10_indicator","sw_ma20_indicator","sw_ma30_indicator","sw_ma60_indicator","ma5_signal_scale","ma10_signal_scale","ma20_signal_scale","ma30_signal_scale","ma60_signal_scale"
+	};
+	//单次交易收益率的扩展ARFF格式之第三批数据
+	public static final String[] INCREMENTAL_EXT_ARFF_RIGHT2= {
+		"zhangdieting","shangying","xiaying","index_shangying","index_xiaying","yearhighbias","yearlowbias","monthhighbias","monthlowbias","index_yearhighbias","index_yearlowbias","index_monthhighbias","index_monthlowbias"
 	};
 	
 	// 交易ARFF数据全集数据的格式 （从ID到均线策略，后面都和trainingarff的相同了）， 总共10个字段
