@@ -145,8 +145,8 @@ public abstract class MyClassifier {
 			System.out.println("HS300 index thresholding value：between "	+ thresholdMin_hs300 + " , "+ thresholdMax_hs300);
 		}
 		
-//		//20160622临时放开预测阀值
-//		if (thresholdMin>=0.218369919967342 && thresholdMin<0.22) thresholdMin=0.2;
+//		//20160623临时放开预测阀值
+//		if (thresholdMin>=0.178427 && thresholdMin<0.22) thresholdMin=0.2;
 		
 		
 		return predictWithThresHolds(test, result, thresholdMin, thresholdMax,
