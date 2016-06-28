@@ -1005,6 +1005,7 @@ private static Instances mergeTransactionWithExtension(Instances transData,Insta
 	//将两边数据以ID排序
 	transData.sort(ArffFormat.ID_POSITION-1);
 	extData.sort(ArffFormat.ID_POSITION-1);
+	System.out.println("all data sorted by id");
 
 	//找出transData中的所有待校验字段
 	Attribute[] attToCompare=new Attribute[ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length];
@@ -1075,10 +1076,9 @@ private static Instances mergeTransactionWithExtension(Instances transData,Insta
 			copyToNewInstance(leftCurr, newData, srcStartIndex, srcEndIndex,targetStartIndex);
 
 			processed++;
-			if (processed % 100000 ==0){
-				System.out.println("number of results processed:"+ processed);
-			}
-			
+		}
+		if (i % 1000 ==0){
+			System.out.println("number of results processed:"+ i);
 		}
 	}//end for
 	if (processed!=extData.numInstances()){
