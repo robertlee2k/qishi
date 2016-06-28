@@ -960,7 +960,6 @@ protected static void mergeExtData() throws Exception{
 	Instances extData=FileUtility.loadDataFromExtCSVFile(file1);
 	Instances extData2=FileUtility.loadDataFromExtCSVFile(file2);
 
-	System.out.println(extData.equalHeadersMsg(extData2));
 	
 	//如果不是用这种copy的方式和setDataSet的方式，String和nominal数据会全乱掉。
 	Instance oldRow=null;
@@ -975,12 +974,6 @@ protected static void mergeExtData() throws Exception{
 	extData2=null;
 	System.out.println("Group 2 full ext data loaded. number="+extData.numInstances());
 
-	for (int i=0;i<extData.numInstances();i++){
-		if (extData.instance(i).value(0)==6745956){
-			System.out.println(extData.instance(i));
-		}
-	}	
-	
 	String originFileName=C_ROOT_DIRECTORY+"AllTransaction20052016";
 	Instances fullData = FileUtility.loadDataFromFile(originFileName+".arff");
 	System.out.println("full trans data loaded. number="+fullData.numInstances());
