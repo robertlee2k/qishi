@@ -1071,7 +1071,7 @@ private static Instances mergeTransactionWithExtension(Instances transData,Insta
 
 			//再拷贝extData中除校验数据之外的数据				
 			srcStartIndex=ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length;
-			srcEndIndex=extDataFormat.length-1;
+			srcEndIndex=ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length+extDataFormat.length-1;
 			targetStartIndex=leftCurr.numAttributes()-1; //接着拷贝
 			copyToNewInstance(rightCurr, newData, srcStartIndex, srcEndIndex,targetStartIndex);
 
@@ -1118,8 +1118,9 @@ private static Instances prepareMergedFormat(Instances transData, Instances extD
     enu = extData.enumerateAttributes();
     while (enu.hasMoreElements()) {
     	//去掉冗余字段，将有效数据字段加入新数据集
-    	if (((Attribute)enu.nextElement()).index()>= ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length){
-    		newAttributes.add((Attribute)(enu.nextElement()).copy());// Need to copy because indices will change.
+    	Attribute att=(Attribute)enu.nextElement().copy();
+    	if (att.index()>= ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length){
+    		newAttributes.add(att);// Need to copy because indices will change.
     	}
     }
     //将第一个数据集里的Class属性作为新数据集的class属性
