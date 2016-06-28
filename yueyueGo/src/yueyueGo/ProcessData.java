@@ -957,36 +957,68 @@ protected static void saveSelectedFileForMarkets(Instances fullOutput,String cla
 protected static void mergeExtData() throws Exception{
 	String file1=C_ROOT_DIRECTORY+"sourceData\\单次收益率第二组数据2005_2010.txt";
 	String file2=C_ROOT_DIRECTORY+"sourceData\\单次收益率第二组数据2011_20160531.txt";
-	Instances fullExtData=FileUtility.loadDataFromExtCSVFile(file1);
+	Instances extData=FileUtility.loadDataFromExtCSVFile(file1);
 	Instances extData2=FileUtility.loadDataFromExtCSVFile(file2);
+
+	System.out.println(extData.equalHeadersMsg(extData2));
 	
+	//如果不是用这种copy的方式和setDataSet的方式，String和nominal数据会全乱掉。
+	Instance oldRow=null;
+	int colSize=extData.numAttributes()-1;
 	for (int i=0;i<extData2.numInstances();i++){
-		fullExtData.add(extData2.instance(i));
+		Instance newRow=new DenseInstance(extData.numAttributes());
+		newRow.setDataset(extData);
+		oldRow=extData2.instance(i);
+		copyToNewInstance(oldRow,newRow,0,colSize,0);
+		extData.add(newRow);
 	}
 	extData2=null;
-	System.out.println("Group 2 full ext data loaded. number="+fullExtData.numInstances());
+	System.out.println("Group 2 full ext data loaded. number="+extData.numInstances());
+
+	for (int i=0;i<extData.numInstances();i++){
+		if (extData.instance(i).value(0)==6745956){
+			System.out.println(extData.instance(i));
+		}
+	}	
 	
 	String originFileName=C_ROOT_DIRECTORY+"AllTransaction20052016";
 	Instances fullData = FileUtility.loadDataFromFile(originFileName+".arff");
 	System.out.println("full trans data loaded. number="+fullData.numInstances());
-	Instances result=mergeTransactionWithExtension(fullData,fullExtData,ArffFormat.INCREMENTAL_EXT_ARFF_RIGHT);
+	
+	//将两边数据以ID排序
+	fullData.sort(ArffFormat.ID_POSITION-1);
+	extData.sort(ArffFormat.ID_POSITION-1);
+	System.out.println("all data sorted by id");
+	
+	
+	Instances result=mergeTransactionWithExtension(fullData,extData,ArffFormat.INCREMENTAL_EXT_ARFF_RIGHT);
 	System.out.println("group 2 ext data processed. number="+result.numInstances()+" columns="+result.numAttributes());
-	fullExtData=null;
+	extData=null;
 	fullData=null;
 	
 	//处理第三组数据
 	file1=C_ROOT_DIRECTORY+"sourceData\\单次收益率第三组数据2005_2010.txt";
 	file2=C_ROOT_DIRECTORY+"sourceData\\单次收益率第三组数据2011_20160531.txt";
-	fullExtData=FileUtility.loadDataFromExtCSVFile(file1);
+	extData=FileUtility.loadDataFromExtCSVFile(file1);
 	extData2=FileUtility.loadDataFromExtCSVFile(file2);
 	
+	//如果不是用这种copy的方式和setDataSet的方式，String和nominal数据会全乱掉。
+	oldRow=null;
+	colSize=extData.numAttributes()-1;
 	for (int i=0;i<extData2.numInstances();i++){
-		fullExtData.add(extData2.instance(i));
+		Instance newRow=new DenseInstance(extData.numAttributes());
+		newRow.setDataset(extData);
+		oldRow=extData2.instance(i);
+		copyToNewInstance(oldRow,newRow,0,colSize,0);
+		extData.add(newRow);
 	}
 	extData2=null;
-	System.out.println("Group 3 full ext data loaded. number="+fullExtData.numInstances());
+	System.out.println("Group 3 full ext data loaded. number="+extData.numInstances());
 
-	result=mergeTransactionWithExtension(result,fullExtData,ArffFormat.INCREMENTAL_EXT_ARFF_RIGHT2);
+	extData.sort(ArffFormat.ID_POSITION-1);
+	
+
+	result=mergeTransactionWithExtension(result,extData,ArffFormat.INCREMENTAL_EXT_ARFF_RIGHT2);
 	System.out.println("group 2 ext data processed. number="+result.numInstances()+" columns="+result.numAttributes());
 
 	
@@ -1002,19 +1034,18 @@ protected static void mergeExtData() throws Exception{
 	System.out.println("full ext Data File saved "  );
 }
 
+
+//数据必须是以ID排序的。
 private static Instances mergeTransactionWithExtension(Instances transData,Instances extData,String[] extDataFormat) throws Exception{
 
-	//将两边数据以ID排序
-	transData.sort(ArffFormat.ID_POSITION-1);
-	extData.sort(ArffFormat.ID_POSITION-1);
-	System.out.println("all data sorted by id");
+
 
 	//找出transData中的所有待校验字段
 	Attribute[] attToCompare=new Attribute[ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length];
 	for (int i=0;i<ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length;i++){
 		attToCompare[i]=transData.attribute(ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[i]);
 	}
-    Instances mergedResult=prepareMergedFormat(transData, extData);
+    Instances mergedResult=prepareMergedFormat(new Instances(transData,0), new Instances(extData,0));
     System.out.println("merged output column number="+mergedResult.numAttributes());
 
     
@@ -1032,7 +1063,7 @@ private static Instances mergeTransactionWithExtension(Instances transData,Insta
 		leftCurr=transData.instance(i);
 		rightCurr=extData.instance(i);
 
-		if (leftCurr.value(0)==rightCurr.value(0)){//找到相同ID的记录了
+		if (leftCurr.value(0)==rightCurr.value(0) ){//找到相同ID的记录了
 			//先对所有的冗余数据进行校验
 			for (int j=0;j<ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length;j++){
 				Attribute att = attToCompare[j];

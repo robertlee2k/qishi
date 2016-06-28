@@ -87,8 +87,8 @@ public class FileUtility {
 			loader.setSource(new File(fileName));
 			//数据全部读进来之后再看怎么转nominal，否则直接加载， nominal的值的顺序会和文件顺序有关，造成数据不对
 			Instances datasrc = loader.getDataSet();
-			datasrc=FilterData.numToNominal(datasrc, "3,6,8");
-			datasrc=FilterData.NominalToString(datasrc, "3,6,8");
+			datasrc=FilterData.numToNominal(datasrc, "2-6,8");
+			datasrc=FilterData.NominalToString(datasrc, "2-6,8");
 			
 			// 把读入的数据改名 以适应内部训练的arff格式，更名均线策略、bias5前日差、指数code
 			datasrc.renameAttribute(5, ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[5]);
