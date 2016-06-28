@@ -1117,7 +1117,8 @@ private static Instances mergeTransactionWithExtension(Instances transData,Insta
 			srcEndIndex=leftCurr.numAttributes()-1;
 			targetStartIndex=newData.numAttributes()-1;
 			copyToNewInstance(leftCurr, newData, srcStartIndex, srcEndIndex,targetStartIndex);
-
+			
+			mergedResult.add(newData);
 			processed++;
 		}// end if leftCurr
 		if (i % 10000 ==0){
