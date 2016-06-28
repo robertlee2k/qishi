@@ -970,9 +970,9 @@ protected static void mergeExtData() throws Exception{
 	Instances fullData = FileUtility.loadDataFromFile(originFileName+".arff");
 	System.out.println("full trans data loaded. number="+fullData.numInstances());
 	Instances result=mergeTransactionWithExtension(fullData,fullExtData,ArffFormat.INCREMENTAL_EXT_ARFF_RIGHT);
-	System.out.println("group 2 ext data processed. number="+fullData.numInstances()+" columns="+fullData.numAttributes());
+	System.out.println("group 2 ext data processed. number="+result.numInstances()+" columns="+result.numAttributes());
 	fullExtData=null;
-	
+	fullData=null;
 	
 	//处理第三组数据
 	file1=C_ROOT_DIRECTORY+"sourceData\\单次收益率第三组数据2005_2010.txt";
@@ -984,8 +984,10 @@ protected static void mergeExtData() throws Exception{
 		fullExtData.add(extData2.instance(i));
 	}
 	extData2=null;
-	result=mergeTransactionWithExtension(fullData,fullExtData,ArffFormat.INCREMENTAL_EXT_ARFF_RIGHT2);
 	System.out.println("Group 3 full ext data loaded. number="+fullExtData.numInstances());
+
+	result=mergeTransactionWithExtension(result,fullExtData,ArffFormat.INCREMENTAL_EXT_ARFF_RIGHT2);
+	System.out.println("group 2 ext data processed. number="+result.numInstances()+" columns="+result.numAttributes());
 
 	
 	// 去除与训练无关的字段
