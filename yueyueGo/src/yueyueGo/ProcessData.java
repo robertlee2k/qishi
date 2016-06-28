@@ -1035,26 +1035,30 @@ private static Instances mergeTransactionWithExtension(Instances transData,Insta
 			//先对所有的冗余数据进行校验
 			for (int j=0;j<ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length;j++){
 				Attribute att = attToCompare[j];
-				if (att != null) {
-					if (att.isNominal() || att.isString()) {
-						String leftLabel = leftCurr.stringValue(att);
-						String rightLabel=rightCurr.stringValue(j);
-						if (leftLabel!=rightLabel){
+				if (att.isNominal() || att.isString()) {
+					String leftLabel = leftCurr.stringValue(att);
+					String rightLabel=rightCurr.stringValue(j);
+					if (leftLabel.equals(rightLabel)){
+						//do nothing
+					}else{
+						//可能是因为输入文件的date格式不一样，尝试转换一下
+						if (leftLabel.equals(FormatUtility.convertDate(rightLabel))==false){
 							throw new Exception("data not equal! at attribute:"+ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[j]+ " left= "+leftLabel+" while right= "+rightLabel);
 						}
-					} else if (att.isNumeric()) {
-						double leftValue=leftCurr.value(att);
-						double rightValue=rightCurr.value(j);
-						if ( (leftValue==rightValue) || Double.isNaN(leftValue) && Double.isNaN(rightValue)){
-							// do nothing
-						}else {
-							throw new Exception("data not equal! at attribute:"+ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[j]+ " left= "+leftValue+" while right= "+rightValue);							
-						}
-					} else {
-						throw new IllegalStateException("Unhandled attribute type!");
 					}
+				} else if (att.isNumeric()) {
+					double leftValue=leftCurr.value(att);
+					double rightValue=rightCurr.value(j);
+					if ( (leftValue==rightValue) || Double.isNaN(leftValue) && Double.isNaN(rightValue)){
+						// do nothing
+					}else {
+						throw new Exception("data not equal! at attribute:"+ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[j]+ " left= "+leftValue+" while right= "+rightValue);							
+					}
+				} else {
+					throw new IllegalStateException("Unhandled attribute type!");
 				}
-			}		
+
+			}//end for j
 
 			newData=new DenseInstance(mergedResult.numAttributes());
 			newData.setDataset(mergedResult);
@@ -1078,7 +1082,7 @@ private static Instances mergeTransactionWithExtension(Instances transData,Insta
 			copyToNewInstance(leftCurr, newData, srcStartIndex, srcEndIndex,targetStartIndex);
 
 			processed++;
-		}
+		}// end if leftCurr
 		if (i % 10000 ==0){
 			System.out.println("number of results processed:"+ i);
 		}

@@ -57,7 +57,7 @@ public class ArffFormat {
 
 	//单次交易收益率的扩展ARFF格式之校验位
 	public static final String[] INCREMENTAL_EXT_ARFF_LEFT= {
-		ID,TRADE_DATE,"code",SELL_DATE,DATA_DATE,SELECTED_MA,"bias5_preday_dif","指数code",
+		ID,TRADE_DATE,"code",SELL_DATE,DATA_DATE,SELECTED_MA,"bias5前日差","指数code",
 	};
 	//单次交易收益率的扩展ARFF格式之第二批数据
 	public static final String[] INCREMENTAL_EXT_ARFF_RIGHT= {
