@@ -964,13 +964,13 @@ private static void saveResultFile(Instances result,String classiferName) throws
 protected static void saveSelectedFileForMarkets(Instances fullOutput,String classiferName) throws Exception{
 	//输出全市场结果
 	Instances fullMarketSelected=FilterData.getInstancesSubset(fullOutput, FilterData.WEKA_ATT_PREFIX +fullOutput.numAttributes()+" = 1");
-	FileUtility.saveCSVFile(fullMarketSelected, C_ROOT_DIRECTORY+"回测选股-"+ classiferName+"-full" + RESULT_EXTENSION );
+	FileUtility.saveCSVFile(fullMarketSelected, C_ROOT_DIRECTORY+"testResult\\回测选股-"+ classiferName+"-full" + RESULT_EXTENSION );
 	//输出沪深300
 	Instances subsetMarketSelected=FilterData.filterDataForIndex(fullMarketSelected,ArffFormat.IS_HS300);
-	FileUtility.saveCSVFile(subsetMarketSelected, C_ROOT_DIRECTORY+"回测选股-"+ classiferName+"-hs300" + RESULT_EXTENSION );
+	FileUtility.saveCSVFile(subsetMarketSelected, C_ROOT_DIRECTORY+"testResult\\回测选股-"+ classiferName+"-hs300" + RESULT_EXTENSION );
 	//输出中证300
 	subsetMarketSelected=FilterData.filterDataForIndex(fullMarketSelected,ArffFormat.IS_ZZ500);
-	FileUtility.saveCSVFile(subsetMarketSelected, C_ROOT_DIRECTORY+"回测选股-"+ classiferName+"-zz500" + RESULT_EXTENSION );
+	FileUtility.saveCSVFile(subsetMarketSelected, C_ROOT_DIRECTORY+"testResult\\回测选股-"+ classiferName+"-zz500" + RESULT_EXTENSION );
 }
 
 protected static void mergeExtData() throws Exception{
