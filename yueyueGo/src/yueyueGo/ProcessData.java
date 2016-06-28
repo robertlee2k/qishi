@@ -904,13 +904,13 @@ public class ProcessData {
 					String label = leftCurr.stringValue(att);
 					int index = att.indexOfValue(label);
 					if (index != -1) {
-						newData.setValue(targetStartIndex+n, index);
+						newData.setValue(targetStartIndex+n-srcStartIndex, index);
 					} //这里如果left里面的数据没有值，也就不必设值了
 				} else if (att.isNumeric()) {
-					newData.setValue(targetStartIndex+n, leftCurr.value(att));
+					newData.setValue(targetStartIndex+n-srcStartIndex, leftCurr.value(att));
 				} else if (att.isString()) {
 					String label = leftCurr.stringValue(att);
-					newData.setValue(targetStartIndex+n, label);
+					newData.setValue(targetStartIndex+n-srcStartIndex, label);
 				} else {
 					throw new IllegalStateException("Unhandled attribute type!");
 				}
