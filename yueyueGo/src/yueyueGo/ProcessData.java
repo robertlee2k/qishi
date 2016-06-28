@@ -1015,6 +1015,7 @@ private static Instances mergeTransactionWithExtension(Instances transData,Insta
 		attToCompare[i]=transData.attribute(ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[i]);
 	}
     Instances mergedResult=prepareMergedFormat(transData, extData);
+    System.out.println("merged output column number="+mergedResult.numAttributes());
 
     
 	//开始准备合并
@@ -1042,8 +1043,11 @@ private static Instances mergeTransactionWithExtension(Instances transData,Insta
 						//do nothing
 					}else{
 						//可能是因为输入文件的date格式不一样，尝试转换一下
-						if (leftLabel.equals(FormatUtility.convertDate(rightLabel))==false){
-							throw new Exception("data not equal! at attribute:"+ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[j]+ " left= "+leftLabel+" while right= "+rightLabel);
+						rightLabel=FormatUtility.convertDate(rightLabel);
+						if (leftLabel.equals(rightLabel)==false){
+							System.out.println("current left====="+ leftCurr.toString());
+							System.out.println("current right===="+ rightCurr.toString());		
+							throw new Exception("data not equal! at attribute:"+ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[j]+ " left= "+leftLabel+" while right= "+rightLabel +" @id="+leftCurr.value(0));
 						}
 					}
 				} else if (att.isNumeric()) {
@@ -1052,6 +1056,8 @@ private static Instances mergeTransactionWithExtension(Instances transData,Insta
 					if ( (leftValue==rightValue) || Double.isNaN(leftValue) && Double.isNaN(rightValue)){
 						// do nothing
 					}else {
+						System.out.println("current left====="+ leftCurr.toString());
+						System.out.println("current right===="+ rightCurr.toString());						
 						throw new Exception("data not equal! at attribute:"+ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[j]+ " left= "+leftValue+" while right= "+rightValue);							
 					}
 				} else {
@@ -1113,23 +1119,25 @@ private static Instances prepareMergedFormat(Instances transData, Instances extD
     		extData.numAttributes()-ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length);
     Enumeration<Attribute> enu = transData.enumerateAttributes();
     while (enu.hasMoreElements()) {
-    	newAttributes.add((Attribute) enu.nextElement());
+    	newAttributes.add((Attribute) (enu.nextElement().copy()));// Need to copy because indices will change.
     }
     enu = extData.enumerateAttributes();
     while (enu.hasMoreElements()) {
     	//去掉冗余字段，将有效数据字段加入新数据集
+    	// Need to copy because indices will change.
     	Attribute att=(Attribute)enu.nextElement().copy();
     	if (att.index()>= ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length){
-    		newAttributes.add(att);// Need to copy because indices will change.
+    		newAttributes.add(att);
     	}
     }
     //将第一个数据集里的Class属性作为新数据集的class属性
-    Attribute classAttribute=transData.classAttribute();
+    Attribute classAttribute=(Attribute)transData.classAttribute().copy();// Need to copy because indices will change.
     newAttributes.add(classAttribute);
 
     // Create the set of mergedInstances
     Instances merged = new Instances(transData.relationName(), newAttributes, 0);
     merged.setClassIndex(merged.numAttributes()-1);
+    
     return merged;
 }
 

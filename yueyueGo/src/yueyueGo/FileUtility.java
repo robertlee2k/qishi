@@ -92,7 +92,7 @@ public class FileUtility {
 			
 			// 把读入的数据改名 以适应内部训练的arff格式，更名均线策略、bias5前日差、指数code
 			datasrc.renameAttribute(5, ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[5]);
-			datasrc.renameAttribute(5, ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[6]);
+			datasrc.renameAttribute(6, ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[6]);
 			datasrc.renameAttribute(7, ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[7]);
 			return datasrc;
 		}	
