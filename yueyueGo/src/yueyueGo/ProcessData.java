@@ -25,6 +25,8 @@ package yueyueGo;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 import weka.classifiers.Classifier;
@@ -103,7 +105,7 @@ public class ProcessData {
 
 			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
 //			processHistoryFile();
-
+			mergeExtData();
 		} catch (Exception e) {
 			
 			e.printStackTrace();
@@ -849,25 +851,10 @@ public class ProcessData {
 				if ( checkSumBeforeMerge(leftCurr, resultCurr, leftMA, resultMA,leftBias5, resultBias5)) {
 					newData=new DenseInstance(mergedResult.numAttributes());
 					newData.setDataset(mergedResult);
-					for (int n = 0; n < leftCurr.numAttributes(); n++) { 
-						Attribute att = leftCurr.attribute(n);
-						if (att != null) {
-							if (att.isNominal()) {
-								String label = leftCurr.stringValue(att);
-								int index = att.indexOfValue(label);
-								if (index != -1) {
-									newData.setValue(n, index);
-								} //这里如果left里面的数据没有值，也就不必设值了
-							} else if (att.isNumeric()) {
-								newData.setValue(n, leftCurr.value(att));
-							} else if (att.isString()) {
-								String label = leftCurr.stringValue(att);
-								newData.setValue(n, label);
-							} else {
-								throw new IllegalStateException("Unhandled attribute type!");
-							}
-						}
-					}
+					int srcStartIndex=0;
+					int srcEndIndex=leftCurr.numAttributes()-1;
+					int targetStartIndex=0;
+					copyToNewInstance(leftCurr, newData, srcStartIndex, srcEndIndex,targetStartIndex);
 
 					//根据传入的参数判断需要当前有什么，需要补充的数据是什么
 					double profit;
@@ -919,6 +906,37 @@ public class ProcessData {
 		return mergedResult;
 	}
 
+
+	/**
+	 * @param leftCurr
+	 * @param newData
+	 * @param startIndex
+	 * @param endIndex
+	 * @throws IllegalStateException
+	 */
+	private static void copyToNewInstance(Instance leftCurr, Instance newData,
+			int srcStartIndex, int srcEndIndex,int targetStartIndex) throws IllegalStateException {
+		for (int n = srcStartIndex; n <= srcEndIndex; n++) { 
+			Attribute att = leftCurr.attribute(n);
+			if (att != null) {
+				if (att.isNominal()) {
+					String label = leftCurr.stringValue(att);
+					int index = att.indexOfValue(label);
+					if (index != -1) {
+						newData.setValue(targetStartIndex+n, index);
+					} //这里如果left里面的数据没有值，也就不必设值了
+				} else if (att.isNumeric()) {
+					newData.setValue(targetStartIndex+n, leftCurr.value(att));
+				} else if (att.isString()) {
+					String label = leftCurr.stringValue(att);
+					newData.setValue(targetStartIndex+n, label);
+				} else {
+					throw new IllegalStateException("Unhandled attribute type!");
+				}
+			}
+		}
+	}
+
 /**
   比较两个instances中的均线策略和bias5字段是否一致（数据冗余校验）
  * @return
@@ -943,7 +961,7 @@ private static void saveResultFile(Instances result,String classiferName) throws
 	FileUtility.saveCSVFile(result, C_ROOT_DIRECTORY+"回测结果-"+ classiferName + RESULT_EXTENSION);
 }
 
-private static void saveSelectedFileForMarkets(Instances fullOutput,String classiferName) throws Exception{
+protected static void saveSelectedFileForMarkets(Instances fullOutput,String classiferName) throws Exception{
 	//输出全市场结果
 	Instances fullMarketSelected=FilterData.getInstancesSubset(fullOutput, FilterData.WEKA_ATT_PREFIX +fullOutput.numAttributes()+" = 1");
 	FileUtility.saveCSVFile(fullMarketSelected, C_ROOT_DIRECTORY+"回测选股-"+ classiferName+"-full" + RESULT_EXTENSION );
@@ -955,121 +973,159 @@ private static void saveSelectedFileForMarkets(Instances fullOutput,String class
 	FileUtility.saveCSVFile(subsetMarketSelected, C_ROOT_DIRECTORY+"回测选股-"+ classiferName+"-zz500" + RESULT_EXTENSION );
 }
 
+protected static void mergeExtData() throws Exception{
+	String file1=C_ROOT_DIRECTORY+"sourceData\\单次收益率第二组数据2005_2010.txt";
+	String file2=C_ROOT_DIRECTORY+"sourceData\\单次收益率第二组数据2011_20160531.txt";
+	Instances fullExtData=FileUtility.loadDataFromExtCSVFile(file1);
+	Instances extData2=FileUtility.loadDataFromExtCSVFile(file2);
+	
+	for (int i=0;i<extData2.numInstances();i++){
+		fullExtData.add(extData2.instance(i));
+	}
+	System.out.println("full ext data loaded. number="+fullExtData.numInstances());
+	
+	String originFileName=C_ROOT_DIRECTORY+"AllTransaction20052016";
+	Instances fullData = FileUtility.loadDataFromFile(originFileName+".arff");
+	System.out.println("full trans data loaded. number="+fullData.numInstances());
+	Instances result=mergeTransactionWithExtension(fullData,fullExtData,ArffFormat.INCREMENTAL_EXT_ARFF_RIGHT);
+	// 去除与训练无关的字段
+	result=ArffFormat.processAllTransaction(result);
+//	//保存训练用的format，用于做日后的校验 
+	Instances format=new Instances(result,0);
+	FileUtility.SaveDataIntoFile(format, originFileName+"-ext-format.arff");	
+	//保存短格式
+	FileUtility.SaveDataIntoFile(result, originFileName+"-ext-short.arff");
+	result=ArffFormat.addCalculateAttribute(result);
+	FileUtility.SaveDataIntoFile(result, originFileName+"-ext-new.arff");
+	System.out.println("full ext Data File saved "  );
+}
 
-//protected static Instances mergeTransactionWithExtension(Instances transData,Instances extData) throws Exception{
-//
-//	//将两边数据以ID排序
-//	transData.sort(ArffFormat.ID_POSITION-1);
-//	extData.sort(ArffFormat.ID_POSITION-1);
-//
-//	//删除extData中的不需要字段
-//  extData=FilterData.removeAttribs(extData,"1-8");
-//	
-//    // 创建输出结果
-//    Instances mergedResult = mergedResult.mergeInstances(transData, extData);
-//
-//  
-//	
-//	int processed=0;
-//	Instance leftCurr;
-//	Instance resultCurr;
-//	Instance referenceCurr;
-//	Instance newData;
-//	Attribute leftMA=left.attribute(ArffFormat.SELECTED_MA);
-//	Attribute resultMA=resultData.attribute(ArffFormat.SELECTED_MA);
-//	Attribute leftBias5=left.attribute("bias5");
-//	Attribute resultBias5=resultData.attribute("bias5");
-//	Attribute resultSelectedAtt=resultData.attribute(ArffFormat.RESULT_SELECTED);
-//	Attribute outputSelectedAtt=mergedResult.attribute(ArffFormat.RESULT_SELECTED);
-//	Attribute outputPredictAtt=mergedResult.attribute(ArffFormat.RESULT_PREDICTED_PROFIT);
-//	Attribute outputWinrateAtt=mergedResult.attribute(ArffFormat.RESULT_PREDICTED_WIN_RATE);
-//			
-//	
-//	
-//	//传入的结果集result不是排序的,而left的数据是按tradeDate日期排序的， 所以都先按ID排序。
-//	left.sort(ArffFormat.ID_POSITION-1);
-//	resultData.sort(ArffFormat.ID_POSITION-1);
-//	referenceData.sort(ArffFormat.ID_POSITION-1);
-//
-//
-//	for (int i=0;i<left.numInstances();i++){	
-//		leftCurr=left.instance(i);
-//		resultCurr=resultData.instance(processed);
-//		referenceCurr=referenceData.instance(processed);
-//		if (leftCurr.value(0)==resultCurr.value(0)){//找到相同ID的记录了，接下来做冗余字段的数据校验
-//			if ( checkSumBeforeMerge(leftCurr, resultCurr, leftMA, resultMA,leftBias5, resultBias5)) {
-//				newData=new DenseInstance(mergedResult.numAttributes());
-//				newData.setDataset(mergedResult);
-//				for (int n = 0; n < leftCurr.numAttributes(); n++) { 
-//					Attribute att = leftCurr.attribute(n);
-//					if (att != null) {
-//						if (att.isNominal()) {
-//							String label = leftCurr.stringValue(att);
-//							int index = att.indexOfValue(label);
-//							if (index != -1) {
-//								newData.setValue(n, index);
-//							} //这里如果left里面的数据没有值，也就不必设值了
-//						} else if (att.isNumeric()) {
-//							newData.setValue(n, leftCurr.value(att));
-//						} else if (att.isString()) {
-//							String label = leftCurr.stringValue(att);
-//							newData.setValue(n, label);
-//						} else {
-//							throw new IllegalStateException("Unhandled attribute type!");
-//						}
-//					}
-//				}
-//
-//				//根据传入的参数判断需要当前有什么，需要补充的数据是什么
-//				double profit;
-//				double winrate;
-//				if (dataToAdd.equals(ArffFormat.RESULT_PREDICTED_WIN_RATE)){
-//					//当前结果集里有什么数据
-//					profit=resultCurr.value(resultData.attribute(ArffFormat.RESULT_PREDICTED_PROFIT));
-//					//需要添加参考集里的什么数据
-//					winrate=referenceCurr.value(referenceData.attribute(ArffFormat.RESULT_PREDICTED_WIN_RATE));
-//				}else{
-//					//当前结果集里有什么数据
-//					winrate=resultCurr.value(resultData.attribute(ArffFormat.RESULT_PREDICTED_WIN_RATE));
-//					//需要添加参考集里的什么数据
-//					profit=referenceCurr.value(referenceData.attribute(ArffFormat.RESULT_PREDICTED_PROFIT));
-//				}
-//
-//				newData.setValue(outputPredictAtt, profit);
-//				newData.setValue(outputWinrateAtt, winrate);
-//				newData.setValue(outputSelectedAtt, resultCurr.value(resultSelectedAtt));
-//				mergedResult.add(newData);
-//				processed++;
-//				if (processed % 100000 ==0){
-//					System.out.println("number of results processed:"+ processed);
-//				}
-//				if (processed>=resultData.numInstances()){
-//					break;
-//				}
-//			}else {
-//				throw new Exception("data value in header data and result data does not equal "+leftCurr.value(leftMA)+" = "+resultCurr.value(resultMA)+ " / "+leftCurr.value(leftBias5) + " = "+resultCurr.value(resultBias5));
-//			}
-//		}
-//	}// end left processed
-//	if (processed!=resultData.numInstances()){
-//		throw new Exception("not all data in result have been processed , processed= "+processed+" ,while total result="+resultData.numInstances());
-//	}else {
-//		System.out.println("number of results merged and processed: "+ processed);
-//	}
-//	
-//	//返回结果之前需要按TradeDate重新排序
-//	int tradeDateIndex=FilterData.findATTPosition(mergedResult, ArffFormat.TRADE_DATE);
-//	mergedResult.sort(tradeDateIndex-1);
-//	
-//	//输出前改名
-//	mergedResult.renameAttribute(mergedResult.attribute(ArffFormat.SELECTED_MA), ArffFormat.SELECTED_MA_IN_OTHER_SYSTEM);
-//	//给mergedResult瘦身。
-//	mergedResult=FilterData.removeAttribs(mergedResult, "2,6-9,11");
-//
-//
-//	return mergedResult;
-//}
-//
-//
+private static Instances mergeTransactionWithExtension(Instances transData,Instances extData,String[] extDataFormat) throws Exception{
+
+	//将两边数据以ID排序
+	transData.sort(ArffFormat.ID_POSITION-1);
+	extData.sort(ArffFormat.ID_POSITION-1);
+
+	//找出transData中的所有待校验字段
+	Attribute[] attToCompare=new Attribute[ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length];
+	for (int i=0;i<ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length;i++){
+		attToCompare[i]=transData.attribute(ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[i]);
+	}
+    Instances mergedResult=prepareMergedFormat(transData, extData);
+
+    
+	//开始准备合并
+	if (transData.numInstances()!=extData.numInstances()){
+		System.out.println("=============warning================= transData number ="+transData.numInstances() +" while extData="+extData.numInstances());
+	}
+	
+	int processed=0;
+	Instance leftCurr;
+	Instance rightCurr;
+	Instance newData;
+
+	for (int i=0;i<transData.numInstances();i++){	
+		leftCurr=transData.instance(i);
+		rightCurr=extData.instance(i);
+
+		if (leftCurr.value(0)==rightCurr.value(0)){//找到相同ID的记录了
+			//先对所有的冗余数据进行校验
+			for (int j=0;j<ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length;i++){
+				Attribute att = attToCompare[j];
+				if (att != null) {
+					if (att.isNominal() || att.isString()) {
+						String leftLabel = leftCurr.stringValue(att);
+						String rightLabel=rightCurr.stringValue(j);
+						if (leftLabel!=rightLabel){
+							throw new Exception("data not equal! at attribute:"+ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[j]+ " left= "+leftLabel+" while right= "+rightLabel);
+						}
+					} else if (att.isNumeric()) {
+						double leftValue=leftCurr.value(att);
+						double rightValue=rightCurr.value(j);
+						if ( (leftValue==rightValue) || Double.isNaN(leftValue) && Double.isNaN(rightValue)){
+							// do nothing
+						}else {
+							throw new Exception("data not equal! at attribute:"+ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[j]+ " left= "+leftValue+" while right= "+rightValue);							
+						}
+					} else {
+						throw new IllegalStateException("Unhandled attribute type!");
+					}
+				}
+			}		
+
+			newData=new DenseInstance(mergedResult.numAttributes());
+			newData.setDataset(mergedResult);
+
+			//先拷贝transData中除了classvalue以外的数据
+			int srcStartIndex=0;
+			int srcEndIndex=leftCurr.numAttributes()-2;//注意这里的classvalue先不拷贝 
+			int targetStartIndex=0;
+			copyToNewInstance(leftCurr, newData, srcStartIndex, srcEndIndex,targetStartIndex);
+
+			//再拷贝extData中除校验数据之外的数据				
+			srcStartIndex=ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length;
+			srcEndIndex=extDataFormat.length-1;
+			targetStartIndex=leftCurr.numAttributes()-1; //接着拷贝
+			copyToNewInstance(rightCurr, newData, srcStartIndex, srcEndIndex,targetStartIndex);
+
+			//再设置classValue
+			srcStartIndex=leftCurr.numAttributes()-1;
+			srcEndIndex=leftCurr.numAttributes()-1;
+			targetStartIndex=newData.numAttributes()-1;
+			copyToNewInstance(leftCurr, newData, srcStartIndex, srcEndIndex,targetStartIndex);
+
+			processed++;
+			if (processed % 100000 ==0){
+				System.out.println("number of results processed:"+ processed);
+			}
+			
+		}
+	}//end for
+	if (processed!=extData.numInstances()){
+		throw new Exception("not all data in extData have been processed , processed= "+processed+" ,while total="+extData.numInstances());
+	}else {
+		System.out.println("number of data merged and processed: "+ processed+" origin data columns="+transData.numAttributes()+" new data columns="+mergedResult.numAttributes());
+	}
+	
+	//返回结果之前需要按TradeDate重新排序
+	int tradeDateIndex=FilterData.findATTPosition(mergedResult, ArffFormat.TRADE_DATE);
+	mergedResult.sort(tradeDateIndex-1);
+	
+	return mergedResult;
+}
+
+
+/**
+ * Merges two sets of Instances together（这里仅生成空格式不实际合并数据）. The resulting set will have all the
+ * attributes of the first set plus all the attributes of the second set. 
+ * 将第一个Instances的classvalue（最后一列）作为合并后的classvalue
+ * 
+ */
+private static Instances prepareMergedFormat(Instances transData, Instances extData) {
+	// Create the vector of merged attributes
+    ArrayList<Attribute> newAttributes = new ArrayList<Attribute>(transData.numAttributes() +
+    		extData.numAttributes()-ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length);
+    Enumeration<Attribute> enu = transData.enumerateAttributes();
+    while (enu.hasMoreElements()) {
+    	newAttributes.add((Attribute) enu.nextElement());
+    }
+    enu = extData.enumerateAttributes();
+    while (enu.hasMoreElements()) {
+    	//去掉冗余字段，将有效数据字段加入新数据集
+    	if (((Attribute)enu.nextElement()).index()>= ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length){
+    		newAttributes.add((Attribute)(enu.nextElement()).copy());// Need to copy because indices will change.
+    	}
+    }
+    //将第一个数据集里的Class属性作为新数据集的class属性
+    Attribute classAttribute=transData.classAttribute();
+    newAttributes.add(classAttribute);
+
+    // Create the set of mergedInstances
+    Instances merged = new Instances(transData.relationName(), newAttributes, 0);
+    merged.setClassIndex(merged.numAttributes()-1);
+    return merged;
+}
+
+
 
 }

@@ -81,6 +81,21 @@ public class FileUtility {
 			return datasrc;
 		}
 	
+	// 从扩展交易CSV文件中加载数据，根据后续处理需要这里不设classIndex
+	public static Instances loadDataFromExtCSVFile(String fileName)		throws Exception {
+			CSVLoader loader = new CSVLoader();
+			loader.setSource(new File(fileName));
+			//数据全部读进来之后再看怎么转nominal，否则直接加载， nominal的值的顺序会和文件顺序有关，造成数据不对
+			Instances datasrc = loader.getDataSet();
+			datasrc=FilterData.numToNominal(datasrc, "3,6,8");
+			datasrc=FilterData.NominalToString(datasrc, "3,6,8");
+			
+			// 把读入的数据改名 以适应内部训练的arff格式，更名均线策略和指数code
+			datasrc.renameAttribute(5, ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[5]);
+			datasrc.renameAttribute(7, ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[7]);
+			return datasrc;
+		}	
+	
 	protected static void SaveDataIntoFile(Instances dataSet, String fileName) throws IOException {
 
 		ArffSaver saver = new ArffSaver();
