@@ -105,6 +105,8 @@ public class ProcessData {
 
 			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
 //			processHistoryFile();
+			
+			//合并历史扩展数据
 			mergeExtData();
 		} catch (Exception e) {
 			
@@ -113,7 +115,7 @@ public class ProcessData {
 	}
 
 
-	@Deprecated 
+
 	// replaced by compareRefreshedInstances which is more effecient 
 	//此方法用于比较原始文件和refreshed文件之间的差异
 	// 根据原始文件的格式ORIGINAL_TRANSACTION_ARFF_FORMAT
@@ -216,28 +218,7 @@ public class ProcessData {
 		System.out.println("number of refreshed data="+refreshedDataSize+ " vs. rowCompared+rowAdded"+(rowCompare+rowAdded));
 	}
 
-	protected static void compareRefreshedInstances() throws Exception {
-		
-		String filePrefix=C_ROOT_DIRECTORY+"AllTransaction20052016";
-		Instances originData=FileUtility.loadDataFromFile(filePrefix+"-origin.arff");
-		int originDataSize=originData.numInstances();
-		System.out.println("loaded original file into memory, number= "+originDataSize);
-		
-//		Attribute dateCodeMA
-//		originData.insertAttributeAt(, position);
-		for (int i=0;i<originDataSize;i++){
-			
-		}
 
-		
-		Instances refreshedData=FileUtility.loadDataFromFile(filePrefix+".arff");
-		int refreshedDataSize=refreshedData.numInstances();
-		System.out.println("loaded refreshed file into memory, number= "+refreshedDataSize);
-		System.out.println("compare originData and newData header,result is :"+originData.equalHeadersMsg(refreshedData));
-		
-		
-		
-	}
 	/**
 	 * @param maIndex
 	 * @param originRow
@@ -982,12 +963,31 @@ protected static void mergeExtData() throws Exception{
 	for (int i=0;i<extData2.numInstances();i++){
 		fullExtData.add(extData2.instance(i));
 	}
-	System.out.println("full ext data loaded. number="+fullExtData.numInstances());
+	extData2=null;
+	System.out.println("Group 2 full ext data loaded. number="+fullExtData.numInstances());
 	
 	String originFileName=C_ROOT_DIRECTORY+"AllTransaction20052016";
 	Instances fullData = FileUtility.loadDataFromFile(originFileName+".arff");
 	System.out.println("full trans data loaded. number="+fullData.numInstances());
 	Instances result=mergeTransactionWithExtension(fullData,fullExtData,ArffFormat.INCREMENTAL_EXT_ARFF_RIGHT);
+	System.out.println("group 2 ext data processed. number="+fullData.numInstances()+" columns="+fullData.numAttributes());
+	fullExtData=null;
+	
+	
+	//处理第三组数据
+	file1=C_ROOT_DIRECTORY+"sourceData\\单次收益率第三组数据2005_2010.txt";
+	file2=C_ROOT_DIRECTORY+"sourceData\\单次收益率第三组数据2011_20160531.txt";
+	fullExtData=FileUtility.loadDataFromExtCSVFile(file1);
+	extData2=FileUtility.loadDataFromExtCSVFile(file2);
+	
+	for (int i=0;i<extData2.numInstances();i++){
+		fullExtData.add(extData2.instance(i));
+	}
+	extData2=null;
+	result=mergeTransactionWithExtension(fullData,fullExtData,ArffFormat.INCREMENTAL_EXT_ARFF_RIGHT2);
+	System.out.println("Group 3 full ext data loaded. number="+fullExtData.numInstances());
+
+	
 	// 去除与训练无关的字段
 	result=ArffFormat.processAllTransaction(result);
 //	//保存训练用的format，用于做日后的校验 
@@ -1031,7 +1031,7 @@ private static Instances mergeTransactionWithExtension(Instances transData,Insta
 
 		if (leftCurr.value(0)==rightCurr.value(0)){//找到相同ID的记录了
 			//先对所有的冗余数据进行校验
-			for (int j=0;j<ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length;i++){
+			for (int j=0;j<ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length;j++){
 				Attribute att = attToCompare[j];
 				if (att != null) {
 					if (att.isNominal() || att.isString()) {
@@ -1077,7 +1077,7 @@ private static Instances mergeTransactionWithExtension(Instances transData,Insta
 
 			processed++;
 		}
-		if (i % 1000 ==0){
+		if (i % 10000 ==0){
 			System.out.println("number of results processed:"+ i);
 		}
 	}//end for
