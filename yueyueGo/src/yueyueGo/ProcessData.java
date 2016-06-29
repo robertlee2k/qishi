@@ -86,9 +86,9 @@ public class ProcessData {
 //			//按二分类器回测历史数据
 //			MLPClassifier nModel = new MLPClassifier();
 //			Instances nominalResult=testBackward(nModel);
-//			//按连续分类器回测历史数据
-//			M5PClassifier cModel=new M5PClassifier();
-//			Instances continuousResult=testBackward(cModel);
+			//按连续分类器回测历史数据
+			M5PClassifier cModel=new M5PClassifier();
+			Instances continuousResult=testBackward(cModel);
 //
 //			//输出用于计算收益率的CSV文件
 //			Instances m5pOutput=mergeResultWithData(continuousResult,nominalResult,ArffFormat.RESULT_PREDICTED_WIN_RATE);
@@ -107,7 +107,7 @@ public class ProcessData {
 //			processHistoryFile();
 			
 			//合并历史扩展数据
-			mergeExtData();
+//			mergeExtData();
 		} catch (Exception e) {
 			
 			e.printStackTrace();
@@ -957,23 +957,10 @@ protected static void saveSelectedFileForMarkets(Instances fullOutput,String cla
 protected static void mergeExtData() throws Exception{
 	String file1=C_ROOT_DIRECTORY+"sourceData\\单次收益率第二组数据2005_2010.txt";
 	String file2=C_ROOT_DIRECTORY+"sourceData\\单次收益率第二组数据2011_20160531.txt";
-	Instances extData=FileUtility.loadDataFromExtCSVFile(file1);
-	Instances extData2=FileUtility.loadDataFromExtCSVFile(file2);
-
-	
-	//如果不是用这种copy的方式和setDataSet的方式，String和nominal数据会全乱掉。
-	Instance oldRow=null;
-	int colSize=extData.numAttributes()-1;
-	for (int i=0;i<extData2.numInstances();i++){
-		Instance newRow=new DenseInstance(extData.numAttributes());
-		newRow.setDataset(extData);
-		oldRow=extData2.instance(i);
-		copyToNewInstance(oldRow,newRow,0,colSize,0);
-		extData.add(newRow);
-	}
-	extData2=null;
+	Instances extData = mergeInstancesFromTwoFiles(file1, file2);
 	System.out.println("Group 2 full ext data loaded. number="+extData.numInstances());
-
+	
+	//加载原始arff文件
 	String originFileName=C_ROOT_DIRECTORY+"AllTransaction20052016";
 	Instances fullData = FileUtility.loadDataFromFile(originFileName+".arff");
 	System.out.println("full trans data loaded. number="+fullData.numInstances());
@@ -992,20 +979,7 @@ protected static void mergeExtData() throws Exception{
 	//处理第三组数据
 	file1=C_ROOT_DIRECTORY+"sourceData\\单次收益率第三组数据2005_2010.txt";
 	file2=C_ROOT_DIRECTORY+"sourceData\\单次收益率第三组数据2011_20160531.txt";
-	extData=FileUtility.loadDataFromExtCSVFile(file1);
-	extData2=FileUtility.loadDataFromExtCSVFile(file2);
-	
-	//如果不是用这种copy的方式和setDataSet的方式，String和nominal数据会全乱掉。
-	oldRow=null;
-	colSize=extData.numAttributes()-1;
-	for (int i=0;i<extData2.numInstances();i++){
-		Instance newRow=new DenseInstance(extData.numAttributes());
-		newRow.setDataset(extData);
-		oldRow=extData2.instance(i);
-		copyToNewInstance(oldRow,newRow,0,colSize,0);
-		extData.add(newRow);
-	}
-	extData2=null;
+	extData = mergeInstancesFromTwoFiles(file1, file2);
 	System.out.println("Group 3 full ext data loaded. number="+extData.numInstances());
 
 	extData.sort(ArffFormat.ID_POSITION-1);
@@ -1014,6 +988,9 @@ protected static void mergeExtData() throws Exception{
 	result=mergeTransactionWithExtension(result,extData,ArffFormat.INCREMENTAL_EXT_ARFF_RIGHT2);
 	System.out.println("group 2 ext data processed. number="+result.numInstances()+" columns="+result.numAttributes());
 
+	//返回结果之前需要按TradeDate重新排序
+	int tradeDateIndex=FilterData.findATTPosition(result, ArffFormat.TRADE_DATE);
+	result.sort(tradeDateIndex-1);
 	
 	// 去除与训练无关的字段
 	result=ArffFormat.processAllTransaction(result);
@@ -1022,9 +999,39 @@ protected static void mergeExtData() throws Exception{
 	FileUtility.SaveDataIntoFile(format, originFileName+"-ext-format.arff");	
 	//保存短格式
 	FileUtility.SaveDataIntoFile(result, originFileName+"-ext-short.arff");
+	//添加计算字段
 	result=ArffFormat.addCalculateAttribute(result);
 	FileUtility.SaveDataIntoFile(result, originFileName+"-ext-new.arff");
 	System.out.println("full ext Data File saved "  );
+}
+
+
+
+/**
+ * @param firstFile
+ * @param secondFile
+ * @return
+ * @throws Exception
+ * @throws IllegalStateException
+ */
+private static Instances mergeInstancesFromTwoFiles(String firstFile,
+		String secondFile) throws Exception, IllegalStateException {
+	Instances extData=FileUtility.loadDataFromExtCSVFile(firstFile);
+	Instances extDataSecond=FileUtility.loadDataFromExtCSVFile(secondFile);
+
+	
+	//如果不是用这种copy的方式和setDataSet的方式，String和nominal数据会全乱掉。
+	Instance oldRow=null;
+	int colSize=extData.numAttributes()-1;
+	for (int i=0;i<extDataSecond.numInstances();i++){
+		Instance newRow=new DenseInstance(extData.numAttributes());
+		newRow.setDataset(extData);
+		oldRow=extDataSecond.instance(i);
+		copyToNewInstance(oldRow,newRow,0,colSize,0);
+		extData.add(newRow);
+	}
+
+	return extData;
 }
 
 
@@ -1047,16 +1054,26 @@ private static Instances mergeTransactionWithExtension(Instances transData,Insta
 		System.out.println("=============warning================= transData number ="+transData.numInstances() +" while extData="+extData.numInstances());
 	}
 	
-	int processed=0;
+	int leftProcessed=0;
+	int rightProcessed=0;
 	Instance leftCurr;
 	Instance rightCurr;
 	Instance newData;
 
-	for (int i=0;i<transData.numInstances();i++){	
-		leftCurr=transData.instance(i);
-		rightCurr=extData.instance(i);
-
-		if (leftCurr.value(0)==rightCurr.value(0) ){//找到相同ID的记录了
+	while (leftProcessed<transData.numInstances() && rightProcessed<extData.numInstances()){	
+		leftCurr=transData.instance(leftProcessed);
+		rightCurr=extData.instance(rightProcessed);
+		double leftID = leftCurr.value(0);
+		double rightID = rightCurr.value(0);
+		if (leftID<rightID){ // 如果左边有未匹配的数据
+			System.out.println("unmatched left====="+ leftCurr.toString());
+			leftProcessed++;
+			continue;
+		}else if (leftID>rightID){ // 如果右边有未匹配的数据
+			rightProcessed++;
+			System.out.println("unmatched right===="+ rightCurr.toString());	
+			continue;
+		}else if (leftID==rightID ){//找到相同ID的记录了
 			//先对所有的冗余数据进行校验
 			for (int j=0;j<ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length;j++){
 				Attribute att = attToCompare[j];
@@ -1071,7 +1088,7 @@ private static Instances mergeTransactionWithExtension(Instances transData,Insta
 						if (leftLabel.equals(rightLabel)==false){
 							System.out.println("current left====="+ leftCurr.toString());
 							System.out.println("current right===="+ rightCurr.toString());		
-							throw new Exception("data not equal! at attribute:"+ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[j]+ " left= "+leftLabel+" while right= "+rightLabel +" @id="+leftCurr.value(0));
+							throw new Exception("data not equal! at attribute:"+ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[j]+ " left= "+leftLabel+" while right= "+rightLabel +" @id="+leftID);
 						}
 					}
 				} else if (att.isNumeric()) {
@@ -1082,7 +1099,7 @@ private static Instances mergeTransactionWithExtension(Instances transData,Insta
 					}else {
 						System.out.println("current left====="+ leftCurr.toString());
 						System.out.println("current right===="+ rightCurr.toString());						
-						throw new Exception("data not equal! at attribute:"+ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[j]+ " left= "+leftValue+" while right= "+rightValue);							
+						System.out.println("=========data not equal! at attribute:"+ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[j]+ " left= "+leftValue+" while right= "+rightValue);							
 					}
 				} else {
 					throw new IllegalStateException("Unhandled attribute type!");
@@ -1112,22 +1129,22 @@ private static Instances mergeTransactionWithExtension(Instances transData,Insta
 			copyToNewInstance(leftCurr, newData, srcStartIndex, srcEndIndex,targetStartIndex);
 			
 			mergedResult.add(newData);
-			processed++;
+			leftProcessed++;
+			rightProcessed++;
+			if (leftProcessed % 100000 ==0){
+				System.out.println("number of results processed. left="+ leftProcessed+ " right="+rightProcessed);
+			}
+
 		}// end if leftCurr
-		if (i % 10000 ==0){
-			System.out.println("number of results processed:"+ i);
-		}
+
 	}//end for
-	if (processed!=extData.numInstances()){
-		throw new Exception("not all data in extData have been processed , processed= "+processed+" ,while total="+extData.numInstances());
+	if (rightProcessed!=extData.numInstances()){
+		System.out.println("not all data in extData have been processed , processed= "+rightProcessed+" ,while total="+extData.numInstances());
 	}else {
-		System.out.println("number of data merged and processed: "+ processed+" origin data columns="+transData.numAttributes()+" new data columns="+mergedResult.numAttributes());
+		System.out.println("number of data merged and processed: "+ rightProcessed+" origin data columns="+transData.numAttributes()+" new data columns="+mergedResult.numAttributes());
 	}
 	
-	//返回结果之前需要按TradeDate重新排序
-	int tradeDateIndex=FilterData.findATTPosition(mergedResult, ArffFormat.TRADE_DATE);
-	mergedResult.sort(tradeDateIndex-1);
-	
+
 	return mergedResult;
 }
 
