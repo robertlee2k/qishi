@@ -955,9 +955,13 @@ protected static void saveSelectedFileForMarkets(Instances fullOutput,String cla
 }
 
 protected static void mergeExtData() throws Exception{
-	String file1=C_ROOT_DIRECTORY+"sourceData\\单次收益率第二组数据2005_2010.txt";
-	String file2=C_ROOT_DIRECTORY+"sourceData\\单次收益率第二组数据2011_20160531.txt";
-	Instances extData = mergeInstancesFromTwoFiles(file1, file2);
+	String file1=null;
+	String file2=null;
+	Instances extData=null;
+	
+	file1=C_ROOT_DIRECTORY+"sourceData\\单次收益率第二组数据2005_2010.txt";
+	file2=C_ROOT_DIRECTORY+"sourceData\\单次收益率第二组数据2011_20160531.txt";
+	extData = mergeInstancesFromTwoFiles(file1, file2);
 	System.out.println("Group 2 full ext data loaded. number="+extData.numInstances());
 	
 	//加载原始arff文件
@@ -970,11 +974,12 @@ protected static void mergeExtData() throws Exception{
 	extData.sort(ArffFormat.ID_POSITION-1);
 	System.out.println("all data sorted by id");
 	
-	
+
 	Instances result=mergeTransactionWithExtension(fullData,extData,ArffFormat.INCREMENTAL_EXT_ARFF_RIGHT);
 	System.out.println("group 2 ext data processed. number="+result.numInstances()+" columns="+result.numAttributes());
 	extData=null;
 	fullData=null;
+	
 	
 	//处理第三组数据
 	file1=C_ROOT_DIRECTORY+"sourceData\\单次收益率第三组数据2005_2010.txt";
@@ -1065,13 +1070,18 @@ private static Instances mergeTransactionWithExtension(Instances transData,Insta
 		rightCurr=extData.instance(rightProcessed);
 		double leftID = leftCurr.value(0);
 		double rightID = rightCurr.value(0);
+
 		if (leftID<rightID){ // 如果左边有未匹配的数据
 			System.out.println("unmatched left====="+ leftCurr.toString());
+			System.out.println("current right ====="+ rightCurr.toString());
+			System.out.println("leftProcessed="+leftProcessed+" rightProcessed="+rightProcessed);
 			leftProcessed++;
 			continue;
 		}else if (leftID>rightID){ // 如果右边有未匹配的数据
-			rightProcessed++;
 			System.out.println("unmatched right===="+ rightCurr.toString());	
+			System.out.println("current left  ====="+ leftCurr.toString());
+			System.out.println("leftProcessed="+leftProcessed+" rightProcessed="+rightProcessed);
+			rightProcessed++;
 			continue;
 		}else if (leftID==rightID ){//找到相同ID的记录了
 			//先对所有的冗余数据进行校验
