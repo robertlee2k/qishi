@@ -77,25 +77,25 @@ public class ProcessData {
 //			M5PClassifier cModel=new M5PClassifier();
 //			predictWithFile(cModel,PREDICT_WORK_DIR,dataFileName);
 
-//			VotedPerceptionClassifier nModel = new VotedPerceptionClassifier();
-//			Instances nominalResult=testBackward(nModel);
+			VotedPerceptionClassifier nModel = new VotedPerceptionClassifier();
+			Instances nominalResult=testBackward(nModel);
 			
 //			//REP树（C45树的变种，规则过于简单）
 ////		REPTreeClassifier nModel = new REPTreeClassifier();
 ////		Instances nominalResult=testBackward(nModel);
 
-			//按二分类器回测历史数据
-			MLPClassifier nModel = new MLPClassifier();
-			Instances nominalResult=testBackward(nModel);
-			//按连续分类器回测历史数据
-			M5PClassifier cModel=new M5PClassifier();
-			Instances continuousResult=testBackward(cModel);
-
-			//输出用于计算收益率的CSV文件
-			Instances m5pOutput=mergeResultWithData(continuousResult,nominalResult,ArffFormat.RESULT_PREDICTED_WIN_RATE,true);
-			saveSelectedFileForMarkets(m5pOutput,cModel.classifierName);
-			Instances mlpOutput=mergeResultWithData(nominalResult,continuousResult,ArffFormat.RESULT_PREDICTED_PROFIT,false);
-			saveSelectedFileForMarkets(mlpOutput,nModel.classifierName);
+//			//按二分类器回测历史数据
+//			MLPClassifier nModel = new MLPClassifier();
+//			Instances nominalResult=testBackward(nModel);
+//			//按连续分类器回测历史数据
+//			M5PClassifier cModel=new M5PClassifier();
+//			Instances continuousResult=testBackward(cModel);
+//
+//			//输出用于计算收益率的CSV文件
+//			Instances m5pOutput=mergeResultWithData(continuousResult,nominalResult,ArffFormat.RESULT_PREDICTED_WIN_RATE,true);
+//			saveSelectedFileForMarkets(m5pOutput,cModel.classifierName);
+//			Instances mlpOutput=mergeResultWithData(nominalResult,continuousResult,ArffFormat.RESULT_PREDICTED_PROFIT,false);
+//			saveSelectedFileForMarkets(mlpOutput,nModel.classifierName);
 			
 			//用最新的单次交易数据，更新原始的交易数据文件
 //			int startYear=2005;
@@ -390,7 +390,8 @@ public class ProcessData {
 	}
 
 
-
+	@Deprecated
+	//这是处理未含ext数据的
 	protected static void processHistoryFile() throws Exception {
 		System.out.println("loading history file into memory "  );
 		String originFileName=C_ROOT_DIRECTORY+"AllTransaction20052016";
@@ -409,8 +410,8 @@ public class ProcessData {
 		
 		// 存下用于计算收益率的数据
 		Instances left=ArffFormat.getTransLeftPartFromAllTransaction(fullSetData);
-		FileUtility.SaveDataIntoFile(left, C_ROOT_DIRECTORY+EXT_TRANS_LEFT_ARFF);
-		System.out.println("history Data left File saved: "+EXT_TRANS_LEFT_ARFF  );
+		FileUtility.SaveDataIntoFile(left, C_ROOT_DIRECTORY+TRANS_LEFT_ARFF);
+		System.out.println("history Data left File saved: "+TRANS_LEFT_ARFF  );
 	}
 
 	protected static void addCalculationsToFile(String path, String arffName) throws Exception{
@@ -1005,6 +1006,12 @@ protected static void mergeExtData() throws Exception{
 	//返回结果之前需要按TradeDate重新排序
 	int tradeDateIndex=FilterData.findATTPosition(result, ArffFormat.TRADE_DATE);
 	result.sort(tradeDateIndex-1);
+
+	
+	// 存下用于计算收益率的数据
+	Instances left=ArffFormat.getTransLeftPartFromAllTransaction(result);
+	FileUtility.SaveDataIntoFile(left, C_ROOT_DIRECTORY+EXT_TRANS_LEFT_ARFF);
+	System.out.println("history Data left File saved: "+EXT_TRANS_LEFT_ARFF  );	
 	
 	// 去除与训练无关的字段
 	result=ArffFormat.processAllTransaction(result);
@@ -1017,6 +1024,8 @@ protected static void mergeExtData() throws Exception{
 	result=ArffFormat.addCalculateAttribute(result);
 	FileUtility.SaveDataIntoFile(result, originFileName+"-ext-new.arff");
 	System.out.println("full ext Data File saved "  );
+	
+
 }
 
 
