@@ -42,7 +42,8 @@ public class ProcessData {
 	public static final String NOMINAL_CLASSIFIER_DIR = C_ROOT_DIRECTORY+"models\\01-二分类器\\";
 	public static final String CONTINOUS_CLASSIFIER_DIR = C_ROOT_DIRECTORY+"models\\02-连续分类器\\";
 	public static final String PREDICT_WORK_DIR=C_ROOT_DIRECTORY+"03-预测模型\\";
-	private static final String ALL_TRANSACTION_LEFT_ARFF = "AllTransaction20052016-left.arff";
+	private static final String EXT_TRANS_LEFT_ARFF = "AllTransaction20052016-ext-left.arff";
+	private static final String TRANS_LEFT_ARFF = "AllTransaction20052016-left.arff";
 	public static final String RESULT_EXTENSION = "-Test Result.csv";
 	
 	public static final String MLP_PREDICT_MODEL= "\\交易分析2005-2016 by month-new-mlp-201605 MA ";
@@ -91,9 +92,9 @@ public class ProcessData {
 			Instances continuousResult=testBackward(cModel);
 
 			//输出用于计算收益率的CSV文件
-			Instances m5pOutput=mergeResultWithData(continuousResult,nominalResult,ArffFormat.RESULT_PREDICTED_WIN_RATE);
+			Instances m5pOutput=mergeResultWithData(continuousResult,nominalResult,ArffFormat.RESULT_PREDICTED_WIN_RATE,true);
 			saveSelectedFileForMarkets(m5pOutput,cModel.classifierName);
-			Instances mlpOutput=mergeResultWithData(nominalResult,continuousResult,ArffFormat.RESULT_PREDICTED_PROFIT);
+			Instances mlpOutput=mergeResultWithData(nominalResult,continuousResult,ArffFormat.RESULT_PREDICTED_PROFIT,false);
 			saveSelectedFileForMarkets(mlpOutput,nModel.classifierName);
 			
 			//用最新的单次交易数据，更新原始的交易数据文件
@@ -408,8 +409,8 @@ public class ProcessData {
 		
 		// 存下用于计算收益率的数据
 		Instances left=ArffFormat.getTransLeftPartFromAllTransaction(fullSetData);
-		FileUtility.SaveDataIntoFile(left, C_ROOT_DIRECTORY+ALL_TRANSACTION_LEFT_ARFF);
-		System.out.println("history Data left File saved "  );
+		FileUtility.SaveDataIntoFile(left, C_ROOT_DIRECTORY+EXT_TRANS_LEFT_ARFF);
+		System.out.println("history Data left File saved: "+EXT_TRANS_LEFT_ARFF  );
 	}
 
 	protected static void addCalculationsToFile(String path, String arffName) throws Exception{
@@ -790,9 +791,17 @@ public class ProcessData {
 
 	
 	
-	protected static Instances mergeResultWithData(Instances resultData,Instances referenceData,String dataToAdd) throws Exception{
+	protected static Instances mergeResultWithData(Instances resultData,Instances referenceData,String dataToAdd,boolean useExt) throws Exception{
 		//读取磁盘上预先保存的左侧数据
-		Instances left=FileUtility.loadDataFromFile(C_ROOT_DIRECTORY+ALL_TRANSACTION_LEFT_ARFF);
+		Instances left=null;
+		
+		//TODO 过渡期
+		if (useExt){
+			left=FileUtility.loadDataFromFile(C_ROOT_DIRECTORY+EXT_TRANS_LEFT_ARFF);
+		}else{
+			left=FileUtility.loadDataFromFile(C_ROOT_DIRECTORY+TRANS_LEFT_ARFF);
+		}
+		
 
 
 	    // 创建输出结果
