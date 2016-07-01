@@ -20,7 +20,7 @@ import weka.core.converters.ConverterUtils.DataSource;
 
 public class FileUtility {
 	// load full set of data
-	protected static Instances loadDataFromFile(String fileName)
+	public static Instances loadDataFromFile(String fileName)
 			throws Exception {
 		DataSource source = new DataSource(fileName); 
 		Instances data = source.getDataSet();
@@ -106,7 +106,7 @@ public class FileUtility {
 			return datasrc;
 		}	
 	
-	protected static void SaveDataIntoFile(Instances dataSet, String fileName) throws IOException {
+	public static void SaveDataIntoFile(Instances dataSet, String fileName) throws IOException {
 
 		ArffSaver saver = new ArffSaver();
 		saver.setInstances(dataSet);
@@ -114,7 +114,7 @@ public class FileUtility {
 		saver.writeBatch();
 
 	}
-	protected static void saveCSVFile(Instances data, String fileName) throws IOException {
+	public static void saveCSVFile(Instances data, String fileName) throws IOException {
 		CSVSaver saver = new CSVSaver();
 		saver.setInstances(data);
 		saver.setFile(new File(fileName));

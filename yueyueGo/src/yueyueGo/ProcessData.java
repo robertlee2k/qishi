@@ -88,11 +88,16 @@ public class ProcessData {
 			//按二分类器回测历史数据
 			MLPClassifier nModel = new MLPClassifier();
 			Instances nominalResult=testBackward(nModel);
+			//不真正回测了，直接从以前的结果文件中加载
+//			Instances nominalResult=loadBackTestResultFromFile(nModel.classifierName);
 
 			//按连续分类器回测历史数据
 			M5PClassifier cModel=new M5PClassifier();
 			Instances continuousResult=testBackward(cModel);
+			//不真正回测了，直接从以前的结果文件中加载
+//			Instances continuousResult=loadBackTestResultFromFile(cModel.classifierName);
 
+			
 			//输出用于计算收益率的CSV文件
 			Instances m5pOutput=mergeResultWithData(continuousResult,nominalResult,ArffFormat.RESULT_PREDICTED_WIN_RATE,true);
 			saveSelectedFileForMarkets(m5pOutput,cModel.classifierName);
@@ -661,7 +666,7 @@ public class ProcessData {
 			int maIndex=FilterData.findATTPosition(result,"policy");
 			result.renameAttribute(maIndex-1, ArffFormat.SELECTED_MA);
 		}		
-		saveResultFile(result,clModel.classifierName);
+		saveBacktestResultFile(result,clModel.classifierName);
 		
 		System.out.println(clModel.classifierName+" test result file saved.");
 		return result;
@@ -1000,21 +1005,24 @@ private static boolean checkSumBeforeMerge(Instance leftCurr,
 	return result;
 }	
 
-private static void saveResultFile(Instances result,String classiferName) throws IOException{
-	FileUtility.saveCSVFile(result, BACKTEST_RESULT_DIR+"回测结果-"+ classiferName + RESULT_EXTENSION);
+private static void saveBacktestResultFile(Instances result,String classiferName) throws IOException{
+	FileUtility.SaveDataIntoFile(result, BACKTEST_RESULT_DIR+"回测结果-"+ classiferName+".arff" );
 }
-
+protected static Instances loadBackTestResultFromFile(String classiferName) throws Exception{
+	Instances result=FileUtility.loadDataFromFile(BACKTEST_RESULT_DIR+"回测结果-"+ classiferName+".arff" );
+	return result;
+}
 
 protected static void saveSelectedFileForMarkets(Instances fullOutput,String classiferName) throws Exception{
 	//输出全市场结果
 	Instances fullMarketSelected=FilterData.getInstancesSubset(fullOutput, FilterData.WEKA_ATT_PREFIX +fullOutput.numAttributes()+" = 1");
-	FileUtility.saveCSVFile(fullMarketSelected, BACKTEST_RESULT_DIR+"回测选股-"+ classiferName+"-full" + RESULT_EXTENSION );
+	FileUtility.saveCSVFile(fullMarketSelected, BACKTEST_RESULT_DIR+"选股-"+ classiferName+"-full" + RESULT_EXTENSION );
 	//输出沪深300
 	Instances subsetMarketSelected=FilterData.filterDataForIndex(fullMarketSelected,ArffFormat.IS_HS300);
-	FileUtility.saveCSVFile(subsetMarketSelected, BACKTEST_RESULT_DIR+"回测选股-"+ classiferName+"-hs300" + RESULT_EXTENSION );
+	FileUtility.saveCSVFile(subsetMarketSelected, BACKTEST_RESULT_DIR+"选股-"+ classiferName+"-hs300" + RESULT_EXTENSION );
 	//输出中证300
 	subsetMarketSelected=FilterData.filterDataForIndex(fullMarketSelected,ArffFormat.IS_ZZ500);
-	FileUtility.saveCSVFile(subsetMarketSelected, BACKTEST_RESULT_DIR+"回测选股-"+ classiferName+"-zz500" + RESULT_EXTENSION );
+	FileUtility.saveCSVFile(subsetMarketSelected, BACKTEST_RESULT_DIR+"选股-"+ classiferName+"-zz500" + RESULT_EXTENSION );
 }
 
 protected static void mergeExtData() throws Exception{
