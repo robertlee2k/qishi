@@ -31,6 +31,15 @@ public class FileUtility {
 		  data.setClassIndex(data.numAttributes() - 1);
 		return data;
 	}
+	
+	// 从CSV文件中加载数据，不做任何特殊操作及后续处理
+	public static Instances loadNormalCSVFile(String fileName)
+			throws Exception {
+		CSVLoader loader = new CSVLoader();
+		loader.setSource(new File(fileName));
+		Instances datasrc = loader.getDataSet();
+		return datasrc;
+	}
 
 	// 从文件中加载每天的预测数据（该方法不常用，仅限于数据库加载失败时使用）
 	public static Instances loadDailyNewDataFromCSVFile(String fileName)

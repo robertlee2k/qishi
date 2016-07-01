@@ -88,6 +88,7 @@ public class ProcessData {
 			//按二分类器回测历史数据
 			MLPClassifier nModel = new MLPClassifier();
 			Instances nominalResult=testBackward(nModel);
+
 			//按连续分类器回测历史数据
 			M5PClassifier cModel=new M5PClassifier();
 			Instances continuousResult=testBackward(cModel);
@@ -874,6 +875,7 @@ public class ProcessData {
 					}else { //当前ID比result的ID小，需要向后找，但向后找到最后一条也没找到
 						referenceCurr=new DenseInstance(referenceData.numAttributes());
 						referenceIndex=oldIndex; //这一条设为空，index恢复原状
+						break;
 					}
 				}
 				while (idInReference>idInResults ){
@@ -884,6 +886,7 @@ public class ProcessData {
 					}else {  //当前ID比result的ID大，需要向前找，但向前找到第一条也没找到
 						referenceCurr=new DenseInstance(referenceData.numAttributes());
 						referenceIndex=oldIndex; //这一条设为空，index恢复原状
+						break;
 					}
 				}
 				
@@ -1000,6 +1003,7 @@ private static boolean checkSumBeforeMerge(Instance leftCurr,
 private static void saveResultFile(Instances result,String classiferName) throws IOException{
 	FileUtility.saveCSVFile(result, BACKTEST_RESULT_DIR+"回测结果-"+ classiferName + RESULT_EXTENSION);
 }
+
 
 protected static void saveSelectedFileForMarkets(Instances fullOutput,String classiferName) throws Exception{
 	//输出全市场结果
