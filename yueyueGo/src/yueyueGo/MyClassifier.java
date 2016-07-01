@@ -436,7 +436,7 @@ public abstract class MyClassifier {
 				strBuff.append(summary_selectedShouyilv.getElement(i)-summary_totalShouyilv.getElement(i));
 				strBuff.append("\r\n");
 			}
-			FileUtility.write(ProcessData.C_ROOT_DIRECTORY+"回测结果-"+this.classifierName+"-monthlySummary.csv", header+strBuff, "UTF-8");
+			FileUtility.write(ProcessData.BACKTEST_RESULT_DIR+this.classifierName+"-monthlySummary.csv", header+strBuff, "UTF-8");
 		}
 	}
 	

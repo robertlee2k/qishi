@@ -41,6 +41,7 @@ public class ProcessData {
 	public static final String C_ROOT_DIRECTORY = "C:\\Users\\robert\\Desktop\\提升均线策略\\";
 	public static final String NOMINAL_CLASSIFIER_DIR = C_ROOT_DIRECTORY+"models\\01-二分类器\\";
 	public static final String CONTINOUS_CLASSIFIER_DIR = C_ROOT_DIRECTORY+"models\\02-连续分类器\\";
+	public static final String BACKTEST_RESULT_DIR=C_ROOT_DIRECTORY+"testResult\\";
 	public static final String PREDICT_WORK_DIR=C_ROOT_DIRECTORY+"03-预测模型\\";
 	private static final String EXT_TRANS_LEFT_ARFF = "AllTransaction20052016-ext-left.arff";
 	private static final String TRANS_LEFT_ARFF = "AllTransaction20052016-left.arff";
@@ -77,25 +78,25 @@ public class ProcessData {
 //			M5PClassifier cModel=new M5PClassifier();
 //			predictWithFile(cModel,PREDICT_WORK_DIR,dataFileName);
 
-			VotedPerceptionClassifier nModel = new VotedPerceptionClassifier();
-			Instances nominalResult=testBackward(nModel);
+//			VotedPerceptionClassifier nModel = new VotedPerceptionClassifier();
+//			Instances nominalResult=testBackward(nModel);
 			
 //			//REP树（C45树的变种，规则过于简单）
 ////		REPTreeClassifier nModel = new REPTreeClassifier();
 ////		Instances nominalResult=testBackward(nModel);
 
-//			//按二分类器回测历史数据
-//			MLPClassifier nModel = new MLPClassifier();
-//			Instances nominalResult=testBackward(nModel);
-//			//按连续分类器回测历史数据
-//			M5PClassifier cModel=new M5PClassifier();
-//			Instances continuousResult=testBackward(cModel);
-//
-//			//输出用于计算收益率的CSV文件
-//			Instances m5pOutput=mergeResultWithData(continuousResult,nominalResult,ArffFormat.RESULT_PREDICTED_WIN_RATE,true);
-//			saveSelectedFileForMarkets(m5pOutput,cModel.classifierName);
-//			Instances mlpOutput=mergeResultWithData(nominalResult,continuousResult,ArffFormat.RESULT_PREDICTED_PROFIT,false);
-//			saveSelectedFileForMarkets(mlpOutput,nModel.classifierName);
+			//按二分类器回测历史数据
+			MLPClassifier nModel = new MLPClassifier();
+			Instances nominalResult=testBackward(nModel);
+			//按连续分类器回测历史数据
+			M5PClassifier cModel=new M5PClassifier();
+			Instances continuousResult=testBackward(cModel);
+
+			//输出用于计算收益率的CSV文件
+			Instances m5pOutput=mergeResultWithData(continuousResult,nominalResult,ArffFormat.RESULT_PREDICTED_WIN_RATE,true);
+			saveSelectedFileForMarkets(m5pOutput,cModel.classifierName);
+			Instances mlpOutput=mergeResultWithData(nominalResult,continuousResult,ArffFormat.RESULT_PREDICTED_PROFIT,false);
+			saveSelectedFileForMarkets(mlpOutput,nModel.classifierName);
 			
 			//用最新的单次交易数据，更新原始的交易数据文件
 //			int startYear=2005;
@@ -802,7 +803,9 @@ public class ProcessData {
 		}else{
 			left=FileUtility.loadDataFromFile(C_ROOT_DIRECTORY+TRANS_LEFT_ARFF);
 		}
-		
+		System.out.println("incoming resultData size, row="+resultData.numInstances()+" column="+resultData.numAttributes());
+		System.out.println("incoming referenceData size, row="+referenceData.numInstances()+" column="+referenceData.numAttributes());
+		System.out.println("Left data loaded, row="+left.numInstances()+" column="+left.numAttributes());
 
 
 	    // 创建输出结果
@@ -812,7 +815,6 @@ public class ProcessData {
 	    mergedResult=FilterData.AddAttribute(mergedResult,ArffFormat.RESULT_SELECTED, mergedResult.numAttributes());
 
 		
-		int processed=0;
 		Instance leftCurr;
 		Instance resultCurr;
 		Instance referenceCurr;
@@ -832,13 +834,61 @@ public class ProcessData {
 		left.sort(ArffFormat.ID_POSITION-1);
 		resultData.sort(ArffFormat.ID_POSITION-1);
 		referenceData.sort(ArffFormat.ID_POSITION-1);
+		
+		
+		double idInResults=0;
+		double idInLeft=0;
+		double idInReference=0;
+		int resultIndex=0;
+		int leftIndex=0;
+		int referenceIndex=0;
+		int referenceDataNum=referenceData.numInstances();
 
 
-		for (int i=0;i<left.numInstances();i++){	
-			leftCurr=left.instance(i);
-			resultCurr=resultData.instance(processed);
-			referenceCurr=referenceData.instance(processed);
-			if (leftCurr.value(0)==resultCurr.value(0)){//找到相同ID的记录了，接下来做冗余字段的数据校验
+		while (leftIndex<left.numInstances() && resultIndex<resultData.numInstances()){				
+			resultCurr=resultData.instance(resultIndex);
+			leftCurr=left.instance(leftIndex);
+			idInResults=resultCurr.value(0);
+			idInLeft=leftCurr.value(0);
+			if (idInLeft<idInResults){ // 如果左边有未匹配的数据，这是正常的，因为left数据是从2005年开始的全量
+				leftIndex++;
+				continue;
+			}else if (idInLeft>idInResults){ // 如果右边result有未匹配的数据，这个不大正常，需要输出
+				System.out.println("!!!unmatched result===="+ resultCurr.toString());	
+				System.out.println("!!!current left   ====="+ leftCurr.toString());
+				resultIndex++;
+				continue;
+			}else if (idInLeft==idInResults ){//找到相同ID的记录了
+				//去reference数据里查找相应的ID记录
+				referenceCurr=resultData.instance(referenceIndex);
+				idInReference=referenceCurr.value(0);
+
+				//这段代码是用于应对reference的数据与result的数据不一致情形的。
+				//reference数据也是按ID排序的，所以可以按序查找
+				int oldIndex=referenceIndex;//暂存一下
+				while (idInReference<idInResults ){ 
+					if (referenceIndex<referenceDataNum-1){
+						referenceIndex++;
+						referenceCurr=resultData.instance(referenceIndex);
+						idInReference=referenceCurr.value(0);
+					}else { //当前ID比result的ID小，需要向后找，但向后找到最后一条也没找到
+						referenceCurr=new DenseInstance(referenceData.numAttributes());
+						referenceIndex=oldIndex; //这一条设为空，index恢复原状
+					}
+				}
+				while (idInReference>idInResults ){
+					if (referenceIndex>0){
+						referenceIndex--;
+						referenceCurr=resultData.instance(referenceIndex);
+						idInReference=referenceCurr.value(0);
+					}else {  //当前ID比result的ID大，需要向前找，但向前找到第一条也没找到
+						referenceCurr=new DenseInstance(referenceData.numAttributes());
+						referenceIndex=oldIndex; //这一条设为空，index恢复原状
+					}
+				}
+				
+				
+				//接下来做冗余字段的数据校验
 				if ( checkSumBeforeMerge(leftCurr, resultCurr, leftMA, resultMA,leftBias5, resultBias5)) {
 					newData=new DenseInstance(mergedResult.numAttributes());
 					newData.setDataset(mergedResult);
@@ -866,22 +916,21 @@ public class ProcessData {
 					newData.setValue(outputWinrateAtt, winrate);
 					newData.setValue(outputSelectedAtt, resultCurr.value(resultSelectedAtt));
 					mergedResult.add(newData);
-					processed++;
-					if (processed % 100000 ==0){
-						System.out.println("number of results processed:"+ processed);
-					}
-					if (processed>=resultData.numInstances()){
-						break;
+					resultIndex++;
+					leftIndex++;
+					if (mergedResult.numInstances() % 100000 ==0){
+						System.out.println("number of results processed:"+ mergedResult.numInstances());
 					}
 				}else {
 					throw new Exception("data value in header data and result data does not equal "+leftCurr.value(leftMA)+" = "+resultCurr.value(resultMA)+ " / "+leftCurr.value(leftBias5) + " = "+resultCurr.value(resultBias5));
 				}
 			}
 		}// end left processed
-		if (processed!=resultData.numInstances()){
-			throw new Exception("not all data in result have been processed , processed= "+processed+" ,while total result="+resultData.numInstances());
+		if (mergedResult.numInstances()!=resultData.numInstances()){
+//			throw new Exception
+			System.out.println("------Attention!!! not all data in result have been processed , processed= "+mergedResult.numInstances()+" ,while total result="+resultData.numInstances());
 		}else {
-			System.out.println("number of results merged and processed: "+ processed);
+			System.out.println("number of results merged and processed: "+ mergedResult.numInstances());
 		}
 		
 		//返回结果之前需要按TradeDate重新排序
@@ -949,19 +998,19 @@ private static boolean checkSumBeforeMerge(Instance leftCurr,
 }	
 
 private static void saveResultFile(Instances result,String classiferName) throws IOException{
-	FileUtility.saveCSVFile(result, C_ROOT_DIRECTORY+"回测结果-"+ classiferName + RESULT_EXTENSION);
+	FileUtility.saveCSVFile(result, BACKTEST_RESULT_DIR+"回测结果-"+ classiferName + RESULT_EXTENSION);
 }
 
 protected static void saveSelectedFileForMarkets(Instances fullOutput,String classiferName) throws Exception{
 	//输出全市场结果
 	Instances fullMarketSelected=FilterData.getInstancesSubset(fullOutput, FilterData.WEKA_ATT_PREFIX +fullOutput.numAttributes()+" = 1");
-	FileUtility.saveCSVFile(fullMarketSelected, C_ROOT_DIRECTORY+"testResult\\回测选股-"+ classiferName+"-full" + RESULT_EXTENSION );
+	FileUtility.saveCSVFile(fullMarketSelected, BACKTEST_RESULT_DIR+"回测选股-"+ classiferName+"-full" + RESULT_EXTENSION );
 	//输出沪深300
 	Instances subsetMarketSelected=FilterData.filterDataForIndex(fullMarketSelected,ArffFormat.IS_HS300);
-	FileUtility.saveCSVFile(subsetMarketSelected, C_ROOT_DIRECTORY+"testResult\\回测选股-"+ classiferName+"-hs300" + RESULT_EXTENSION );
+	FileUtility.saveCSVFile(subsetMarketSelected, BACKTEST_RESULT_DIR+"回测选股-"+ classiferName+"-hs300" + RESULT_EXTENSION );
 	//输出中证300
 	subsetMarketSelected=FilterData.filterDataForIndex(fullMarketSelected,ArffFormat.IS_ZZ500);
-	FileUtility.saveCSVFile(subsetMarketSelected, C_ROOT_DIRECTORY+"testResult\\回测选股-"+ classiferName+"-zz500" + RESULT_EXTENSION );
+	FileUtility.saveCSVFile(subsetMarketSelected, BACKTEST_RESULT_DIR+"回测选股-"+ classiferName+"-zz500" + RESULT_EXTENSION );
 }
 
 protected static void mergeExtData() throws Exception{
