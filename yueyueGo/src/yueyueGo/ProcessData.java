@@ -861,7 +861,7 @@ public class ProcessData {
 				continue;
 			}else if (idInLeft==idInResults ){//找到相同ID的记录了
 				//去reference数据里查找相应的ID记录
-				referenceCurr=resultData.instance(referenceIndex);
+				referenceCurr=referenceData.instance(referenceIndex);
 				idInReference=referenceCurr.value(0);
 
 				//这段代码是用于应对reference的数据与result的数据不一致情形的。
@@ -870,7 +870,7 @@ public class ProcessData {
 				while (idInReference<idInResults ){ 
 					if (referenceIndex<referenceDataNum-1){
 						referenceIndex++;
-						referenceCurr=resultData.instance(referenceIndex);
+						referenceCurr=referenceData.instance(referenceIndex);
 						idInReference=referenceCurr.value(0);
 					}else { //当前ID比result的ID小，需要向后找，但向后找到最后一条也没找到
 						referenceCurr=new DenseInstance(referenceData.numAttributes());
@@ -881,7 +881,7 @@ public class ProcessData {
 				while (idInReference>idInResults ){
 					if (referenceIndex>0){
 						referenceIndex--;
-						referenceCurr=resultData.instance(referenceIndex);
+						referenceCurr=referenceData.instance(referenceIndex);
 						idInReference=referenceCurr.value(0);
 					}else {  //当前ID比result的ID大，需要向前找，但向前找到第一条也没找到
 						referenceCurr=new DenseInstance(referenceData.numAttributes());
