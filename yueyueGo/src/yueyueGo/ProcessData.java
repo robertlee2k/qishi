@@ -60,56 +60,14 @@ public class ProcessData {
 
 	public static void main(String[] args) {
 		try {
+			//用模型预测每日增量数据
+//			callDailyPredict();
 
-//			//用二分类模型预测每日增量数据
-//			MLPClassifier nModel=new MLPClassifier();
-//			predictWithDB(nModel,PREDICT_WORK_DIR);
-//			//用连续模型预测每日增量数据
-//			M5PClassifier cModel=new M5PClassifier();
-//			//读取数据库预测
-//			predictWithDB(cModel,PREDICT_WORK_DIR);
-		
-//			//使用文件预测
-//			String dataFileName=("t_stock_avgline_increment_zuixin_v"+FormatUtility.getDateStringFor(-1)).trim();
-//			//用二分类模型预测每日增量数据
-//			MLPClassifier nModel=new MLPClassifier();
-//			predictWithFile(nModel,PREDICT_WORK_DIR,dataFileName);
-//			//用连续模型预测每日增量数据
-//			M5PClassifier cModel=new M5PClassifier();
-//			predictWithFile(cModel,PREDICT_WORK_DIR,dataFileName);
-
-//			VotedPerceptionClassifier nModel = new VotedPerceptionClassifier();
-//			Instances nominalResult=testBackward(nModel);
-			
-//			//REP树（C45树的变种，规则过于简单）
-////		REPTreeClassifier nModel = new REPTreeClassifier();
-////		Instances nominalResult=testBackward(nModel);
-
-//			//按二分类器回测历史数据
-//			MLPClassifier nModel = new MLPClassifier();
-//			Instances nominalResult=testBackward(nModel);
-//			//不真正回测了，直接从以前的结果文件中加载
-////			Instances nominalResult=loadBackTestResultFromFile(nModel.classifierName);
-//
-//			//按连续分类器回测历史数据
-//			M5PClassifier cModel=new M5PClassifier();
-//			Instances continuousResult=testBackward(cModel);
-//			//不真正回测了，直接从以前的结果文件中加载
-////			Instances continuousResult=loadBackTestResultFromFile(cModel.classifierName);
-//
-//			
-//			//输出用于计算收益率的CSV文件
-//			Instances m5pOutput=mergeResultWithData(continuousResult,nominalResult,ArffFormat.RESULT_PREDICTED_WIN_RATE,true);
-//			saveSelectedFileForMarkets(m5pOutput,cModel.classifierName);
-//			Instances mlpOutput=mergeResultWithData(nominalResult,continuousResult,ArffFormat.RESULT_PREDICTED_PROFIT,false);
-//			saveSelectedFileForMarkets(mlpOutput,nModel.classifierName);
+			//调用回测函数回测
+			callTestBack();
 			
 			//用最新的单次交易数据，更新原始的交易数据文件
-//			int startYear=2005;
-//			int endYear=2016;
-//			refreshArffFile(startYear,endYear);
-//			compareRefreshedInstancesForYear(2008,100);
-//			compareRefreshedInstancesForYear(2015,100);
+//			callRefreshInstances();
 
 			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
 //			processHistoryFile();
@@ -120,6 +78,80 @@ public class ProcessData {
 			
 			e.printStackTrace();
 		}
+	}
+
+
+
+	/**
+	 * @throws Exception
+	 */
+	protected static void callRefreshInstances() throws Exception {
+		int startYear=2005;
+		int endYear=2016;
+		refreshArffFile(startYear,endYear);
+		compareRefreshedInstancesForYear(2008,100);
+		compareRefreshedInstancesForYear(2015,100);
+	}
+
+
+
+	/**
+	 * @throws Exception
+	 */
+	protected static void callDailyPredict() throws Exception {
+		//用二分类模型预测每日增量数据
+		MLPClassifier nModel=new MLPClassifier();
+		predictWithDB(nModel,PREDICT_WORK_DIR);
+		//用连续模型预测每日增量数据
+		M5PClassifier cModel=new M5PClassifier();
+		//读取数据库预测
+		predictWithDB(cModel,PREDICT_WORK_DIR);
+
+//			//使用文件预测
+//			String dataFileName=("t_stock_avgline_increment_zuixin_v"+FormatUtility.getDateStringFor(-1)).trim();
+//			//用二分类模型预测每日增量数据
+//			MLPClassifier nModel=new MLPClassifier();
+//			predictWithFile(nModel,PREDICT_WORK_DIR,dataFileName);
+//			//用连续模型预测每日增量数据
+//			M5PClassifier cModel=new M5PClassifier();
+//			predictWithFile(cModel,PREDICT_WORK_DIR,dataFileName);
+	}
+
+
+
+	/**
+	 * @throws Exception
+	 * @throws IOException
+	 */
+	protected static void callTestBack() throws Exception, IOException {
+		//			//按二分类器回测历史数据
+		//			MLPClassifier nModel = new MLPClassifier();
+		//			Instances nominalResult=testBackward(nModel);
+
+		//	投票感知器
+		VotedPerceptionClassifier nModel = new VotedPerceptionClassifier();
+		Instances nominalResult=testBackward(nModel);
+
+		//			//REP树（C45树的变种，规则过于简单）
+		////		REPTreeClassifier nModel = new REPTreeClassifier();
+		////		Instances nominalResult=testBackward(nModel);
+
+		//			//不真正回测了，直接从以前的结果文件中加载
+		////			Instances nominalResult=loadBackTestResultFromFile(nModel.classifierName);
+
+		//按连续分类器回测历史数据
+		M5PClassifier cModel=new M5PClassifier();
+		Instances continuousResult=testBackward(cModel);
+
+		//不真正回测了，直接从以前的结果文件中加载
+		//			Instances continuousResult=loadBackTestResultFromFile(cModel.classifierName);
+
+
+		//输出用于计算收益率的CSV文件
+		Instances m5pOutput=mergeResultWithData(continuousResult,nominalResult,ArffFormat.RESULT_PREDICTED_WIN_RATE,true);
+		saveSelectedFileForMarkets(m5pOutput,cModel.classifierName);
+		Instances mlpOutput=mergeResultWithData(nominalResult,continuousResult,ArffFormat.RESULT_PREDICTED_PROFIT,false);
+		saveSelectedFileForMarkets(mlpOutput,nModel.classifierName);
 	}
 
 
