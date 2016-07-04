@@ -85,24 +85,24 @@ public class ProcessData {
 ////		REPTreeClassifier nModel = new REPTreeClassifier();
 ////		Instances nominalResult=testBackward(nModel);
 
-			//按二分类器回测历史数据
-			MLPClassifier nModel = new MLPClassifier();
-			Instances nominalResult=testBackward(nModel);
-			//不真正回测了，直接从以前的结果文件中加载
-//			Instances nominalResult=loadBackTestResultFromFile(nModel.classifierName);
-
-			//按连续分类器回测历史数据
-			M5PClassifier cModel=new M5PClassifier();
-			Instances continuousResult=testBackward(cModel);
-			//不真正回测了，直接从以前的结果文件中加载
-//			Instances continuousResult=loadBackTestResultFromFile(cModel.classifierName);
-
-			
-			//输出用于计算收益率的CSV文件
-			Instances m5pOutput=mergeResultWithData(continuousResult,nominalResult,ArffFormat.RESULT_PREDICTED_WIN_RATE,true);
-			saveSelectedFileForMarkets(m5pOutput,cModel.classifierName);
-			Instances mlpOutput=mergeResultWithData(nominalResult,continuousResult,ArffFormat.RESULT_PREDICTED_PROFIT,false);
-			saveSelectedFileForMarkets(mlpOutput,nModel.classifierName);
+//			//按二分类器回测历史数据
+//			MLPClassifier nModel = new MLPClassifier();
+//			Instances nominalResult=testBackward(nModel);
+//			//不真正回测了，直接从以前的结果文件中加载
+////			Instances nominalResult=loadBackTestResultFromFile(nModel.classifierName);
+//
+//			//按连续分类器回测历史数据
+//			M5PClassifier cModel=new M5PClassifier();
+//			Instances continuousResult=testBackward(cModel);
+//			//不真正回测了，直接从以前的结果文件中加载
+////			Instances continuousResult=loadBackTestResultFromFile(cModel.classifierName);
+//
+//			
+//			//输出用于计算收益率的CSV文件
+//			Instances m5pOutput=mergeResultWithData(continuousResult,nominalResult,ArffFormat.RESULT_PREDICTED_WIN_RATE,true);
+//			saveSelectedFileForMarkets(m5pOutput,cModel.classifierName);
+//			Instances mlpOutput=mergeResultWithData(nominalResult,continuousResult,ArffFormat.RESULT_PREDICTED_PROFIT,false);
+//			saveSelectedFileForMarkets(mlpOutput,nModel.classifierName);
 			
 			//用最新的单次交易数据，更新原始的交易数据文件
 //			int startYear=2005;
