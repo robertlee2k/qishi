@@ -30,6 +30,7 @@ public abstract class MyClassifier {
 	
 
 	public boolean inputAttShouldBeIndependent=false;  //缺省情况下，不限制输入文件中的计算字段 （在子类中覆盖）
+	public int arff_format=ArffFormat.EXT_FORMAT; //缺省使用扩展arff
 
 	//用于策略分组
     public String[] m_policySubGroup;//在子类构造函数中赋值覆盖 = {"5","10","20","30","60" };

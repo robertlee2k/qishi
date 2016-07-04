@@ -15,20 +15,36 @@ public class DBAccess  {
 		// TODO Auto-generated constructor stub
 	}
 	
-	private static String generateQueryData(){
+	private static String generateQueryData(int format){
+		
 		String queryData="SELECT ";
-		for (int i=0;i<ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT.length;i++){
-			queryData+= " `"+ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT[i]+"`";
-			if (i<ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT.length-1){
+		String[] target_columns=null;
+		String target_view=null;
+		
+		switch (format) {
+		case ArffFormat.NORMAL_FORMAT:
+			target_columns=ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT;
+			target_view="t_stock_avgline_increment_zuixin_v";
+			break;
+		case ArffFormat.EXT_FORMAT:
+			target_columns=ArffFormat.EXT_DAILY_DATA_TO_PREDICT_FORMAT;
+			target_view="t_stock_avgline_increment_zuixin_group3";
+			break;			
+		default:
+			break;
+		}
+		for (int i=0;i<target_columns.length;i++){
+			queryData+= " `"+target_columns[i]+"`";
+			if (i<target_columns.length-1){
 				queryData+=", ";
 			}
 		}
-		queryData+=" FROM t_stock_avgline_increment_zuixin_v";
+		queryData+=" FROM "+target_view;
 		System.out.println(queryData);
 		return queryData;
 	}
 	
-	public static Instances LoadDataFromDB() throws Exception{
+	public static Instances LoadDataFromDB(int format) throws Exception{
 //		DatabaseLoader loader = new DatabaseLoader();
 //		loader.setUrl(URL);
 //		loader.setUser(USER);
@@ -43,7 +59,7 @@ public class DBAccess  {
 		query.setDatabaseURL(URL);
 		query.setUsername(USER);
 		query.setPassword(PASSWORD);
-		String queryData=generateQueryData();
+		String queryData=generateQueryData(format);
 		query.setQuery(queryData); 
 
 		Instances data = query.retrieveInstances();

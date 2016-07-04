@@ -49,8 +49,8 @@ public class ProcessData {
 	
 	public static final String MLP_PREDICT_MODEL= "\\交易分析2005-2016 by month-new-mlp-201605 MA ";
 	public static final String MLP_EVAL_MODEL= "\\交易分析2005-2016 by month-new-mlp-201605 MA ";
-	public static final String M5P_PREDICT_MODEL="\\交易分析2005-2016 by month-new-m5p-201605 MA ";
-	public static final String M5P_EVAL_MODEL="\\交易分析2005-2016 by month-new-m5p-201605 MA ";
+	public static final String M5P_PREDICT_MODEL="\\extData2005-2016-m5p-201605 MA ";//"\\交易分析2005-2016 by month-new-m5p-201605 MA ";
+	public static final String M5P_EVAL_MODEL="\\extData2005-2016-m5p-201605 MA ";//"\\交易分析2005-2016 by month-new-m5p-201605 MA ";
 	
 	
 	public static final String[] splitYear ={
@@ -480,7 +480,7 @@ public class ProcessData {
 	//直接访问数据库预测每天的增量数据
 	protected static void predictWithDB(MyClassifier clModel, String pathName) throws Exception {
 		System.out.println("-----------------------------");
-		Instances fullData = DBAccess.LoadDataFromDB();
+		Instances fullData = DBAccess.LoadDataFromDB(clModel.arff_format);
 
 		
 		predict(clModel, pathName, fullData);
@@ -492,7 +492,7 @@ public class ProcessData {
 		Instances newData = null;
 		Instances result = null;
 
-		Instances fullData=calibrateAttributesForDailyData(pathName, inData);
+		Instances fullData=calibrateAttributesForDailyData(pathName, inData,clModel.arff_format);
 	
 		//如果模型需要计算字段，则把计算字段加上
 		if (clModel.inputAttShouldBeIndependent==false){
@@ -774,10 +774,22 @@ public class ProcessData {
 	}
 
 	//这是对增量数据nominal label的处理 （因为增量数据中的nominal数据，label会可能不全）
-	private static Instances calibrateAttributesForDailyData(String pathName,Instances incomingData) throws Exception {
+	private static Instances calibrateAttributesForDailyData(String pathName,Instances incomingData,int formatType) throws Exception {
 		
 		//与本地格式数据比较，这地方基本上会有nominal数据的label不一致，临时处理办法就是先替换掉
-		Instances format=FileUtility.loadDataFromFile(C_ROOT_DIRECTORY+"AllTransaction20052016-format.arff");
+		String formatFile=null;
+		switch (formatType) {
+		case ArffFormat.NORMAL_FORMAT:
+			formatFile="AllTransaction20052016-format.arff";
+			break;
+		case ArffFormat.EXT_FORMAT:
+			formatFile="AllTransaction20052016-ext-format.arff";
+			break;
+		default:
+			break;
+		}
+
+		Instances format=FileUtility.loadDataFromFile(C_ROOT_DIRECTORY+formatFile);
 		format=FilterData.removeAttribs(format, "2");
 		System.out.println("!!!!!verifying input data format , you should read this .... "+ format.equalHeadersMsg(incomingData));
 		calibrateAttributes(incomingData, format);

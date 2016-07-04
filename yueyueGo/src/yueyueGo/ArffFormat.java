@@ -6,6 +6,9 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 public class ArffFormat {
+	public static final int NORMAL_FORMAT=1;
+	public static final int EXT_FORMAT=2;
+	
 	public static final String LONG_ARFF_FILE = "AllTransaction20052016-ext-new.arff";//"AllTransaction20052016-new.arff"; // 包含计算字段的ARFF格式，这是提供给各输入属性独立的分类器使用的，如分类树
 	public static final String SHORT_ARFF_FILE = "AllTransaction20052016-short.arff";//"AllTransaction20052016-short.arff";// 不包含计算字段的ARFF格式，这是提供给各输入属性独立的分类器使用的，如神经网络
 
@@ -111,12 +114,25 @@ public class ArffFormat {
 			"zhishu_bias30_pre2day_dif", "zhishu_bias60_pre2day_dif"
 			//"shouyilv"  //收益率这个字段在每日预测的输入数据中并没有，是loadfromDB或CSV方法中加的空字段。
 	};
+	
+	// 每日扩展数据（数据库和数据文件都是如此)的格式
+	public static String[] EXT_DAILY_DATA_TO_PREDICT_FORMAT = create_ext_daily_data_to_predict();
+	
 
 	// 读取的数据源（每日预测数据和单次收益率数据）中的日期格式
 	public static final String INPUT_DATE_FORMAT = "yyyy/M/d";
 	// ARFF文件中的日期格式
 	public static final String ARFF_DATE_FORMAT = "M/d/yyyy";
 
+	protected static final String[] create_ext_daily_data_to_predict(){
+		String[] ext_formatString=new String[DAILY_DATA_TO_PREDICT_FORMAT.length+INCREMENTAL_EXT_ARFF_RIGHT.length+INCREMENTAL_EXT_ARFF_RIGHT2.length];
+		System.arraycopy(DAILY_DATA_TO_PREDICT_FORMAT, 0, ext_formatString, 0, DAILY_DATA_TO_PREDICT_FORMAT.length);  
+		System.arraycopy(INCREMENTAL_EXT_ARFF_RIGHT, 0, ext_formatString, DAILY_DATA_TO_PREDICT_FORMAT.length, INCREMENTAL_EXT_ARFF_RIGHT.length);
+		System.arraycopy(INCREMENTAL_EXT_ARFF_RIGHT2, 0, ext_formatString, DAILY_DATA_TO_PREDICT_FORMAT.length+INCREMENTAL_EXT_ARFF_RIGHT.length,INCREMENTAL_EXT_ARFF_RIGHT2.length); 
+		return ext_formatString;
+		
+	}
+	
 	// 从All Transaction Data中删除无关字段remove attribute: 3-9 (tradeDate到均线策略）
 	public static Instances processAllTransaction(Instances allData)
 			throws Exception {
@@ -223,6 +239,7 @@ public class ArffFormat {
 	}
 
 	// 将输入文件和training数据顺序对比 ，bypassColumnCount是指需要忽略掉的colum数（比如每日增量里多了一列ID需要忽略）
+	//因为201607以后有扩展格式存在， 这个改名仅限于原始的training改名（扩展格式中的名字与原始训练模型中是相同的）
 	public static Instances trainingAttribMapper(Instances data,String[] validInputColumns,
 			int bypassColumnCount) throws Exception {
 		// 把读入的数据改名 以适应内部训练的arff格式
