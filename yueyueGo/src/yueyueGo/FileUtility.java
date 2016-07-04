@@ -20,7 +20,7 @@ import weka.core.converters.ConverterUtils.DataSource;
 
 public class FileUtility {
 	// load full set of data
-	protected static Instances loadDataFromFile(String fileName)
+	public static Instances loadDataFromFile(String fileName)
 			throws Exception {
 		DataSource source = new DataSource(fileName); 
 		Instances data = source.getDataSet();
@@ -30,6 +30,15 @@ public class FileUtility {
 		if (data.classIndex() == -1)
 		  data.setClassIndex(data.numAttributes() - 1);
 		return data;
+	}
+	
+	// 从CSV文件中加载数据，不做任何特殊操作及后续处理
+	public static Instances loadNormalCSVFile(String fileName)
+			throws Exception {
+		CSVLoader loader = new CSVLoader();
+		loader.setSource(new File(fileName));
+		Instances datasrc = loader.getDataSet();
+		return datasrc;
 	}
 
 	// 从文件中加载每天的预测数据（该方法不常用，仅限于数据库加载失败时使用）
@@ -97,7 +106,7 @@ public class FileUtility {
 			return datasrc;
 		}	
 	
-	protected static void SaveDataIntoFile(Instances dataSet, String fileName) throws IOException {
+	public static void SaveDataIntoFile(Instances dataSet, String fileName) throws IOException {
 
 		ArffSaver saver = new ArffSaver();
 		saver.setInstances(dataSet);
@@ -105,7 +114,7 @@ public class FileUtility {
 		saver.writeBatch();
 
 	}
-	protected static void saveCSVFile(Instances data, String fileName) throws IOException {
+	public static void saveCSVFile(Instances data, String fileName) throws IOException {
 		CSVSaver saver = new CSVSaver();
 		saver.setInstances(data);
 		saver.setFile(new File(fileName));
