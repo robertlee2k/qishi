@@ -10,7 +10,7 @@ public class ArffFormat {
 	public static final int EXT_FORMAT=2;
 	
 	public static final String LONG_ARFF_FILE = "AllTransaction20052016-ext-new.arff";//"AllTransaction20052016-new.arff"; // 包含计算字段的ARFF格式，这是提供给各输入属性独立的分类器使用的，如分类树
-	public static final String SHORT_ARFF_FILE = "AllTransaction20052016-short.arff";//"AllTransaction20052016-short.arff";// 不包含计算字段的ARFF格式，这是提供给各输入属性独立的分类器使用的，如神经网络
+	public static final String SHORT_ARFF_FILE = "AllTransaction20052016-ext-short.arff";//"AllTransaction20052016-short.arff";// 不包含计算字段的ARFF格式，这是提供给各输入属性独立的分类器使用的，如神经网络
 
 	
 	public static final String SELECTED_MA = "均线策略";

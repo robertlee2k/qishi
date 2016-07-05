@@ -43,10 +43,10 @@ public class MLPClassifier extends NominalClassifier {
 		classifierName="mlp";
 		WORK_PATH =WORK_PATH+classifierName+"\\";
 		inputAttShouldBeIndependent=true; //这个模型是用短格式的 		
-		arff_format=ArffFormat.NORMAL_FORMAT; //这个模型是用非扩展模式的
+//		arff_format=ArffFormat.NORMAL_FORMAT; //这个模型是用非扩展模式的
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
-		m_skipTrainInBacktest = true;
-		m_skipEvalInBacktest = true;
+		m_skipTrainInBacktest = false;
+		m_skipEvalInBacktest = false;
 		
 		EVAL_RECENT_PORTION = 0.7; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
 		m_sepeperate_eval_HS300=true;//单独为HS300评估阀值
