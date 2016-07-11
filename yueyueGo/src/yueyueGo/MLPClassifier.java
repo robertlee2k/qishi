@@ -42,8 +42,11 @@ public class MLPClassifier extends NominalClassifier {
 		super();
 		classifierName="mlp";
 		WORK_PATH =WORK_PATH+classifierName+"\\";
-		inputAttShouldBeIndependent=true; //这个模型是用短格式的 		
-//		arff_format=ArffFormat.NORMAL_FORMAT; //这个模型是用非扩展模式的
+		WORK_FILE_PREFIX = "extData2005-2016 month-new";
+		
+		inputAttShouldBeIndependent=true; //这个模型是用短格式的
+		//TODO 这个只影响每日增量数据
+//		arff_format=ArffFormat.NORMAL_FORMAT; 
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = false;
 		m_skipEvalInBacktest = false;
@@ -61,29 +64,18 @@ public class MLPClassifier extends NominalClassifier {
 	
 	@Override
 	public Classifier loadModel(String yearSplit, String policySplit) throws Exception{
-		//TODO 这是为MLP单独准备的模型，模型文件是按年读取，但evaluation文件不变仍按月
+		//这是为MLP单独准备的模型，模型文件是按年读取，但evaluation文件不变仍按月
 		int inputYear=Integer.parseInt(yearSplit.substring(0,4));
 
-		//TODO 为2014和2016年增加一个模型
-		int inputMonth=Integer.parseInt(yearSplit.substring(4,6));
-		if (inputYear==2014 && inputMonth>6){
-			inputYear=201407;
-		}else if (inputYear==2016 && inputMonth==5) {
-			inputYear=201605;
-		}
-//		String modelYear=null;
-//		if (inputYear>=2008 && inputYear<2010)
-//			modelYear="2008";
-//		else if (inputYear>=2010 && inputYear<2012)
-//			modelYear="2010";
-//		else if (inputYear>=2012 && inputYear<2014)
-//			modelYear="2012";
-//		else if (inputYear>=2014 && inputYear<2015)
-//			modelYear="2014";
-//		else if (inputYear>=2015 && inputYear<2016)
-//			modelYear="2015";
-//		else if (inputYear>=2016)
-//			modelYear="2016";
+//		//TODO 为2014和2016年增加一个模型
+//		int inputMonth=Integer.parseInt(yearSplit.substring(4,6));
+//		if (inputYear==2014 && inputMonth>6){
+//			inputYear=201407;
+//		}else if (inputYear==2016 && inputMonth==5) {
+//			inputYear=201605;
+//		}
+		if (inputYear>=2014)
+			inputYear=2014;
 		String filename=this.WORK_PATH+this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + inputYear + MA_PREFIX + policySplit;//如果使用固定模型
 		
 		this.setModelFileName(filename);

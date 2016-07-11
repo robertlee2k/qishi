@@ -86,6 +86,7 @@ public abstract class MyClassifier {
 		summary_selectedShouyilv= new DescriptiveStatistics();
 		summary_totalShouyilv= new DescriptiveStatistics();
 
+		WORK_FILE_PREFIX = "extData2005-2016";//"交易分析2005-2016 by month-new";
 		
 	}
 	
@@ -146,8 +147,8 @@ public abstract class MyClassifier {
 			System.out.println("HS300 index thresholding value：between "	+ thresholdMin_hs300 + " , "+ thresholdMax_hs300);
 		}
 		
-//		//20160623临时放开预测阀值
-//		if (thresholdMin>=0.178427 && thresholdMin<0.22) thresholdMin=0.2;
+//		//20160711临时放开预测阀值
+//		if (thresholdMin>=0.033782 && thresholdMin<=0.041) thresholdMin=0.033782;
 		
 		
 		return predictWithThresHolds(test, result, thresholdMin, thresholdMax,

@@ -51,7 +51,6 @@ public class REPTreeClassifier extends NominalClassifier {
 		classifierName="rep";
 		WORK_PATH =WORK_PATH+classifierName+"\\";
 		inputAttShouldBeIndependent=false; //这个模型是用长格式的 	
-		arff_format=ArffFormat.NORMAL_FORMAT; //这个模型是用非扩展模式的
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = true;
 		m_skipEvalInBacktest = true;

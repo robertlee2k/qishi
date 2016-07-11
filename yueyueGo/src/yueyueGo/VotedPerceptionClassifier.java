@@ -21,7 +21,6 @@ public class VotedPerceptionClassifier extends NominalClassifier {
 
 	public VotedPerceptionClassifier() {
 		super();
-		WORK_FILE_PREFIX = "extData2005-2016";
 		classifierName="voted";
 		WORK_PATH =WORK_PATH+classifierName+"\\";
 		inputAttShouldBeIndependent=false; //这个模型是用长格式的 		
