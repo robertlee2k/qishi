@@ -52,7 +52,7 @@ public class ProcessData {
 //	public static final String M5P_EVAL_MODEL="\\交易分析2005-2016 by month-new-m5p-201605 MA ";//"\\extData2005-2016-m5p-201606 MA ";
 
 	public static final String MLP_PREDICT_MODEL= "\\extData2005-2016 month-new-mlp-2016 MA ";
-	public static final String MLP_EVAL_MODEL= "\\extData2005-2016 month-new-mlp-201606 MA  ";
+	public static final String MLP_EVAL_MODEL= "\\extData2005-2016 month-new-mlp-201606 MA ";
 	public static final String M5P_PREDICT_MODEL="\\extData2005-2016-m5p-201606 MA ";
 	public static final String M5P_EVAL_MODEL="\\extData2005-2016-m5p-201606 MA ";
 	
@@ -64,10 +64,10 @@ public class ProcessData {
 	public static void main(String[] args) {
 		try {
 			//用模型预测每日增量数据
-//			callDailyPredict();
+			callDailyPredict();
 
 			//调用回测函数回测
-			callTestBack();
+//			callTestBack();
 			
 			//用最新的单次交易数据，更新原始的交易数据文件
 //			callRefreshInstances();
@@ -145,15 +145,15 @@ public class ProcessData {
 
 		//按连续分类器回测历史数据
 		M5PClassifier cModel=new M5PClassifier();
-		Instances continuousResult=testBackward(cModel);
+//		Instances continuousResult=testBackward(cModel);
 		//不真正回测了，直接从以前的结果文件中加载
-//		Instances continuousResult=loadBackTestResultFromFile(cModel.classifierName);
+		Instances continuousResult=loadBackTestResultFromFile(cModel.classifierName);
 
 
 		//输出用于计算收益率的CSV文件
-		Instances m5pOutput=mergeResultWithData(continuousResult,nominalResult,ArffFormat.RESULT_PREDICTED_WIN_RATE,true);
+		Instances m5pOutput=mergeResultWithData(continuousResult,nominalResult,ArffFormat.RESULT_PREDICTED_WIN_RATE,cModel.arff_format);
 		saveSelectedFileForMarkets(m5pOutput,cModel.classifierName);
-		Instances mlpOutput=mergeResultWithData(nominalResult,continuousResult,ArffFormat.RESULT_PREDICTED_PROFIT,false);
+		Instances mlpOutput=mergeResultWithData(nominalResult,continuousResult,ArffFormat.RESULT_PREDICTED_PROFIT,nModel.arff_format);
 		saveSelectedFileForMarkets(mlpOutput,nModel.classifierName);
 	}
 
@@ -846,14 +846,14 @@ public class ProcessData {
 
 	
 	
-	protected static Instances mergeResultWithData(Instances resultData,Instances referenceData,String dataToAdd,boolean useExt) throws Exception{
+	protected static Instances mergeResultWithData(Instances resultData,Instances referenceData,String dataToAdd,int format) throws Exception{
 		//读取磁盘上预先保存的左侧数据
 		Instances left=null;
 		
 		//TODO 过渡期 有少量模型尚使用原有格式
-		if (useExt){
+		if (format==ArffFormat.EXT_FORMAT){
 			left=FileUtility.loadDataFromFile(C_ROOT_DIRECTORY+TRANSACTION_ARFF_PREFIX+"-left.arff");
-		}else{ //LEGACY 有少量模型尚使用原有格式
+		}else if (format==ArffFormat.LEGACY_FORMAT){ //LEGACY 有少量模型尚使用原有格式
 			left=FileUtility.loadDataFromFile(C_ROOT_DIRECTORY+"AllTransaction20052016-left.arff");
 		}
 		System.out.println("incoming resultData size, row="+resultData.numInstances()+" column="+resultData.numAttributes());

@@ -35,7 +35,16 @@ public class M5PClassifier extends ContinousClassifier {
 
 	// 4.  中证5002008-2016 10单元格年均 18%（20格 13%），全市场10单元15%，hs300 10格7% （单独评估）  18357/47673
 	// 参数：  eval 0.9 / 沪深单独评估阀值/ TP——FP RATIO { 1.6, 1.4, 1.3, 1.1, 0.9 }, UPPer { 0.07, 0.09, 0.1, 0.1, 0.1 }TP_FP_BOTTOM_LINE=0.7
-	
+//	===============================output summary=====================================
+//			Monthly selected_TPR mean: 20.46% standard deviation=26.04% Skewness=1.26 Kurtosis=0.83
+//			Monthly selected_LIFT mean : 0.63
+//			Monthly selected_positive summary: 20,463
+//			Monthly selected_count summary: 56,140
+//			Monthly selected_shouyilv average: 1.14% standard deviation=8.33% Skewness=8.52 Kurtosis=115.11
+//			Monthly total_shouyilv average: 1.00% standard deviation=6.15% Skewness=3.02 Kurtosis=15.27
+//			mixed selected positive rate: 36.45%
+//			Monthly summary_judge_result summary: good number= 268 bad number=242
+//			===============================end of summary=====================================
 
 	public M5PClassifier() {
 		super();
