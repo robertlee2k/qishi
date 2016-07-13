@@ -43,21 +43,22 @@ public class ProcessData {
 	public static final String CONTINOUS_CLASSIFIER_DIR = C_ROOT_DIRECTORY+"models\\02-连续分类器\\";
 	public static final String BACKTEST_RESULT_DIR=C_ROOT_DIRECTORY+"testResult\\";
 	public static final String PREDICT_WORK_DIR=C_ROOT_DIRECTORY+"03-预测模型\\";
-	private static final String EXT_TRANS_LEFT_ARFF = "AllTransaction20052016-ext-left.arff";
-	private static final String TRANS_LEFT_ARFF = "AllTransaction20052016-left.arff";
+	public static final String TRANSACTION_ARFF_PREFIX="AllTransaction20052016-ext";
 	public static final String RESULT_EXTENSION = "-Test Result.csv";
 	
-	public static final String MLP_PREDICT_MODEL= "\\交易分析2005-2016 by month-new-mlp-201605 MA ";
-	public static final String MLP_EVAL_MODEL= "\\交易分析2005-2016 by month-new-mlp-201605 MA ";
-	public static final String M5P_PREDICT_MODEL="\\extData2005-2016-m5p-201605 MA ";//"\\交易分析2005-2016 by month-new-m5p-201605 MA ";
-	public static final String M5P_EVAL_MODEL="\\extData2005-2016-m5p-201605 MA ";//"\\交易分析2005-2016 by month-new-m5p-201605 MA ";
-	
+//	public static final String MLP_PREDICT_MODEL= "\\交易分析2005-2016 by month-new-mlp-201605 MA ";
+//	public static final String MLP_EVAL_MODEL= "\\交易分析2005-2016 by month-new-mlp-201605 MA ";
+//	public static final String M5P_PREDICT_MODEL="\\交易分析2005-2016 by month-new-m5p-201605 MA ";//"\\extData2005-2016-m5p-201606 MA ";
+//	public static final String M5P_EVAL_MODEL="\\交易分析2005-2016 by month-new-m5p-201605 MA ";//"\\extData2005-2016-m5p-201606 MA ";
+
+	public static final String MLP_PREDICT_MODEL= "\\extData2005-2016 month-new-mlp-2016 MA ";
+	public static final String MLP_EVAL_MODEL= "\\extData2005-2016 month-new-mlp-201606 MA  ";
+	public static final String M5P_PREDICT_MODEL="\\extData2005-2016-m5p-201606 MA ";
+	public static final String M5P_EVAL_MODEL="\\extData2005-2016-m5p-201606 MA ";
 	
 	public static final String[] splitYear ={
 //		"2008","2009","2010","2011","2012","2013","2014","2015","2016"
-//		  "200801","200802","200803","200804","200805","200806","200807","200808","200809","200810","200811","200812","200901","200902","200903","200904","200905","200906","200907","200908","200909","200910","200911","200912","201001","201002","201003","201004","201005","201006","201007","201008","201009","201010","201011","201012","201101","201102","201103","201104","201105","201106","201107","201108","201109","201110","201111","201112","201201","201202","201203","201204","201205","201206","201207","201208","201209","201210","201211","201212","201301","201302","201303","201304","201305","201306","201307","201308","201309","201310","201311","201312","201401","201402","201403","201404","201405","201406","201407","201408","201409","201410","201411","201412","201501","201502","201503","201504","201505","201506","201507","201508","201509","201510","201511","201512","201601","201602","201603", "201604","201605"
-//		"201501","201502","201503","201504","201505","201506","201507","201508","201509","201510","201511","201512","201601","201602","201603", "201604","201605"
-		"2016"
+		  "200801","200802","200803","200804","200805","200806","200807","200808","200809","200810","200811","200812","200901","200902","200903","200904","200905","200906","200907","200908","200909","200910","200911","200912","201001","201002","201003","201004","201005","201006","201007","201008","201009","201010","201011","201012","201101","201102","201103","201104","201105","201106","201107","201108","201109","201110","201111","201112","201201","201202","201203","201204","201205","201206","201207","201208","201209","201210","201211","201212","201301","201302","201303","201304","201305","201306","201307","201308","201309","201310","201311","201312","201401","201402","201403","201404","201405","201406","201407","201408","201409","201410","201411","201412","201501","201502","201503","201504","201505","201506","201507","201508","201509","201510","201511","201512","201601","201602","201603", "201604","201605","201606"
 		};
 
 	public static void main(String[] args) {
@@ -71,6 +72,7 @@ public class ProcessData {
 			//用最新的单次交易数据，更新原始的交易数据文件
 //			callRefreshInstances();
 
+//			compareRefreshedInstancesForYear(2016,100);
 			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
 //			processHistoryFile();
 			
@@ -88,11 +90,11 @@ public class ProcessData {
 	 * @throws Exception
 	 */
 	protected static void callRefreshInstances() throws Exception {
-		int startYear=2005;
+		int startYear=2016;
 		int endYear=2016;
 		refreshArffFile(startYear,endYear);
-		compareRefreshedInstancesForYear(2008,100);
-		compareRefreshedInstancesForYear(2015,100);
+		compareRefreshedInstancesForYear(2010,100);
+		compareRefreshedInstancesForYear(2016,5);
 	}
 
 
@@ -126,26 +128,26 @@ public class ProcessData {
 	 * @throws IOException
 	 */
 	protected static void callTestBack() throws Exception, IOException {
-		//			//按二分类器回测历史数据
-					MLPClassifier nModel = new MLPClassifier();
-					Instances nominalResult=testBackward(nModel);
-
+		//按二分类器回测历史数据
 		//	投票感知器
 //		VotedPerceptionClassifier nModel = new VotedPerceptionClassifier();
 //		Instances nominalResult=testBackward(nModel);
 
-		//			//REP树（C45树的变种，规则过于简单）
-		////		REPTreeClassifier nModel = new REPTreeClassifier();
-		////		Instances nominalResult=testBackward(nModel);
+		//REP树（C45树的变种，规则过于简单）
+//		REPTreeClassifier nModel = new REPTreeClassifier();
+//		Instances nominalResult=testBackward(nModel);
 
-		//			//不真正回测了，直接从以前的结果文件中加载
-		////			Instances nominalResult=loadBackTestResultFromFile(nModel.classifierName);
+		//神经网络
+		MLPClassifier nModel = new MLPClassifier();
+		Instances nominalResult=testBackward(nModel);
+		//不真正回测了，直接从以前的结果文件中加载
+//		Instances nominalResult=loadBackTestResultFromFile(nModel.classifierName);
 
 		//按连续分类器回测历史数据
 		M5PClassifier cModel=new M5PClassifier();
-//		Instances continuousResult=testBackward(cModel);
+		Instances continuousResult=testBackward(cModel);
 		//不真正回测了，直接从以前的结果文件中加载
-		Instances continuousResult=loadBackTestResultFromFile(cModel.classifierName);
+//		Instances continuousResult=loadBackTestResultFromFile(cModel.classifierName);
 
 
 		//输出用于计算收益率的CSV文件
@@ -165,7 +167,7 @@ public class ProcessData {
 	protected static void compareRefreshedInstancesForYear(int year,int checkSample) throws Exception {
 		
 		String splitSampleClause = "( ATT" + ArffFormat.YEAR_MONTH_INDEX + " >= " + year + "01) and ( ATT" + ArffFormat.YEAR_MONTH_INDEX+ " <= "	+ year + "12) ";
-		String filePrefix=C_ROOT_DIRECTORY+"AllTransaction20052016";
+		String filePrefix=C_ROOT_DIRECTORY+TRANSACTION_ARFF_PREFIX;
 		Instances originData=FileUtility.loadDataFromFile(filePrefix+"-origin.arff");
 		originData=FilterData.getInstancesSubset(originData, splitSampleClause);
 		
@@ -329,7 +331,7 @@ public class ProcessData {
 	//这里是用最近一年的数据刷新最原始的文件，调整完再用processHistoryData生成有计算字段之后的数据
 	protected static void refreshArffFile(int startYear,int endYear) throws Exception {
 		System.out.println("loading original history file into memory "  );
-		String originFileName=C_ROOT_DIRECTORY+"AllTransaction20052016";
+		String originFileName=C_ROOT_DIRECTORY+TRANSACTION_ARFF_PREFIX;
 		Instances fullData = FileUtility.loadDataFromFile(originFileName+"-origin.arff");
 		
 		//做这个处理是因为不知为何有时id之前会出现全角空格
@@ -344,7 +346,7 @@ public class ProcessData {
 		
 
 		for (int i=startYear;i<=endYear;i++){
-			fullData = refreshArffForOneYear(i,C_ROOT_DIRECTORY+"onceyield"+i+".txt",fullData);
+			fullData = refreshArffForOneYear(i,C_ROOT_DIRECTORY+"sourceData\\onceyield"+i+".txt",fullData);
 		}
 
 		//保险起见把新数据按日期重新排序，虽然这样比较花时间，但可以确保日后处理时按tradeDate升序。
@@ -430,11 +432,11 @@ public class ProcessData {
 	}
 
 
-	@Deprecated
-	//这是处理未含ext数据的
+
+	//这是处理历史全量数据，重新切割生成各种长、短以及格式文件的方法
 	protected static void processHistoryFile() throws Exception {
 		System.out.println("loading history file into memory "  );
-		String originFileName=C_ROOT_DIRECTORY+"AllTransaction20052016";
+		String originFileName=C_ROOT_DIRECTORY+TRANSACTION_ARFF_PREFIX;
 		Instances fullSetData = FileUtility.loadDataFromFile(originFileName+".arff");
 		System.out.println("finish  loading fullset File  row : "+ fullSetData.numInstances() + " column:"+ fullSetData.numAttributes());
 		// 去除与训练无关的字段
@@ -450,8 +452,8 @@ public class ProcessData {
 		
 		// 存下用于计算收益率的数据
 		Instances left=ArffFormat.getTransLeftPartFromAllTransaction(fullSetData);
-		FileUtility.SaveDataIntoFile(left, C_ROOT_DIRECTORY+TRANS_LEFT_ARFF);
-		System.out.println("history Data left File saved: "+TRANS_LEFT_ARFF  );
+		FileUtility.SaveDataIntoFile(left, C_ROOT_DIRECTORY+TRANSACTION_ARFF_PREFIX+"-left.arff");
+		System.out.println("history Data left File saved: "+TRANSACTION_ARFF_PREFIX+"-left.arff"  );
 	}
 
 	protected static void addCalculationsToFile(String path, String arffName) throws Exception{
@@ -780,11 +782,11 @@ public class ProcessData {
 		//与本地格式数据比较，这地方基本上会有nominal数据的label不一致，临时处理办法就是先替换掉
 		String formatFile=null;
 		switch (formatType) {
-		case ArffFormat.NORMAL_FORMAT:
+		case ArffFormat.LEGACY_FORMAT:
 			formatFile="AllTransaction20052016-format.arff";
 			break;
 		case ArffFormat.EXT_FORMAT:
-			formatFile="AllTransaction20052016-ext-format.arff";
+			formatFile=TRANSACTION_ARFF_PREFIX+"-format.arff";
 			break;
 		default:
 			break;
@@ -848,11 +850,11 @@ public class ProcessData {
 		//读取磁盘上预先保存的左侧数据
 		Instances left=null;
 		
-		//TODO 过渡期
+		//TODO 过渡期 有少量模型尚使用原有格式
 		if (useExt){
-			left=FileUtility.loadDataFromFile(C_ROOT_DIRECTORY+EXT_TRANS_LEFT_ARFF);
-		}else{
-			left=FileUtility.loadDataFromFile(C_ROOT_DIRECTORY+TRANS_LEFT_ARFF);
+			left=FileUtility.loadDataFromFile(C_ROOT_DIRECTORY+TRANSACTION_ARFF_PREFIX+"-left.arff");
+		}else{ //LEGACY 有少量模型尚使用原有格式
+			left=FileUtility.loadDataFromFile(C_ROOT_DIRECTORY+"AllTransaction20052016-left.arff");
 		}
 		System.out.println("incoming resultData size, row="+resultData.numInstances()+" column="+resultData.numAttributes());
 		System.out.println("incoming referenceData size, row="+referenceData.numInstances()+" column="+referenceData.numAttributes());
@@ -1070,6 +1072,8 @@ protected static void saveSelectedFileForMarkets(Instances fullOutput,String cla
 	FileUtility.saveCSVFile(subsetMarketSelected, BACKTEST_RESULT_DIR+"选股-"+ classiferName+"-zz500" + RESULT_EXTENSION );
 }
 
+
+//这个函数是将201606之前的数据（只有第一组）合并上新的第二组，第三组数据
 protected static void mergeExtData() throws Exception{
 	String file1=null;
 	String file2=null;
@@ -1112,12 +1116,15 @@ protected static void mergeExtData() throws Exception{
 	//返回结果之前需要按TradeDate重新排序
 	int tradeDateIndex=FilterData.findATTPosition(result, ArffFormat.TRADE_DATE);
 	result.sort(tradeDateIndex-1);
-
+	
+	//保留原始的ext文件
+	FileUtility.SaveDataIntoFile(result, originFileName+"-ext.arff");
+	System.out.println("history Data File saved: "+originFileName+"-ext.arff");
 	
 	// 存下用于计算收益率的数据
 	Instances left=ArffFormat.getTransLeftPartFromAllTransaction(result);
-	FileUtility.SaveDataIntoFile(left, C_ROOT_DIRECTORY+EXT_TRANS_LEFT_ARFF);
-	System.out.println("history Data left File saved: "+EXT_TRANS_LEFT_ARFF  );	
+	FileUtility.SaveDataIntoFile(left, C_ROOT_DIRECTORY+originFileName+"-ext-left.arff");
+	System.out.println("history Data left File saved: "+originFileName+"-ext-left.arff");	
 	
 	// 去除与训练无关的字段
 	result=ArffFormat.processAllTransaction(result);

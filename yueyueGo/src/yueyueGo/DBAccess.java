@@ -22,7 +22,7 @@ public class DBAccess  {
 		String target_view=null;
 		
 		switch (format) {
-		case ArffFormat.NORMAL_FORMAT:
+		case ArffFormat.LEGACY_FORMAT:
 			target_columns=ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT;
 			target_view="t_stock_avgline_increment_zuixin_v";
 			break;

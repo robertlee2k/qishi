@@ -45,12 +45,13 @@ public class M5PClassifier extends ContinousClassifier {
 		m_skipEvalInBacktest = true;
 		m_sepeperate_eval_HS300=false;//单独为HS300评估阀值
 		m_seperate_classify_HS300=false; //M5P不适用沪深300，缺省不单独评估HS300
-		
+		//TODO 试验旧模型
+//		arff_format=ArffFormat.LEGACY_FORMAT; 
 		EVAL_RECENT_PORTION = 0.9; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
 		SAMPLE_LOWER_LIMIT = new double[]{ 0.01, 0.01, 0.02, 0.02, 0.02 }; // 各条均线选择样本的下限 
 				
-		SAMPLE_UPPER_LIMIT = new double[] {0.07, 0.09, 0.1, 0.1, 0.1 };
-		TP_FP_RATIO_LIMIT = new double[]  { 1.6, 1.4, 1.3, 1.1, 0.9 };//选择样本阀值时TP FP RATIO到了何种值就可以停止了。
+		SAMPLE_UPPER_LIMIT = new double[]  { 0.07, 0.09, 0.1, 0.1, 0.1 };
+		TP_FP_RATIO_LIMIT = new double[] { 1.6, 1.4, 1.3, 1.1, 0.9 }; //{ 1.8, 1.7, 1.7, 1.0, 0.7 };//选择样本阀值时TP FP RATIO到了何种值就可以停止了。
 		TP_FP_BOTTOM_LINE=0.5; //TP/FP的下限
 	}
 	

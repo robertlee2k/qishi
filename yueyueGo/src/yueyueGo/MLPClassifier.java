@@ -45,11 +45,11 @@ public class MLPClassifier extends NominalClassifier {
 		WORK_FILE_PREFIX = "extData2005-2016 month-new";
 		
 		inputAttShouldBeIndependent=true; //这个模型是用短格式的
-		//TODO 这个只影响每日增量数据
-//		arff_format=ArffFormat.NORMAL_FORMAT; 
+//		//TODO 这个只影响每日增量数据
+//		arff_format=ArffFormat.LEGACY_FORMAT; 
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
-		m_skipTrainInBacktest = false;
-		m_skipEvalInBacktest = false;
+		m_skipTrainInBacktest = true;
+		m_skipEvalInBacktest = true;
 		
 		EVAL_RECENT_PORTION = 0.7; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
 		m_sepeperate_eval_HS300=true;//单独为HS300评估阀值
@@ -74,8 +74,8 @@ public class MLPClassifier extends NominalClassifier {
 //		}else if (inputYear==2016 && inputMonth==5) {
 //			inputYear=201605;
 //		}
-		if (inputYear>=2014)
-			inputYear=2014;
+//		if (inputYear>=2014)
+//			inputYear=2014;
 		String filename=this.WORK_PATH+this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + inputYear + MA_PREFIX + policySplit;//如果使用固定模型
 		
 		this.setModelFileName(filename);

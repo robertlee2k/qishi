@@ -148,7 +148,7 @@ public abstract class MyClassifier {
 		}
 		
 //		//20160711临时放开预测阀值
-//		if (thresholdMin>=0.033782 && thresholdMin<=0.041) thresholdMin=0.033782;
+//		if (thresholdMin>=0.16 && thresholdMin<=0.161) thresholdMin=0.12;
 		
 		
 		return predictWithThresHolds(test, result, thresholdMin, thresholdMax,

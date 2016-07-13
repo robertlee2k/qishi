@@ -6,7 +6,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 public class ArffFormat {
-	public static final int NORMAL_FORMAT=1;
+	public static final int LEGACY_FORMAT=-1;
 	public static final int EXT_FORMAT=2;
 	
 	public static final String LONG_ARFF_FILE = "AllTransaction20052016-ext-new.arff";//"AllTransaction20052016-new.arff"; // 包含计算字段的ARFF格式，这是提供给各输入属性独立的分类器使用的，如分类树
