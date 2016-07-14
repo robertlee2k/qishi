@@ -135,15 +135,15 @@ public abstract class MyClassifier {
 		@SuppressWarnings("unchecked")
 		Vector<Object> v_threshold = loadEvaluationFromFile();
 		double thresholdMin = ((Double) v_threshold.get(0)).doubleValue();
-		//TODO 是否真的要设置上限需要评估
-		double thresholdMax = 8888;//((Double) v_threshold.get(1)).doubleValue();
+		//TODO 是否真的要设置上限需要评估8888
+		double thresholdMax = ((Double) v_threshold.get(1)).doubleValue();
 		System.out.println("full market thresholding value：between "	+ thresholdMin + " , "+ thresholdMax);		
 		double thresholdMin_hs300=-1;
 		double thresholdMax_hs300=-1;
 		if (m_seperate_classify_HS300==true){
 			thresholdMin_hs300=((Double) v_threshold.get(2)).doubleValue();
 			//TODO 是否真的要设置上限需要评估
-			thresholdMax_hs300=8888;//((Double) v_threshold.get(3)).doubleValue();
+			thresholdMax_hs300=((Double) v_threshold.get(3)).doubleValue();
 			System.out.println("HS300 index thresholding value：between "	+ thresholdMin_hs300 + " , "+ thresholdMax_hs300);
 		}
 		
@@ -333,27 +333,7 @@ public abstract class MyClassifier {
 			resultJudgement=1;
 		else 
 			resultJudgement=0;
-//		if (total_TPR>=0.5){
-//			if (selected_TPR>=0.5 && selectedShouyilv*buyableCount>=totalShouyilv*20)
-//				resultJudgement=1;
-//			else 
-//				resultJudgement=0;
-//		}else if (total_TPR>=0.33 && total_TPR<0.5){
-//			if (tpr_lift>=1&& selectedShouyilv*buyableCount>=totalShouyilv*20)
-//				resultJudgement=1;
-//			else 
-//				resultJudgement=0;
-//		}else if (total_TPR>=0.2 && total_TPR<0.33){
-//			if (selected_TPR>0.33 || selectedShouyilv*buyableCount>=totalShouyilv*20)
-//				resultJudgement=1;
-//			else
-//				resultJudgement=0;
-//		}else {
-//			if (selected_TPR>0.33 || selectedShouyilv*buyableCount>=totalShouyilv*20)
-//				resultJudgement=1;
-//			else
-//				resultJudgement=0;
-//		}
+
 		System.out.println("*** evaluation result for this period :"+resultJudgement);
 		summary_judge_result.addValue(resultJudgement);
 		summary_selected_TPR.addValue(selected_TPR);
@@ -419,23 +399,24 @@ public abstract class MyClassifier {
 		System.out.println("......................");
 
 		if (writeFile==true){
-			String header = "selected_TPR,LIFT,selected_positive,selected_count,selectedShouyilv,totalShouyilv,shouyilvDifference\r\n";
+			String header ="所选正收益股数,所选总股数,所选股TPR,提升率,所选股平均收益率,整体平均收益率,收益率差\r\n";
+			//"selected_TPR,LIFT,selected_positive,selected_count,selectedShouyilv,totalShouyilv,shouyilvDifference\r\n";
 			StringBuffer strBuff = new StringBuffer();
 			long size=summary_totalShouyilv.getN();
 			for (int i = 0; i < size; i++) {
-				strBuff.append(summary_selected_TPR.getElement(i));
-				strBuff.append(",");
-				strBuff.append(summary_lift.getElement(i));
-				strBuff.append(",");
 				strBuff.append(summary_selected_positive.getElement(i));
 				strBuff.append(",");
 				strBuff.append(summary_selected_count.getElement(i));
 				strBuff.append(",");
-				strBuff.append(summary_selectedShouyilv.getElement(i));
+				strBuff.append(FormatUtility.formatPercent(summary_selected_TPR.getElement(i)));
 				strBuff.append(",");
-				strBuff.append(summary_totalShouyilv.getElement(i));
+				strBuff.append(summary_lift.getElement(i));
 				strBuff.append(",");
-				strBuff.append(summary_selectedShouyilv.getElement(i)-summary_totalShouyilv.getElement(i));
+				strBuff.append(FormatUtility.formatPercent(summary_selectedShouyilv.getElement(i)));
+				strBuff.append(",");
+				strBuff.append(FormatUtility.formatPercent(summary_totalShouyilv.getElement(i)));
+				strBuff.append(",");
+				strBuff.append(FormatUtility.formatPercent(summary_selectedShouyilv.getElement(i)-summary_totalShouyilv.getElement(i)));
 				strBuff.append("\r\n");
 			}
 			FileUtility.write(ProcessData.BACKTEST_RESULT_DIR+this.classifierName+"-monthlySummary.csv", header+strBuff, "UTF-8");

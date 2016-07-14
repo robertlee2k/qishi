@@ -64,10 +64,10 @@ public class ProcessData {
 	public static void main(String[] args) {
 		try {
 			//用模型预测每日增量数据
-			callDailyPredict();
+//			callDailyPredict();
 
 			//调用回测函数回测
-//			callTestBack();
+			callTestBack();
 			
 			//用最新的单次交易数据，更新原始的交易数据文件
 //			callRefreshInstances();
@@ -139,15 +139,15 @@ public class ProcessData {
 
 		//神经网络
 		MLPClassifier nModel = new MLPClassifier();
-		Instances nominalResult=testBackward(nModel);
+//		Instances nominalResult=testBackward(nModel);
 		//不真正回测了，直接从以前的结果文件中加载
-//		Instances nominalResult=loadBackTestResultFromFile(nModel.classifierName);
+		Instances nominalResult=loadBackTestResultFromFile(nModel.classifierName);
 
 		//按连续分类器回测历史数据
 		M5PClassifier cModel=new M5PClassifier();
-//		Instances continuousResult=testBackward(cModel);
+		Instances continuousResult=testBackward(cModel);
 		//不真正回测了，直接从以前的结果文件中加载
-		Instances continuousResult=loadBackTestResultFromFile(cModel.classifierName);
+//		Instances continuousResult=loadBackTestResultFromFile(cModel.classifierName);
 
 
 		//输出用于计算收益率的CSV文件
