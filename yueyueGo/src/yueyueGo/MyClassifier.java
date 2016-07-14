@@ -128,7 +128,8 @@ public abstract class MyClassifier {
 	}	
 	
 	// result parameter will be changed in this method!
-	public  Instances predictData(Instances test, Instances result)
+	// return the evaluation summary string for prediction
+	public  String predictData(Instances test, Instances result)
 			throws Exception {
 
 		//读取Threshold数据文件
@@ -166,7 +167,7 @@ public abstract class MyClassifier {
 	 * @throws Exception
 	 * @throws IllegalStateException
 	 */
-	private Instances predictWithThresHolds(Instances test, Instances result,
+	private String predictWithThresHolds(Instances test, Instances result,
 			double thresholdMin, double thresholdMax,
 			double thresholdMin_hs300, double thresholdMax_hs300)
 			throws Exception, IllegalStateException {
@@ -259,8 +260,8 @@ public abstract class MyClassifier {
 			inst.setValue(result.numAttributes() - 1, selected);
 			result.add(inst);
 		}
-		evaluateResults(totalPositiveShouyilv,totalNegativeShouyilv,selectedPositiveShouyilv,selectedNegativeShouyilv);
-		return result;
+		String evaluationSummary=evaluateResults(totalPositiveShouyilv,totalNegativeShouyilv,selectedPositiveShouyilv,selectedNegativeShouyilv);
+		return evaluationSummary;
 	}
 
 	// 对于连续分类器， 收益率就是classvalue，缺省直接返回， 对于nominal分类器，调用子类的方法获取暂存的收益率
@@ -282,7 +283,7 @@ public abstract class MyClassifier {
 	//2. 市场小牛市时（量化定义为total_TPR介于0.33与0.5之间)， 应提升胜率（final_lift>1），且保持机会， 以20单元格5均线为例。单月机会(selectedCount）应该大于20/5
 	//3. 市场小熊市时（量化定义为total_TPR介于0.2到0.33之间)，  应提升绝对胜率（selected_TPR>0.33）或 选择少于半仓 selectedCount小于20/4/2
 	//3. 市场小熊市时（量化定义为total_TPR<0.2)，  应提升绝对胜率（selected_TPR>0.33）或 选择少于2成仓 selectedCount小于20/4/5
-	protected void evaluateResults(DescriptiveStatistics totalPositiveShouyilv,DescriptiveStatistics totalNegativeShouyilv,DescriptiveStatistics selectedPositiveShouyilv,DescriptiveStatistics selectedNegativeShouyilv) {
+	protected String evaluateResults(DescriptiveStatistics totalPositiveShouyilv,DescriptiveStatistics totalNegativeShouyilv,DescriptiveStatistics selectedPositiveShouyilv,DescriptiveStatistics selectedNegativeShouyilv) {
 		double selected_TPR=0;
 		double total_TPR=0;
 		double tpr_lift=0;
@@ -340,18 +341,44 @@ public abstract class MyClassifier {
 		summary_selected_positive.addValue(selectedPositive);
 		summary_selected_count.addValue(selectedCount);
 		
-		if (total_TPR!=0){ 
-			summary_lift.addValue(tpr_lift);
-		}else{//如果整体TPR为0则假定lift为1.
-			summary_lift.addValue(1);
+		if (total_TPR==0){//如果整体TPR为0则假定lift为1. 
+			tpr_lift=1;
 		}
+		summary_lift.addValue(tpr_lift);
 		summary_selectedShouyilv.addValue(selectedShouyilv);
 		summary_totalShouyilv.addValue(totalShouyilv);
 		System.out.println("Predicting finished!");
+		
+		//输出评估结果字符串
+		//"整体正收益股数,整体股数,整体TPR,所选正收益股数,所选总股数,所选股TPR,提升率,所选股平均收益率,整体平均收益率,收益率差,是否改善\r\n";
+		StringBuffer evalSummary=new StringBuffer();
+		evalSummary.append(positive);
+		evalSummary.append(",");
+		evalSummary.append(totalCount);
+		evalSummary.append(",");
+		evalSummary.append(FormatUtility.formatPercent(total_TPR));
+		evalSummary.append(",");
+		evalSummary.append(selectedPositive);
+		evalSummary.append(",");
+		evalSummary.append(selectedCount);
+		evalSummary.append(",");
+		evalSummary.append(FormatUtility.formatPercent(selected_TPR));
+		evalSummary.append(",");
+		evalSummary.append(FormatUtility.formatDouble(tpr_lift));
+		evalSummary.append(",");
+		evalSummary.append(FormatUtility.formatPercent(selectedShouyilv));
+		evalSummary.append(",");
+		evalSummary.append(FormatUtility.formatPercent(totalShouyilv));
+		evalSummary.append(",");
+		evalSummary.append(FormatUtility.formatPercent(shouyilv_lift));
+		evalSummary.append(",");
+		evalSummary.append(resultJudgement);
+		evalSummary.append("\r\n");
+		return evalSummary.toString();
 	}
 
 
-	public void outputClassifySummary(boolean writeFile) throws Exception{
+	public void outputClassifySummary() throws Exception{
 		String selected_TPR_mean=FormatUtility.formatPercent(summary_selected_TPR.getMean());
 		String selected_TPR_SD=FormatUtility.formatPercent(summary_selected_TPR.getStandardDeviation());
 		String selected_TPR_SKW=FormatUtility.formatDouble(summary_selected_TPR.getSkewness());
@@ -377,7 +404,7 @@ public abstract class MyClassifier {
 		System.out.println("......................");
 		System.out.println("......................");
 		System.out.println("......................");
-		System.out.println("===============================output summary=====================================");
+		System.out.println("===============================output summary===================================== for : "+classifierName);
 		System.out.println("Monthly selected_TPR mean: "+selected_TPR_mean+" standard deviation="+selected_TPR_SD+" Skewness="+selected_TPR_SKW+" Kurtosis="+selected_TPR_Kur);
 		System.out.println("Monthly selected_LIFT mean : "+lift_mean);
 		System.out.println("Monthly selected_positive summary: "+selected_positive_sum);
@@ -388,7 +415,7 @@ public abstract class MyClassifier {
 			System.out.println("mixed selected positive rate: "+FormatUtility.formatPercent(summary_selected_positive.getSum()/summary_selected_count.getSum()));
 		}
 		System.out.println("Monthly summary_judge_result summary: good number= "+FormatUtility.formatDouble(summary_judge_result.getSum(),8,0) + " bad number=" +FormatUtility.formatDouble((summary_judge_result.getN()-summary_judge_result.getSum()),8,0));
-		System.out.println("===============================end of summary=====================================");
+		System.out.println("===============================end of summary=====================================for : "+classifierName);
 		System.out.println("......................");
 		System.out.println("......................");
 		System.out.println("......................");
@@ -398,29 +425,29 @@ public abstract class MyClassifier {
 		System.out.println("......................");
 		System.out.println("......................");
 
-		if (writeFile==true){
-			String header ="所选正收益股数,所选总股数,所选股TPR,提升率,所选股平均收益率,整体平均收益率,收益率差\r\n";
-			//"selected_TPR,LIFT,selected_positive,selected_count,selectedShouyilv,totalShouyilv,shouyilvDifference\r\n";
-			StringBuffer strBuff = new StringBuffer();
-			long size=summary_totalShouyilv.getN();
-			for (int i = 0; i < size; i++) {
-				strBuff.append(summary_selected_positive.getElement(i));
-				strBuff.append(",");
-				strBuff.append(summary_selected_count.getElement(i));
-				strBuff.append(",");
-				strBuff.append(FormatUtility.formatPercent(summary_selected_TPR.getElement(i)));
-				strBuff.append(",");
-				strBuff.append(summary_lift.getElement(i));
-				strBuff.append(",");
-				strBuff.append(FormatUtility.formatPercent(summary_selectedShouyilv.getElement(i)));
-				strBuff.append(",");
-				strBuff.append(FormatUtility.formatPercent(summary_totalShouyilv.getElement(i)));
-				strBuff.append(",");
-				strBuff.append(FormatUtility.formatPercent(summary_selectedShouyilv.getElement(i)-summary_totalShouyilv.getElement(i)));
-				strBuff.append("\r\n");
-			}
-			FileUtility.write(ProcessData.BACKTEST_RESULT_DIR+this.classifierName+"-monthlySummary.csv", header+strBuff, "UTF-8");
-		}
+//		if (writeFile==true){
+//			String header ="所选正收益股数,所选总股数,所选股TPR,提升率,所选股平均收益率,整体平均收益率,收益率差\r\n";
+//			//"selected_TPR,LIFT,selected_positive,selected_count,selectedShouyilv,totalShouyilv,shouyilvDifference\r\n";
+//			StringBuffer strBuff = new StringBuffer();
+//			long size=summary_totalShouyilv.getN();
+//			for (int i = 0; i < size; i++) {
+//				strBuff.append(summary_selected_positive.getElement(i));
+//				strBuff.append(",");
+//				strBuff.append(summary_selected_count.getElement(i));
+//				strBuff.append(",");
+//				strBuff.append(FormatUtility.formatPercent(summary_selected_TPR.getElement(i)));
+//				strBuff.append(",");
+//				strBuff.append(summary_lift.getElement(i));
+//				strBuff.append(",");
+//				strBuff.append(FormatUtility.formatPercent(summary_selectedShouyilv.getElement(i)));
+//				strBuff.append(",");
+//				strBuff.append(FormatUtility.formatPercent(summary_totalShouyilv.getElement(i)));
+//				strBuff.append(",");
+//				strBuff.append(FormatUtility.formatPercent(summary_selectedShouyilv.getElement(i)-summary_totalShouyilv.getElement(i)));
+//				strBuff.append("\r\n");
+//			}
+//			FileUtility.write(ProcessData.BACKTEST_RESULT_DIR+this.classifierName+"-monthlySummary.csv", header+strBuff, "UTF-8");
+//		}
 	}
 	
 	public String getModelFileName() {

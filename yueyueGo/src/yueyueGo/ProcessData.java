@@ -58,7 +58,8 @@ public class ProcessData {
 	
 	public static final String[] splitYear ={
 //		"2008","2009","2010","2011","2012","2013","2014","2015","2016"
-		  "200801","200802","200803","200804","200805","200806","200807","200808","200809","200810","200811","200812","200901","200902","200903","200904","200905","200906","200907","200908","200909","200910","200911","200912","201001","201002","201003","201004","201005","201006","201007","201008","201009","201010","201011","201012","201101","201102","201103","201104","201105","201106","201107","201108","201109","201110","201111","201112","201201","201202","201203","201204","201205","201206","201207","201208","201209","201210","201211","201212","201301","201302","201303","201304","201305","201306","201307","201308","201309","201310","201311","201312","201401","201402","201403","201404","201405","201406","201407","201408","201409","201410","201411","201412","201501","201502","201503","201504","201505","201506","201507","201508","201509","201510","201511","201512","201601","201602","201603", "201604","201605","201606"
+//		  "200801","200802","200803","200804","200805","200806","200807","200808","200809","200810","200811","200812","200901","200902","200903","200904","200905","200906","200907","200908","200909","200910","200911","200912","201001","201002","201003","201004","201005","201006","201007","201008","201009","201010","201011","201012","201101","201102","201103","201104","201105","201106","201107","201108","201109","201110","201111","201112","201201","201202","201203","201204","201205","201206","201207","201208","201209","201210","201211","201212","201301","201302","201303","201304","201305","201306","201307","201308","201309","201310","201311","201312","201401","201402","201403","201404","201405","201406","201407","201408","201409","201410","201411","201412","201501","201502","201503","201504","201505","201506","201507","201508","201509","201510","201511","201512","201601","201602","201603", "201604","201605","201606"
+		"201604","201605","201606"
 		};
 
 	public static void main(String[] args) {
@@ -148,7 +149,10 @@ public class ProcessData {
 		Instances continuousResult=testBackward(cModel);
 		//不真正回测了，直接从以前的结果文件中加载
 //		Instances continuousResult=loadBackTestResultFromFile(cModel.classifierName);
-
+		
+		//统一输出统计结果
+		nModel.outputClassifySummary();
+		cModel.outputClassifySummary();
 
 		//输出用于计算收益率的CSV文件
 		Instances m5pOutput=mergeResultWithData(continuousResult,nominalResult,ArffFormat.RESULT_PREDICTED_WIN_RATE,cModel.arff_format);
@@ -567,7 +571,7 @@ public class ProcessData {
 
 			}
  
-			result = clModel.predictData(newData, result);
+			clModel.predictData(newData, result);
 			System.out.println("accumulated predicted rows: "+ result.numInstances());
 			System.out.println("complete for 均线策略: " + clModel.m_policySubGroup[j]);
 		}
@@ -577,7 +581,7 @@ public class ProcessData {
 		
 		result.renameAttribute(1, ArffFormat.SELECTED_MA_IN_OTHER_SYSTEM); //输出文件的“均线策略”名字不一样
 		FileUtility.saveCSVFile(result, pathName + clModel.classifierName+"Selected Result"+FormatUtility.getDateStringFor(1)+".csv");		
-		clModel.outputClassifySummary(false);
+		clModel.outputClassifySummary();
 		return result;
 	}
 
@@ -590,6 +594,8 @@ public class ProcessData {
 			IOException {
 		Instances fullSetData = null;
 		Instances result = null;
+		StringBuffer evalResultSummary=new StringBuffer();
+		evalResultSummary.append("时间段,均线策略,整体正收益股数,整体股数,整体TPR,所选正收益股数,所选总股数,所选股TPR,提升率,所选股平均收益率,整体平均收益率,收益率差,是否改善\r\n");
 		System.out.println("test backward using classifier : "+clModel.classifierName);
 		// 别把数据文件里的ID变成Nominal的，否则读出来的ID就变成相对偏移量了
 		for (int i = 0; i < splitYear.length; i++) { // if i starts from 1, the
@@ -669,9 +675,10 @@ public class ProcessData {
 				tp_fp_ratio= clModel.TP_FP_RATIO_LIMIT[0];
 				splitTrainClause = splitTrainYearClause;
 				splitTestClause = splitTestYearClause;
-				result = doOneModel(clModel, fullSetData, result, splitMark,
+				String resultSummary = doOneModel(clModel, fullSetData, result, splitMark,
 						policy, lower_limit, upper_limit,tp_fp_ratio, splitTrainClause,
 						splitTestClause);
+				evalResultSummary.append(resultSummary);
 			} else {
 				for (int j = 0; j < clModel.m_policySubGroup.length; j++) {
 					policy = clModel.m_policySubGroup[j];
@@ -685,9 +692,10 @@ public class ProcessData {
 						splitTrainClause = splitTrainYearClause + " and ((ATT3 is '30') or (ATT3 is '60'))";								
 						splitTestClause = splitTestYearClause + " and ((ATT3 is '30') or (ATT3 is '60'))";
 					}
-					result = doOneModel(clModel, fullSetData, result,
+					String resultSummary = doOneModel(clModel, fullSetData, result,
 							splitMark, policy, lower_limit, upper_limit,tp_fp_ratio,
 							splitTrainClause, splitTestClause);
+					evalResultSummary.append(resultSummary);
 				}
 			}
 			
@@ -695,7 +703,8 @@ public class ProcessData {
 			System.out.println(" ");
 		}
 		
-		clModel.outputClassifySummary(true);
+
+		FileUtility.write(BACKTEST_RESULT_DIR+clModel.classifierName+"-monthlySummary.csv", evalResultSummary.toString(), "GBK");
 		if (clModel instanceof NominalClassifier ){
 			//TODO 因为历史原因，201605018之前build的二分类器模型 “均线策略" 都叫"policy"，所以调用模型前先改一下名，调用模型后再改回来
 			int maIndex=FilterData.findATTPosition(result,"policy");
@@ -707,7 +716,8 @@ public class ProcessData {
 		return result;
 	}
 
-	protected static Instances doOneModel(MyClassifier clModel,
+	// paremeter result will be changed in the method! 
+	protected static String doOneModel(MyClassifier clModel,
 			Instances fullSetData, Instances result, String yearSplit,
 			String policySplit, double lower_limit, double upper_limit, double tp_fp_ratio,
 			String splitTrainClause, String splitTestClause) throws Exception,
@@ -768,12 +778,13 @@ public class ProcessData {
 			clModel.saveArffFile(testingData,"test", yearSplit, policySplit);
 		}
 
-		result = clModel.predictData(testingData, result);
+		String evalSummary=yearSplit+","+policySplit+",";
+		evalSummary+=clModel.predictData(testingData, result);
 		testingData=null;
 		System.out.println("accumulated predicted rows: "
 				+ result.numInstances());
 		System.out.println("complete for " + yearSplit + "均线策略: " + policySplit);
-		return result;
+		return evalSummary;
 	}
 
 	//这是对增量数据nominal label的处理 （因为增量数据中的nominal数据，label会可能不全）
