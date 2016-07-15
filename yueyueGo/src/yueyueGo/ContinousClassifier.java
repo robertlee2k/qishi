@@ -6,35 +6,25 @@ import java.util.Vector;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.trees.M5P;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class ContinousClassifier extends MyClassifier {
+public abstract class ContinousClassifier extends MyClassifier {
 	
 
 	public ContinousClassifier() {
 		super();
 		WORK_PATH = ProcessData.CONTINOUS_CLASSIFIER_DIR;
 	}
+	
+	abstract protected Classifier buildModel(Instances trainData) throws Exception;
 
 	public Classifier trainData(Instances train)
 			throws Exception {
-		M5P model = new M5P();
-		int minNumObj=train.numInstances()/300;
-		if (minNumObj<1000){
-			minNumObj=1000; //防止树过大
-		}
-		String batchSize="1000";
-		model.setBatchSize(batchSize);
-		model.setMinNumInstances(minNumObj);
-		model.setNumDecimalPlaces(6);
-		model.buildClassifier(train);
 
-		System.out
-				.println("finish buiding  model. minNumObj value:"+minNumObj);
+		Classifier model=buildModel(train);
 
 		// save model + header
 

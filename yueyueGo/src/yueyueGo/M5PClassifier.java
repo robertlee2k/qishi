@@ -1,5 +1,9 @@
 package yueyueGo;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.trees.M5P;
+import weka.core.Instances;
+
 
 //结论1： 5单元格的不可靠，偶然性因素太大， 应该在10-30单元格中间选择
 //结论2： 这个分类器适用于中证500及全市场， 沪深300上大不合适（选股少）。
@@ -106,6 +110,25 @@ public class M5PClassifier extends ContinousClassifier {
 		SAMPLE_UPPER_LIMIT = new double[]  { 0.06, 0.07, 0.1, 0.11, 0.12 };
 		TP_FP_RATIO_LIMIT = new double[] { 1.8, 1.6, 1.4, 1.0, 0.75 }; //{ 1.8, 1.7, 1.7, 1.0, 0.7 };//选择样本阀值时TP FP RATIO到了何种值就可以停止了。
 		TP_FP_BOTTOM_LINE=0.5; //TP/FP的下限
+	}
+
+	@Override
+	protected Classifier buildModel(Instances train) throws Exception {
+		M5P model = new M5P();
+		int minNumObj=train.numInstances()/300;
+		if (minNumObj<1000){
+			minNumObj=1000; //防止树过大
+		}
+
+		String batchSize=Integer.toString(minNumObj);
+		model.setBatchSize(batchSize);
+		model.setMinNumInstances(minNumObj);
+		model.setNumDecimalPlaces(6);
+
+		model.buildClassifier(train);
+		System.out.println("finish buiding m5p model. minNumObj value:"+minNumObj);
+
+		return model;
 	}
 	
 
