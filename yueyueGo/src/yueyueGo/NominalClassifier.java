@@ -28,7 +28,7 @@ public class NominalClassifier extends MyClassifier{
 	}
 
 	@Override
-	public  Classifier trainData(Instances train) throws Exception {
+	protected Classifier buildModel(Instances train) throws Exception {
 		cachedOldClassInstances=null; 
 		int minNumObj=train.numInstances()/300;
 		if (minNumObj<1000){
@@ -68,14 +68,6 @@ public class NominalClassifier extends MyClassifier{
 		}
 		model.buildClassifier(train);
 
-
-		// save model + header
-		Vector<Object> v = new Vector<Object>();
-		v.add(model);
-		v.add(new Instances(train, 0));
-		
-		saveModelToFiles(model, v);
-		System.out.println("Training finished!");
 		return model;
 	}
 

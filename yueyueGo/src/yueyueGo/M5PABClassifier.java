@@ -31,16 +31,16 @@ public class M5PABClassifier extends ContinousClassifier {
 	protected Classifier buildModel(Instances train) throws Exception {
 
 		AttributeSelectedClassifier classifier = new AttributeSelectedClassifier();
-		CfsSubsetEval eval = new CfsSubsetEval();
-		GreedyStepwise search = new GreedyStepwise();
-		search.setSearchBackwards(true);
-		classifier.setEvaluator(eval);
-		classifier.setSearch(search);
+//		CfsSubsetEval eval = new CfsSubsetEval();
+//		GreedyStepwise search = new GreedyStepwise();
+//		search.setSearchBackwards(true);
+//		classifier.setEvaluator(eval);
+//		classifier.setSearch(search);
 
-//		PrincipalComponents pca = new PrincipalComponents();
-//		Ranker rank = new Ranker();
-//		classifier.setEvaluator(pca);
-//		classifier.setSearch(rank);	
+		PrincipalComponents pca = new PrincipalComponents();
+		Ranker rank = new Ranker();
+		classifier.setEvaluator(pca);
+		classifier.setSearch(rank);	
 
 		M5P model = new M5P();
 		int minNumObj=train.numInstances()/300;

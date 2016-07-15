@@ -19,24 +19,6 @@ public abstract class ContinousClassifier extends MyClassifier {
 		WORK_PATH = ProcessData.CONTINOUS_CLASSIFIER_DIR;
 	}
 	
-	abstract protected Classifier buildModel(Instances trainData) throws Exception;
-
-	public Classifier trainData(Instances train)
-			throws Exception {
-
-		Classifier model=buildModel(train);
-
-		// save model + header
-
-		Vector<Object> v = new Vector<Object>();
-		v.add(model);
-		v.add(new Instances(train, 0));
-		saveModelToFiles(model, v);
-		System.out.println("Training finished!");
-		return model;
-	}
-
-
 
 	//对模型进行评估
 	public Vector<Double> evaluateModel(Instances train, Classifier model,

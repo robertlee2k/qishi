@@ -91,11 +91,20 @@ public abstract class MyClassifier {
 	}
 	
 	//一系列需要子类实现的抽象方法
-	public abstract Classifier trainData(Instances train) throws Exception;
+	abstract protected Classifier buildModel(Instances trainData) throws Exception;
 	public abstract Vector<Double> evaluateModel(Instances train,Classifier model,double sample_limit, double sample_upper,double tp_fp_ratio) throws Exception;
 	protected abstract double classify(Classifier model,Instance curr) throws Exception ;
 	
-
+	public Classifier trainData(Instances train) throws Exception {
+		Classifier model=buildModel(train);
+		// save model + header
+		Vector<Object> v = new Vector<Object>();
+		v.add(model);
+		v.add(new Instances(train, 0));
+		saveModelToFiles(model, v);
+		System.out.println("Training finished!");
+		return model;
+	}
 
 	
 	//评估模型，eval_start_portion为0到1的值， 为0时表示利用全部Instances做评估，否则取其相应比例评估
