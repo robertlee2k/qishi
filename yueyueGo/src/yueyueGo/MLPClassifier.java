@@ -39,7 +39,18 @@ public class MLPClassifier extends NominalClassifier {
 	//			Monthly summary_judge_result summary: good number= 265 bad number=240
 	//			===============================end of summary=====================================	
 	
-	//7 ext model
+	//7 ext model  ---当前选择
+	//全市场20-30-50单元格 胜率优先(收益率优先没啥差别） 14%-13%-13% （年最低净值0.8， 出现在2008/2013/2016)
+	//HS300 20-30-50单元格 胜率优先(收益率优先没啥差别） 15%-14%-13%
+//	EVAL_RECENT_PORTION = 0.7; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
+//	m_sepeperate_eval_HS300=true;//单独为HS300评估阀值
+//	m_seperate_classify_HS300=true;
+//	
+//	SAMPLE_LOWER_LIMIT =new double[] { 0.01, 0.01, 0.02, 0.02, 0.02 }; // 各条均线选择样本的下限
+//	SAMPLE_UPPER_LIMIT =new double[] {0.07, 0.09, 0.1, 0.1, 0.1 }; // 各条均线选择样本的上限
+//	TP_FP_RATIO_LIMIT=new double[] {  1.6, 1.4, 1.3, 1.1, 0.9 };//选择样本阀值时TP FP RATIO从何开始
+//	TP_FP_BOTTOM_LINE=0.7; //TP/FP的下限
+//	DEFAULT_THRESHOLD=0.6; // 找不出threshold时缺省值。	
 //	===============================output summary=====================================
 //			Monthly selected_TPR mean: 31.93% standard deviation=26.69% Skewness=0.76 Kurtosis=-0.22
 //			Monthly selected_LIFT mean : 1.14

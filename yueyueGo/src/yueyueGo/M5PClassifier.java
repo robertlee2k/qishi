@@ -73,12 +73,29 @@ public class M5PClassifier extends ContinousClassifier {
 //			mixed selected positive rate: 34.66%
 //			Monthly summary_judge_result summary: good number= 254 bad number=256
 //			===============================end of summary=====================================	
+	
+// 	其他跟5一样，阀值加上了上下限。
+//	EVAL_RECENT_PORTION = 0.9; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
+//	SAMPLE_LOWER_LIMIT = new double[]{ 0.01, 0.01, 0.02, 0.02, 0.02 }; // 各条均线选择样本的下限 
+//	SAMPLE_UPPER_LIMIT = new double[]  { 0.06, 0.07, 0.1, 0.11, 0.12 };
+//	TP_FP_RATIO_LIMIT = new double[] { 1.8, 1.6, 1.4, 1.0, 0.75 }; 	
+//	全市场20-30-50单元（收益率排序17%-16%-13%） （胜率排序17%-15%-12%） 
+//	===============================output summary===================================== for : m5p
+//			Monthly selected_TPR mean: 21.31% standard deviation=26.43% Skewness=1.22 Kurtosis=0.68
+//			Monthly selected_LIFT mean : 0.66
+//			Monthly selected_positive summary: 16,123
+//			Monthly selected_count summary: 46,473
+//			Monthly selected_shouyilv average: 1.05% standard deviation=8.47% Skewness=8.06 Kurtosis=107.1
+//			Monthly total_shouyilv average: 1.00% standard deviation=6.15% Skewness=3.02 Kurtosis=15.27
+//			mixed selected positive rate: 34.69%
+//			Monthly summary_judge_result summary: good number= 274 bad number=236
+//			===============================end of summary=====================================for : m5p
 	public M5PClassifier() {
 		super();
 		classifierName = "m5p";
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = true;
-		m_skipEvalInBacktest = false;
+		m_skipEvalInBacktest = true;
 		m_sepeperate_eval_HS300=false;//单独为HS300评估阀值
 		m_seperate_classify_HS300=false; //M5P不适用沪深300，缺省不单独评估HS300
 		//TODO 试验旧模型

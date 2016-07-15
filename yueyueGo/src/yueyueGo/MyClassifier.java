@@ -261,6 +261,7 @@ public abstract class MyClassifier {
 			result.add(inst);
 		}
 		String evaluationSummary=evaluateResults(totalPositiveShouyilv,totalNegativeShouyilv,selectedPositiveShouyilv,selectedNegativeShouyilv);
+		evaluationSummary+=","+FormatUtility.formatDouble(thresholdMin)+","+FormatUtility.formatDouble(thresholdMax)+"\r\n";  //输出评估结果及所使用阀值上、下限
 		return evaluationSummary;
 	}
 
@@ -373,7 +374,6 @@ public abstract class MyClassifier {
 		evalSummary.append(FormatUtility.formatPercent(shouyilv_lift));
 		evalSummary.append(",");
 		evalSummary.append(resultJudgement);
-		evalSummary.append("\r\n");
 		return evalSummary.toString();
 	}
 

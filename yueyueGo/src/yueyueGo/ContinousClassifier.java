@@ -156,10 +156,12 @@ public class ContinousClassifier extends MyClassifier {
 				}
 			}
 			//找threshold区间终点，这里不管起点是否已是确定选出的，都是一直找，要找到最小的那个TPFP才结束(阀值是0.5，再小就产生负效果了）
-			if ( currentTPFP<0.7 && currentTPFP<startTPFP && currentTPFP<endTPFP && endTPFP>0.5){
-				thresholdTop=currentThreshold;
-				endPercent=currentPercent;
-				endTPFP=currentTPFP;
+			if (  currentTPFP<startTPFP && currentTPFP<endTPFP && currentTPFP>0.5){
+				if (currentPercent-startPercent>=3){ //window size最小为3，防止找的间距太小
+					thresholdTop=currentThreshold;
+					endPercent=currentPercent;
+					endTPFP=currentTPFP;
+				}
 			}
 			currentPercent+=1;
 		} 
