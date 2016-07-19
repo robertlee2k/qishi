@@ -110,8 +110,8 @@ public abstract class ContinousClassifier extends MyClassifier {
 						startPercent=currentPercent;
 						startTPFP=currentTPFP;
 						endPercent=100;
-						thresholdTop=9999;
-						endTPFP=9999;
+						thresholdTop=999;
+						endTPFP=999;
 						System.out.println("...... start threshold found in advance!");
 						startFound=true;
 					} else if (currentTPFP>maxTPFP ) {
@@ -121,8 +121,8 @@ public abstract class ContinousClassifier extends MyClassifier {
 						startPercent=currentPercent;
 						startTPFP=currentTPFP;
 						endPercent=100;
-						thresholdTop=9999;
-						endTPFP=9999;
+						thresholdTop=999;
+						endTPFP=999;
 						System.out.println("......temporarilly selected.");
 					}
 				}

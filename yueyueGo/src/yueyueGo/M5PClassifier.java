@@ -94,9 +94,29 @@ public class M5PClassifier extends ContinousClassifier {
 //			mixed selected positive rate: 34.69%
 //			Monthly summary_judge_result summary: good number= 274 bad number=236
 //			===============================end of summary=====================================for : m5p
+	
+
+	//与M5PAB做对比，用同样参数
+//	EVAL_RECENT_PORTION = 0.9; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
+//	SAMPLE_LOWER_LIMIT = new double[]{ 0.03, 0.03, 0.03, 0.03, 0.03 }; // 各条均线选择样本的下限 
+//			
+//	SAMPLE_UPPER_LIMIT = new double[]  { 0.06, 0.07, 0.1, 0.11, 0.12 };
+//	TP_FP_RATIO_LIMIT = new double[] { 1.8, 1.7, 1.5, 1.2, 1}; //{ 1.8, 1.7, 1.7, 1.0, 0.7 };//选择样本阀值时TP FP RATIO到了何种值就可以停止了。
+//	TP_FP_BOTTOM_LINE=0.9; //TP/FP的下限
+//	===============================output summary===================================== for : m5p
+//			Monthly selected_TPR mean: 18.64% standard deviation=25.99% Skewness=1.38 Kurtosis=1.06
+//			Monthly selected_LIFT mean : 0.57
+//			Monthly selected_positive summary: 13,645
+//			Monthly selected_count summary: 38,467
+//			Monthly selected_shouyilv average: 0.96% standard deviation=8.24% Skewness=8.83 Kurtosis=120.86
+//			Monthly total_shouyilv average: 1.00% standard deviation=6.15% Skewness=3.02 Kurtosis=15.27
+//			mixed selected positive rate: 35.47%
+//			Monthly summary_judge_result summary: good number= 274 bad number=236
+//			===============================end of summary=====================================for : m5p	
 	public M5PClassifier() {
 		super();
 		classifierName = "m5p";
+		WORK_PATH =WORK_PATH+classifierName+"\\";
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = true;
 		m_skipEvalInBacktest = true;
@@ -105,11 +125,11 @@ public class M5PClassifier extends ContinousClassifier {
 		//TODO 试验旧模型
 //		arff_format=ArffFormat.LEGACY_FORMAT; 
 		EVAL_RECENT_PORTION = 0.9; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
-		SAMPLE_LOWER_LIMIT = new double[]{ 0.01, 0.01, 0.02, 0.02, 0.02 }; // 各条均线选择样本的下限 
+		SAMPLE_LOWER_LIMIT = new double[]{ 0.03, 0.03, 0.03, 0.03, 0.03 }; // 各条均线选择样本的下限 
 				
 		SAMPLE_UPPER_LIMIT = new double[]  { 0.06, 0.07, 0.1, 0.11, 0.12 };
-		TP_FP_RATIO_LIMIT = new double[] { 1.8, 1.6, 1.4, 1.0, 0.75 }; //{ 1.8, 1.7, 1.7, 1.0, 0.7 };//选择样本阀值时TP FP RATIO到了何种值就可以停止了。
-		TP_FP_BOTTOM_LINE=0.5; //TP/FP的下限
+		TP_FP_RATIO_LIMIT = new double[] { 1.8, 1.7, 1.5, 1.2, 1}; //{ 1.8, 1.7, 1.7, 1.0, 0.7 };//选择样本阀值时TP FP RATIO到了何种值就可以停止了。
+		TP_FP_BOTTOM_LINE=0.9; //TP/FP的下限
 	}
 
 	@Override
