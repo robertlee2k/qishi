@@ -78,7 +78,7 @@ public class M5PClassifier extends ContinousClassifier {
 //			Monthly summary_judge_result summary: good number= 254 bad number=256
 //			===============================end of summary=====================================	
 	
-// 	其他跟5一样，阀值加上了上下限。
+// 	8. 其他跟5一样，阀值加上了上下限。
 //	EVAL_RECENT_PORTION = 0.9; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
 //	SAMPLE_LOWER_LIMIT = new double[]{ 0.01, 0.01, 0.02, 0.02, 0.02 }; // 各条均线选择样本的下限 
 //	SAMPLE_UPPER_LIMIT = new double[]  { 0.06, 0.07, 0.1, 0.11, 0.12 };
@@ -96,12 +96,12 @@ public class M5PClassifier extends ContinousClassifier {
 //			===============================end of summary=====================================for : m5p
 	
 
-	//与M5PAB做对比，用同样参数
+// 9. 与M5PAB做对比，用同样参数 阀值设上下限
+// 收益率优先策略净值 全市场20/30格 2008-2016年均17%/15%，年最低净值0.85 （胜率优先策略差不多）	
 //	EVAL_RECENT_PORTION = 0.9; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
 //	SAMPLE_LOWER_LIMIT = new double[]{ 0.03, 0.03, 0.03, 0.03, 0.03 }; // 各条均线选择样本的下限 
-//			
 //	SAMPLE_UPPER_LIMIT = new double[]  { 0.06, 0.07, 0.1, 0.11, 0.12 };
-//	TP_FP_RATIO_LIMIT = new double[] { 1.8, 1.7, 1.5, 1.2, 1}; //{ 1.8, 1.7, 1.7, 1.0, 0.7 };//选择样本阀值时TP FP RATIO到了何种值就可以停止了。
+//	TP_FP_RATIO_LIMIT = new double[] { 1.8, 1.7, 1.5, 1.2, 1}; //选择样本阀值时TP FP RATIO到了何种值就可以停止了。
 //	TP_FP_BOTTOM_LINE=0.9; //TP/FP的下限
 //	===============================output summary===================================== for : m5p
 //			Monthly selected_TPR mean: 18.64% standard deviation=25.99% Skewness=1.38 Kurtosis=1.06
@@ -126,7 +126,6 @@ public class M5PClassifier extends ContinousClassifier {
 //		arff_format=ArffFormat.LEGACY_FORMAT; 
 		EVAL_RECENT_PORTION = 0.9; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
 		SAMPLE_LOWER_LIMIT = new double[]{ 0.03, 0.03, 0.03, 0.03, 0.03 }; // 各条均线选择样本的下限 
-				
 		SAMPLE_UPPER_LIMIT = new double[]  { 0.06, 0.07, 0.1, 0.11, 0.12 };
 		TP_FP_RATIO_LIMIT = new double[] { 1.8, 1.7, 1.5, 1.2, 1}; //{ 1.8, 1.7, 1.7, 1.0, 0.7 };//选择样本阀值时TP FP RATIO到了何种值就可以停止了。
 		TP_FP_BOTTOM_LINE=0.9; //TP/FP的下限

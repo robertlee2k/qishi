@@ -23,8 +23,8 @@ public class MLPABClassifier extends NominalClassifier {
 		m_skipEvalInBacktest = true;
 		
 		EVAL_RECENT_PORTION = 0.7; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
-		m_sepeperate_eval_HS300=true;//单独为HS300评估阀值
-		m_seperate_classify_HS300=true;
+		m_sepeperate_eval_HS300=false;//太耗时间了，就不单独评估了
+		m_seperate_classify_HS300=false;
 		
 		SAMPLE_LOWER_LIMIT =new double[] { 0.01, 0.01, 0.02, 0.02, 0.02 }; // 各条均线选择样本的下限
 		SAMPLE_UPPER_LIMIT =new double[] {0.07, 0.09, 0.1, 0.1, 0.1 }; // 各条均线选择样本的上限
