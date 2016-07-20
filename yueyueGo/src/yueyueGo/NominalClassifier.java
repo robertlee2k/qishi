@@ -149,7 +149,7 @@ public class NominalClassifier extends MyClassifier{
 //		double fpr=0;
 		double final_tp=0.0;
 		double final_fp=0.0;
-		double final_deviation=-999999999.9;
+//		double final_deviation=-999999999.9;
 		Attribute att_tp = result.attribute("True Positives");
 		Attribute att_fp = result.attribute("False Positives");
 //		Attribute att_tpr = result.attribute("True Positive Rate"); 
@@ -157,6 +157,7 @@ public class NominalClassifier extends MyClassifier{
 		Attribute att_lift = result.attribute("Lift");
 		Attribute att_threshold = result.attribute("Threshold");
 		Attribute att_samplesize = result.attribute("Sample Size");
+
 
 		for (int i = 0; i < result.numInstances(); i++) {
 			Instance curr = result.instance(i);
@@ -166,16 +167,16 @@ public class NominalClassifier extends MyClassifier{
 				fp = curr.value(att_fp);
 //				tpr = curr.value(att_tpr);
 //				fpr = curr.value(att_fpr);
-				if (tp>fp*tp_fp_ratio){
-					//TODO 试了求TPR-FPR的最大值(tpr-fpr)，效果差不多，先恢复原始的
-					if (tp-fp > final_deviation ) {
-						thresholdBottom = curr.value(att_threshold);
-						finalSampleSize = sampleSize;
-						lift_max=curr.value(att_lift);
-						final_tp=tp;
-						final_fp=fp;
-						final_deviation=tp-fp;
-					}
+				if (tp>fp*tp_fp_ratio ){
+//					TODO 试了求TPR-FPR的最大值(tpr-fpr)，效果差不多，先恢复原始的
+//					if (tp-fp > final_deviation ) {
+					thresholdBottom = curr.value(att_threshold);
+					finalSampleSize = sampleSize;
+					lift_max=curr.value(att_lift);
+					final_tp=tp;
+					final_fp=fp;
+//						final_deviation=tp-fp;
+//					}
 				}
 			}
 		}
