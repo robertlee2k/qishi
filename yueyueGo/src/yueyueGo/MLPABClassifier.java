@@ -33,8 +33,6 @@ public class MLPABClassifier extends NominalClassifier {
 	public MLPABClassifier() {
 		super();
 		classifierName="mlpAB";
-		m_skipTrainInBacktest = true;
-		m_skipEvalInBacktest = true;
 		WORK_PATH =WORK_PATH+classifierName+"\\";
 		WORK_FILE_PREFIX = "extData2005-2016 month-new";
 		
