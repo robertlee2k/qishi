@@ -7,7 +7,7 @@ import weka.classifiers.meta.AttributeSelectedClassifier;
 import weka.core.Instances;
 
 
-
+// NO.1 选股太多全市场收益率只有7%-8%
 //EVAL_RECENT_PORTION = 0.7; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
 //m_sepeperate_eval_HS300=false;//太耗时间了，就不单独评估了
 //m_seperate_classify_HS300=false;
@@ -28,6 +28,42 @@ import weka.core.Instances;
 //Monthly summary_judge_result summary: good number= 278 bad number=232
 //===============================end of summary=====================================for : mlpAB
 
+//NO.2 全市场20-30格收益率10%-8% （主要是2009年收益率没跟上，其他年份又没突出）
+//EVAL_RECENT_PORTION = 0.7; // 计算最近数据阀值从历史记录中选取多少比例的最近样本		
+//SAMPLE_LOWER_LIMIT =new double[] { 0.03, 0.03, 0.03, 0.03, 0.03 }; // 各条均线选择样本的下限
+//SAMPLE_UPPER_LIMIT =new double[] {0.07, 0.09, 0.1, 0.1, 0.1 }; // 各条均线选择样本的上限
+//TP_FP_RATIO_LIMIT=new double[] { 1.8, 1.7, 1.5, 1.2, 1};//选择样本阀值时TP FP RATIO从何开始
+//TP_FP_BOTTOM_LINE=0.8; //TP/FP的下限
+//DEFAULT_THRESHOLD=0.6; // 找不出threshold时缺省值。
+//===============================output summary===================================== for : mlpAB
+//Monthly selected_TPR mean: 23.47% standard deviation=29.71% Skewness=1.1 Kurtosis=0.09
+//Monthly selected_LIFT mean : 0.79
+//Monthly selected_positive summary: 13,840
+//Monthly selected_count summary: 34,639
+//Monthly selected_shouyilv average: 1.00% standard deviation=8.82% Skewness=7.5 Kurtosis=94.56
+//Monthly total_shouyilv average: 1.00% standard deviation=6.15% Skewness=3.02 Kurtosis=15.27
+//mixed selected positive rate: 39.95%
+//Monthly summary_judge_result summary: good number= 263 bad number=247
+//===============================end of summary=====================================for : mlpAB
+
+//No. 3
+//EVAL_RECENT_PORTION = 0.7; // 计算最近数据阀值从历史记录中选取多少比例的最近样本		
+//SAMPLE_LOWER_LIMIT =new double[] { 0.02, 0.02, 0.02, 0.03, 0.03 }; // 各条均线选择样本的下限
+//SAMPLE_UPPER_LIMIT =new double[] { 0.06, 0.07, 0.1, 0.11, 0.12 }; // 各条均线选择样本的上限
+//TP_FP_RATIO_LIMIT=new double[] { 1.8, 1.7, 1.5, 1.2, 1};//选择样本阀值时TP FP RATIO从何开始
+//TP_FP_BOTTOM_LINE=0.9; //TP/FP的下限
+//DEFAULT_THRESHOLD=0.6; // 找不出threshold时缺省值。
+//===============================output summary===================================== for : mlpAB
+//Monthly selected_TPR mean: 21.83% standard deviation=30.39% Skewness=1.27 Kurtosis=0.45
+//Monthly selected_LIFT mean : 0.71
+//Monthly selected_positive summary: 10,986
+//Monthly selected_count summary: 28,369
+//Monthly selected_shouyilv average: 0.92% standard deviation=8.76% Skewness=7.6 Kurtosis=97.15
+//Monthly total_shouyilv average: 1.00% standard deviation=6.15% Skewness=3.02 Kurtosis=15.27
+//mixed selected positive rate: 38.73%
+//Monthly summary_judge_result summary: good number= 264 bad number=246
+//===============================end of summary=====================================for : mlpAB
+
 public class MLPABClassifier extends NominalClassifier {
 
 	public MLPABClassifier() {
@@ -40,15 +76,14 @@ public class MLPABClassifier extends NominalClassifier {
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = true;
 		m_skipEvalInBacktest = true;
-		
-		EVAL_RECENT_PORTION = 0.7; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
 		m_sepeperate_eval_HS300=false;//太耗时间了，就不单独评估了
 		m_seperate_classify_HS300=false;
 		
-		SAMPLE_LOWER_LIMIT =new double[] { 0.03, 0.03, 0.03, 0.03, 0.03 }; // 各条均线选择样本的下限
-		SAMPLE_UPPER_LIMIT =new double[] {0.07, 0.09, 0.1, 0.1, 0.1 }; // 各条均线选择样本的上限
-		TP_FP_RATIO_LIMIT=new double[] { 1.8, 1.7, 1.5, 1.2, 1};//{  1.6, 1.4, 1.3, 1.1, 0.9 };//选择样本阀值时TP FP RATIO从何开始
-		TP_FP_BOTTOM_LINE=0.8; //TP/FP的下限
+		EVAL_RECENT_PORTION = 0.7; // 计算最近数据阀值从历史记录中选取多少比例的最近样本		
+		SAMPLE_LOWER_LIMIT =new double[] { 0.02, 0.02, 0.02, 0.03, 0.03 }; // 各条均线选择样本的下限
+		SAMPLE_UPPER_LIMIT =new double[] { 0.06, 0.07, 0.1, 0.11, 0.12 }; // 各条均线选择样本的上限
+		TP_FP_RATIO_LIMIT=new double[] { 1.8, 1.7, 1.5, 1.2, 1};//选择样本阀值时TP FP RATIO从何开始
+		TP_FP_BOTTOM_LINE=0.9; //TP/FP的下限
 		DEFAULT_THRESHOLD=0.6; // 找不出threshold时缺省值。
 	}
 		
