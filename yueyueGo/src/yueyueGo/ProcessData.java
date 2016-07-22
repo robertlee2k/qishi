@@ -48,13 +48,13 @@ public class ProcessData {
 	
 //	public static final String MLP_PREDICT_MODEL= "\\交易分析2005-2016 by month-new-mlp-201605 MA ";
 //	public static final String MLP_EVAL_MODEL= "\\交易分析2005-2016 by month-new-mlp-201605 MA ";
-//	public static final String M5P_PREDICT_MODEL="\\交易分析2005-2016 by month-new-m5p-201605 MA ";
-//	public static final String M5P_EVAL_MODEL="\\交易分析2005-2016 by month-new-m5p-201605 MA ";
+	public static final String M5P_PREDICT_MODEL="\\交易分析2005-2016 by month-new-m5p-201605 MA ";
+	public static final String M5P_EVAL_MODEL="\\交易分析2005-2016 by month-new-m5p-201605 MA ";
 
 	public static final String MLP_PREDICT_MODEL= "\\extData2005-2016 month-new-mlp-2016 MA ";
 	public static final String MLP_EVAL_MODEL= "\\extData2005-2016 month-new-mlp-201606 MA ";
-	public static final String M5P_PREDICT_MODEL="\\extData2005-2016-m5p-201606 MA ";
-	public static final String M5P_EVAL_MODEL="\\extData2005-2016-m5p-201606 MA ";
+//	public static final String M5P_PREDICT_MODEL="\\extData2005-2016-m5p-201606 MA ";
+//	public static final String M5P_EVAL_MODEL="\\extData2005-2016-m5p-201606 MA ";
 	
 	//经过主成分分析后的数据
 	public static final String M5PAB_PREDICT_MODEL="\\extData2005-2016-m5pAB-201606 MA ";
@@ -70,10 +70,10 @@ public class ProcessData {
 	public static void main(String[] args) {
 		try {
 			//用模型预测每日增量数据
-//			callDailyPredict();
+			callDailyPredict();
 
 			//调用回测函数回测
-			callTestBack();
+//			callTestBack();
 			
 			//用最新的单次交易数据，更新原始的交易数据文件
 //			callRefreshInstances();
@@ -116,8 +116,8 @@ public class ProcessData {
 		predictWithDB(nModel,PREDICT_WORK_DIR);
 		
 		//用连续模型预测每日增量数据
-//		M5PClassifier cModel=new M5PClassifier();
-//		predictWithDB(cModel,PREDICT_WORK_DIR);
+		M5PClassifier cModel=new M5PClassifier();
+		predictWithDB(cModel,PREDICT_WORK_DIR);
 		
 		M5PABClassifier cABModel=new M5PABClassifier();
 		//读取数据库预测
