@@ -180,7 +180,7 @@ public class NominalClassifier extends MyClassifier{
 				}
 			}
 		}
-		System.out.print("thresholdBottom is : " + FormatUtility.formatDouble(thresholdBottom));
+		System.out.print("################################################thresholdBottom is : " + FormatUtility.formatDouble(thresholdBottom));
 		System.out.print("/samplesize is : " + FormatUtility.formatPercent(finalSampleSize) );
 		System.out.print("/True Positives is : " + final_tp);
 		System.out.print("/False Positives is : " + final_fp);
