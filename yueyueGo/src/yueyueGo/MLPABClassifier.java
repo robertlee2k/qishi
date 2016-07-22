@@ -46,7 +46,7 @@ import weka.core.Instances;
 //Monthly summary_judge_result summary: good number= 263 bad number=247
 //===============================end of summary=====================================for : mlpAB
 
-//No. 3
+//No. 3 全市场7%-8%， 这个策略2009年和2014跟不上，2010-2013年表现一般， 2008和2016年跌幅也不小，所以没优势
 //EVAL_RECENT_PORTION = 0.7; // 计算最近数据阀值从历史记录中选取多少比例的最近样本		
 //SAMPLE_LOWER_LIMIT =new double[] { 0.02, 0.02, 0.02, 0.03, 0.03 }; // 各条均线选择样本的下限
 //SAMPLE_UPPER_LIMIT =new double[] { 0.06, 0.07, 0.1, 0.11, 0.12 }; // 各条均线选择样本的上限
@@ -75,15 +75,15 @@ public class MLPABClassifier extends NominalClassifier {
 		inputAttShouldBeIndependent=true; //这个模型是用短格式的
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = true;
-		m_skipEvalInBacktest = true;
-		m_sepeperate_eval_HS300=false;//太耗时间了，就不单独评估了
-		m_seperate_classify_HS300=false;
+		m_skipEvalInBacktest = false;
+		m_sepeperate_eval_HS300=true;//单独评估
+		m_seperate_classify_HS300=true;
 		
 		EVAL_RECENT_PORTION = 0.7; // 计算最近数据阀值从历史记录中选取多少比例的最近样本		
-		SAMPLE_LOWER_LIMIT =new double[] { 0.02, 0.02, 0.02, 0.03, 0.03 }; // 各条均线选择样本的下限
+		SAMPLE_LOWER_LIMIT =new double[] { 0.03, 0.03, 0.03, 0.03, 0.03 }; // 各条均线选择样本的下限
 		SAMPLE_UPPER_LIMIT =new double[] { 0.06, 0.07, 0.1, 0.11, 0.12 }; // 各条均线选择样本的上限
-		TP_FP_RATIO_LIMIT=new double[] { 1.8, 1.7, 1.5, 1.2, 1};//选择样本阀值时TP FP RATIO从何开始
-		TP_FP_BOTTOM_LINE=0.9; //TP/FP的下限
+		TP_FP_RATIO_LIMIT=new double[] { 1.8, 1.7, 1.3, 1.1, 0.9};//选择样本阀值时TP FP RATIO从何开始
+		TP_FP_BOTTOM_LINE=0.8; //TP/FP的下限
 		DEFAULT_THRESHOLD=0.6; // 找不出threshold时缺省值。
 	}
 		
