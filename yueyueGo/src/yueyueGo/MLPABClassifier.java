@@ -65,7 +65,8 @@ import weka.core.Instances;
 //===============================end of summary=====================================for : mlpAB
 
 
-//No. 4
+//No. 4 单独评估HS300
+// 全市场20-30单元格 年均13% （2008和2016在0.78左右）， HS300 20-30单元格 14%-15% (2013表现很好1.2-1.3）
 //EVAL_RECENT_PORTION = 0.9; // 计算最近数据阀值从历史记录中选取多少比例的最近样本		
 //SAMPLE_LOWER_LIMIT =new double[] { 0.04, 0.05, 0.06, 0.07, 0.08 }; // 各条均线选择样本的下限
 //SAMPLE_UPPER_LIMIT =new double[] { 0.07, 0.08, 0.11, 0.12, 0.13 }; // 各条均线选择样本的上限
@@ -96,7 +97,7 @@ public class MLPABClassifier extends NominalClassifier {
 		m_skipTrainInBacktest = true;
 		m_skipEvalInBacktest = true;
 		m_sepeperate_eval_HS300=true;//单独评估
-		m_seperate_classify_HS300=false;
+		m_seperate_classify_HS300=true;
 		
 		EVAL_RECENT_PORTION = 0.9; // 计算最近数据阀值从历史记录中选取多少比例的最近样本		
 		SAMPLE_LOWER_LIMIT =new double[] { 0.04, 0.05, 0.06, 0.07, 0.08 }; // 各条均线选择样本的下限
