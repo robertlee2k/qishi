@@ -75,9 +75,9 @@ public class MLPABClassifier extends NominalClassifier {
 		inputAttShouldBeIndependent=true; //这个模型是用短格式的
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = true;
-		m_skipEvalInBacktest = false;
+		m_skipEvalInBacktest = true;
 		m_sepeperate_eval_HS300=true;//单独评估
-		m_seperate_classify_HS300=true;
+		m_seperate_classify_HS300=false;
 		
 		EVAL_RECENT_PORTION = 0.9; // 计算最近数据阀值从历史记录中选取多少比例的最近样本		
 		SAMPLE_LOWER_LIMIT =new double[] { 0.04, 0.05, 0.06, 0.07, 0.08 }; // 各条均线选择样本的下限
