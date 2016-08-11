@@ -621,7 +621,7 @@ public class ProcessData {
 				
 				
 				//接下来做冗余字段的数据校验
-				if ( InstanceUtility.checkSumBeforeMerge(leftCurr, resultCurr, leftMA, resultMA,leftBias5, resultBias5)) {
+				if ( ArffFormat.checkSumBeforeMerge(leftCurr, resultCurr, leftMA, resultMA,leftBias5, resultBias5)) {
 					newData=new DenseInstance(mergedResult.numAttributes());
 					newData.setDataset(mergedResult);
 					int srcStartIndex=0;

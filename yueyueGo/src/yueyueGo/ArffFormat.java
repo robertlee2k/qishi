@@ -297,5 +297,25 @@ public class ArffFormat {
 		return belongToIndex(curr, IS_SZ50);
 	}
 
+	/**
+	  比较两个instances中的均线策略和bias5字段是否一致（数据冗余校验）
+	 * @return
+	 */
+	public static boolean checkSumBeforeMerge(Instance leftCurr,
+			Instance rightCurr, Attribute leftMA, Attribute rightMA,
+			Attribute leftBias5, Attribute rightBias5) {
+		boolean result=false;
+		String leftMAValue=leftCurr.stringValue(leftMA);  //这里不应该为null，否则就抛出异常算了
+		String rightMAValue=rightCurr.stringValue(rightMA);//这里不应该为null，否则就抛出异常算了
+		double leftBias5Value=leftCurr.value(leftBias5); //这里有可能为NaN
+		double rightBias5Value=rightCurr.value(rightBias5);
+		
+		if (leftMAValue.equals(rightMAValue)){
+			if ( (leftBias5Value==rightBias5Value) || Double.isNaN(leftBias5Value) && Double.isNaN(rightBias5Value))
+				result=true;
+		}
+		return result;
+	}
+
 
 }
