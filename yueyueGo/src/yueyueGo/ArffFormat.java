@@ -62,6 +62,8 @@ public class ArffFormat {
 			"指数bias10二日差", "指数bias20二日差", "指数bias30二日差", "指数bias60二日差"
 	};
 	
+	
+	//模型用的训练字段 （最基础部分）
 	public static final String[] MODEL_ATTRIB_FORMAT_SHORT={
 		SELECTED_AVG_LINE, "bias5", "bias10", "bias20", "bias30",
 		"bias60", "bias5_preday_dif", "bias10_preday_dif",
@@ -185,14 +187,14 @@ public class ArffFormat {
 		int row = data.numInstances();
 		double[][] bias5to60 = { { 0.0, 0.0, 0.0, 0.0, 0.0 },
 				{ 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0 } };
-		String[][] biasAttName = {
-				{ "bias5", "bias10", "bias20", "bias30", "bias60" },
-				{ "sw行业bias5", "sw行业bias10", "sw行业bias20", "sw行业bias30",
-						"sw行业bias60" },
-				{ "指数bias5", "指数bias10", "指数bias20", "指数bias30", "指数bias60" } };
-		// String[][] biasAttName = {{ "bias5", "bias10", "bias20",
-		// "bias30","bias60"},{"sw_bias5","sw_bias10","sw_bias20","sw_bias30","sw_bias60"},{"zhishu_bias5","zhishu_bias10","zhishu_bias20","zhishu_bias30","zhishu_bias60"}
-		// };
+//		String[][] biasAttName = {
+//				{ "bias5", "bias10", "bias20", "bias30", "bias60" },
+//				{ "sw行业bias5", "sw行业bias10", "sw行业bias20", "sw行业bias30",
+//						"sw行业bias60" },
+//				{ "指数bias5", "指数bias10", "指数bias20", "指数bias30", "指数bias60" } };
+		 String[][] biasAttName = {{ "bias5", "bias10", "bias20",
+		 "bias30","bias60"},{"sw_bias5","sw_bias10","sw_bias20","sw_bias30","sw_bias60"},{"zhishu_bias5","zhishu_bias10","zhishu_bias20","zhishu_bias30","zhishu_bias60"}
+		 };
 		for (int x = 0; x < bias5to60.length; x++) {
 			for (int m = 0; m < bias5to60[x].length; m++) {
 				for (int k = m + 1; k < bias5to60[x].length; k++) {
