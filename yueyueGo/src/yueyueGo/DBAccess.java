@@ -69,8 +69,8 @@ public class DBAccess  {
 		//读入数据后最后一行加上为空的收益率
 		data = InstanceUtility.AddAttribute(data, ArffFormat.SHOUYILV,data.numAttributes());
 		
-		//把读入的数据改名 以适应内部训练的arff格式,读入的数据里多了第一列的ID
-		data=ArffFormat.trainingAttribMapper(data,ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT,1);
+		//对读入的数据校验以对应内部训练的arff格式
+		data=ArffFormat.validateAttributeNames(data,ArffFormat.EXT_DAILY_DATA_TO_PREDICT_FORMAT,0);
 		data.setClassIndex(data.numAttributes()-1);
 		System.out.println("records loaded from database: "+data.numInstances());
 		return data;

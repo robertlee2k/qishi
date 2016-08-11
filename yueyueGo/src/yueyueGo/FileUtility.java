@@ -58,8 +58,8 @@ public class FileUtility {
 		//读入数据后最后一行加上为空的收益率
 		datasrc = InstanceUtility.AddAttribute(datasrc, ArffFormat.SHOUYILV,datasrc.numAttributes());
 		
-		// 把读入的数据改名 以适应内部训练的arff格式，注意读入的数据里多了第一列的ID
-		datasrc=ArffFormat.trainingAttribMapper(datasrc,ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT,1);
+		// 对读入的数据校验以适应内部训练的arff格式
+		datasrc=ArffFormat.validateAttributeNames(datasrc,ArffFormat.EXT_DAILY_DATA_TO_PREDICT_FORMAT,0);
 		if (datasrc.classIndex() == -1)
 			  datasrc.setClassIndex(datasrc.numAttributes() - 1);
 		return datasrc;
@@ -83,8 +83,8 @@ public class FileUtility {
 			//If you want to do this, you need to use a string attribute instead." 
 			datasrc=InstanceUtility.NominalToString(datasrc, "2-5");
 			
-			// 把读入的数据改名 以适应内部训练的arff格式，更名从均线策略这里开始
-			datasrc=ArffFormat.trainingAttribMapper(datasrc,ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT,ArffFormat.INCREMENTAL_ARFF_FORMAT.length-1);
+			// 对读入的数据校验 以适应内部训练的arff格式，从均线策略这里开始
+			datasrc=ArffFormat.validateAttributeNames(datasrc,ArffFormat.EXT_DAILY_DATA_TO_PREDICT_FORMAT,ArffFormat.INCREMENTAL_ARFF_FORMAT.length-1);
 			if (datasrc.classIndex() == -1)
 				  datasrc.setClassIndex(datasrc.numAttributes() - 1);
 			return datasrc;

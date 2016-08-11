@@ -70,7 +70,7 @@ public class ProcessData {
 	public static void main(String[] args) {
 		try {
 			//用模型预测每日增量数据
-//			callDailyPredict();
+			callDailyPredict();
 
 			//调用回测函数回测
 //			callTestBack();
@@ -78,12 +78,11 @@ public class ProcessData {
 			//用最新的单次交易数据，更新原始的交易数据文件
 //			UpdateHistoryArffFile.callRefreshInstances();
 
-//			UpdateHistoryArffFile.compareRefreshedInstancesForYear(2016,100);
 			//为原始的历史文件Arff添加计算变量，并分拆，因为其数据量太大，所以提前处理，不必每次分割消耗内存
 //			UpdateHistoryArffFile.processHistoryFile();
 			
 			//合并历史扩展数据
-			UpdateHistoryArffFile.mergeExtData();
+//			UpdateHistoryArffFile.mergeExtData();
 		} catch (Exception e) {
 			
 			e.printStackTrace();
@@ -211,19 +210,19 @@ public class ProcessData {
 		
 		FileUtility.SaveDataIntoFile(fullData, pathName+FormatUtility.getDateStringFor(1)+"dailyInput-new116.arff");
 		
-		//获得”均线策略"的位置属性
-		int maIndex=InstanceUtility.findATTPosition(fullData,ArffFormat.SELECTED_MA);
+//		//获得”均线策略"的位置属性
+		int maIndex=InstanceUtility.findATTPosition(fullData,ArffFormat.SELECTED_AVG_LINE);
 
 		if (clModel instanceof NominalClassifier ){
 			fullData=((NominalClassifier)clModel).processDataForNominalClassifier(fullData,false);
-			//TODO 因为历史原因，201605018之前build的二分类器模型 “均线策略" 都叫"policy"，所以调用模型前先改一下名，调用模型后再改回来
-			fullData.renameAttribute(maIndex-1, "policy");
+//			//TODO 因为历史原因，201605018之前build的二分类器模型 “均线策略" 都叫"policy"，所以调用模型前先改一下名，调用模型后再改回来
+//			fullData.renameAttribute(maIndex-1, "policy");
 		}
 
 		
 		for (int j = 0; j < clModel.m_policySubGroup.length; j++) {
 
-			System.out.println("start to load data for " + ArffFormat.SELECTED_MA+"  : "	+ clModel.m_policySubGroup[j]);
+			System.out.println("start to load data for " + ArffFormat.SELECTED_AVG_LINE+"  : "	+ clModel.m_policySubGroup[j]);
 			String expression=null;
 			if("3060".equals(clModel.m_policySubGroup[j])==false){
 				expression=InstanceUtility.WEKA_ATT_PREFIX+ maIndex+" is '"+ clModel.m_policySubGroup[j] + "'";
@@ -292,7 +291,7 @@ public class ProcessData {
 			throw new Exception("not all data have been processed!!!!! incoming Data number = " +inData.numInstances() + " while predicted number is "+result.numInstances());
 		}
 		
-		result.renameAttribute(1, ArffFormat.SELECTED_MA_IN_OTHER_SYSTEM); //输出文件的“均线策略”名字不一样
+		result.renameAttribute(1, ArffFormat.SELECTED_AVG_LINE); //输出文件的“均线策略”名字不一样
 		FileUtility.saveCSVFile(result, pathName + clModel.classifierName+"Selected Result"+FormatUtility.getDateStringFor(1)+".csv");		
 		clModel.outputClassifySummary();
 		return result;
@@ -549,8 +548,8 @@ public class ProcessData {
 		Instance resultCurr;
 		Instance referenceCurr;
 		Instance newData;
-		Attribute leftMA=left.attribute(ArffFormat.SELECTED_MA);
-		Attribute resultMA=resultData.attribute(ArffFormat.SELECTED_MA);
+		Attribute leftMA=left.attribute(ArffFormat.SELECTED_AVG_LINE);
+		Attribute resultMA=resultData.attribute(ArffFormat.SELECTED_AVG_LINE);
 		Attribute leftBias5=left.attribute("bias5");
 		Attribute resultBias5=resultData.attribute("bias5");
 		Attribute resultSelectedAtt=resultData.attribute(ArffFormat.RESULT_SELECTED);
@@ -669,8 +668,8 @@ public class ProcessData {
 		int tradeDateIndex=InstanceUtility.findATTPosition(mergedResult, ArffFormat.TRADE_DATE);
 		mergedResult.sort(tradeDateIndex-1);
 		
-		//输出前改名
-		mergedResult.renameAttribute(mergedResult.attribute(ArffFormat.SELECTED_MA), ArffFormat.SELECTED_MA_IN_OTHER_SYSTEM);
+//		//输出前改名
+//		mergedResult.renameAttribute(mergedResult.attribute(ArffFormat.SELECTED_MA), ArffFormat.SELECTED_AVG_LINE);
 		//给mergedResult瘦身。
 		mergedResult=InstanceUtility.removeAttribs(mergedResult, "2,6-9,11");
 

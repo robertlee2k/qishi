@@ -13,15 +13,19 @@ import weka.core.Instances;
 
 public class UpdateHistoryArffFile {
 
+    String[] columnsToUpdate={
+   		"zhishu_code","huanshoulv_preday_perc","huanshoulv_pre2day_perc","huanshoulv_pre3day_perc","issz50","ishs300","iszz100","iszz500","issz100","isrzbd","zhishu_ma5_indicator","zhishu_ma10_indicator","zhishu_ma20_indicator","zhishu_ma30_indicator","zhishu_ma60_indicator","sw_ma5_indicator","sw_ma10_indicator","sw_ma20_indicator","sw_ma30_indicator","sw_ma60_indicator","zhangdieting"
+    };
+	
 	/**
 	 * @throws Exception
 	 */
 	protected static void callRefreshInstances() throws Exception {
 		int startYear=2016;
 		int endYear=2016;
-		UpdateHistoryArffFile.refreshArffFile(startYear,endYear);
-		UpdateHistoryArffFile.compareRefreshedInstancesForYear(2010,100);
-		UpdateHistoryArffFile.compareRefreshedInstancesForYear(2016,5);
+		refreshArffFile(startYear,endYear);
+//		compareRefreshedInstancesForYear(2015,100);
+//		compareRefreshedInstancesForYear(2016,5);
 	}
 
 	// replaced by compareRefreshedInstances which is more effecient 
@@ -52,7 +56,7 @@ public class UpdateHistoryArffFile {
 		System.out.println("data sorted on tradeDate");
 		
 		int codeIndex=InstanceUtility.findATTPosition(originData, "code");
-		int maIndex=InstanceUtility.findATTPosition(originData, ArffFormat.SELECTED_MA);
+		int maIndex=InstanceUtility.findATTPosition(originData, ArffFormat.SELECTED_AVG_LINE);
 		
 		Instances originDailyData=null;
 		Instances refreshedDailyData=null;
@@ -210,7 +214,7 @@ public class UpdateHistoryArffFile {
 		
 	
 		for (int i=startYear;i<=endYear;i++){
-			fullData = refreshArffForOneYear(i,ProcessData.C_ROOT_DIRECTORY+"sourceData\\onceyield"+i+".txt",fullData);
+			fullData = refreshArffForOneYear(i,ProcessData.C_ROOT_DIRECTORY+"sourceData\\full4group\\test_onceyield_group4allhis"+i+".txt",fullData);
 		}
 	
 		//保险起见把新数据按日期重新排序，虽然这样比较花时间，但可以确保日后处理时按tradeDate升序。
