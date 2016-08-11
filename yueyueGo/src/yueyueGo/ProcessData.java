@@ -70,7 +70,7 @@ public class ProcessData {
 	public static void main(String[] args) {
 		try {
 			//用模型预测每日增量数据
-			callDailyPredict();
+//			callDailyPredict();
 
 			//调用回测函数回测
 //			callTestBack();
@@ -83,7 +83,7 @@ public class ProcessData {
 //			UpdateHistoryArffFile.processHistoryFile();
 			
 			//合并历史扩展数据
-//			UpdateHistoryArffFile.mergeExtData();
+			UpdateHistoryArffFile.mergeExtData();
 		} catch (Exception e) {
 			
 			e.printStackTrace();

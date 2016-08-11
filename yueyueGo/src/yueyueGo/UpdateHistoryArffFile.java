@@ -316,20 +316,20 @@ public class UpdateHistoryArffFile {
 			System.out.println("history Data left File saved: "+ProcessData.TRANSACTION_ARFF_PREFIX+"-left.arff"  );
 		}
 
-		//这个函数是将201606之前的数据（只有第一组）合并上新的第二组，第三组数据
+		//这个函数是将原有的历史arff文件数据（比如说只有第一二三组）合并上新的数据列
 		protected static void mergeExtData() throws Exception{
 			String file1=null;
 			String file2=null;
 			Instances extData=null;
 			
-			file1=ProcessData.C_ROOT_DIRECTORY+"sourceData\\单次收益率第二组数据2005_2010.txt";
-			file2=ProcessData.C_ROOT_DIRECTORY+"sourceData\\单次收益率第二组数据2011_20160531.txt";
-			extData = UpdateHistoryArffFile.mergeInstancesFromTwoFiles(file1, file2);
-			System.out.println("Group 2 full ext data loaded. number="+extData.numInstances());
+			file1=ProcessData.C_ROOT_DIRECTORY+"sourceData\\第四组数据\\追加的增量\\test_onceyield_add2005_2010(20160809).txt";
+			file2=ProcessData.C_ROOT_DIRECTORY+"sourceData\\第四组数据\\追加的增量\\test_onceyield_add2011_2016(20160809).txt";
+			extData = InstanceUtility.mergeInstancesFromTwoFiles(file1, file2);
+			System.out.println("NewGroup data loaded. number="+extData.numInstances());
 			
 			//加载原始arff文件
 			String originFileName=ProcessData.C_ROOT_DIRECTORY+"AllTransaction20052016";
-			Instances fullData = FileUtility.loadDataFromFile(originFileName+".arff");
+			Instances fullData = FileUtility.loadDataFromFile(originFileName+"-ext-origin.arff");
 			System.out.println("full trans data loaded. number="+fullData.numInstances());
 			
 			//将两边数据以ID排序
@@ -338,24 +338,24 @@ public class UpdateHistoryArffFile {
 			System.out.println("all data sorted by id");
 			
 		
-			Instances result=UpdateHistoryArffFile.mergeTransactionWithExtension(fullData,extData,ArffFormat.INCREMENTAL_EXT_ARFF_RIGHT);
-			System.out.println("group 2 ext data processed. number="+result.numInstances()+" columns="+result.numAttributes());
+			Instances result=mergeTransactionWithExtension(fullData,extData,ArffFormat.INCREMENTAL_EXT_ARFF_RIGHT3);
+			System.out.println("NewGroup data processed. number="+result.numInstances()+" columns="+result.numAttributes());
 			extData=null;
 			fullData=null;
 			
 			
-			//处理第三组数据
-			file1=ProcessData.C_ROOT_DIRECTORY+"sourceData\\单次收益率第三组数据2005_2010.txt";
-			file2=ProcessData.C_ROOT_DIRECTORY+"sourceData\\单次收益率第三组数据2011_20160531.txt";
-			extData = UpdateHistoryArffFile.mergeInstancesFromTwoFiles(file1, file2);
-			System.out.println("Group 3 full ext data loaded. number="+extData.numInstances());
-		
-			extData.sort(ArffFormat.ID_POSITION-1);
-			
-		
-			result=UpdateHistoryArffFile.mergeTransactionWithExtension(result,extData,ArffFormat.INCREMENTAL_EXT_ARFF_RIGHT2);
-			System.out.println("group 2 ext data processed. number="+result.numInstances()+" columns="+result.numAttributes());
-		
+//			//处理第三组数据
+//			file1=ProcessData.C_ROOT_DIRECTORY+"sourceData\\单次收益率第三组数据2005_2010.txt";
+//			file2=ProcessData.C_ROOT_DIRECTORY+"sourceData\\单次收益率第三组数据2011_20160531.txt";
+//			extData = InstanceUtility.mergeInstancesFromTwoFiles(file1, file2);
+//			System.out.println("Group 3 full ext data loaded. number="+extData.numInstances());
+//		
+//			extData.sort(ArffFormat.ID_POSITION-1);
+//			
+//		
+//			result=mergeTransactionWithExtension(result,extData,ArffFormat.INCREMENTAL_EXT_ARFF_RIGHT2);
+//			System.out.println("group 2 ext data processed. number="+result.numInstances()+" columns="+result.numAttributes());
+//		
 			//返回结果之前需要按TradeDate重新排序
 			int tradeDateIndex=InstanceUtility.findATTPosition(result, ArffFormat.TRADE_DATE);
 			result.sort(tradeDateIndex-1);
@@ -384,33 +384,6 @@ public class UpdateHistoryArffFile {
 		
 		}
 
-		/**
-		 * @param firstFile
-		 * @param secondFile
-		 * @return
-		 * @throws Exception
-		 * @throws IllegalStateException
-		 */
-		private static Instances mergeInstancesFromTwoFiles(String firstFile,
-				String secondFile) throws Exception, IllegalStateException {
-			Instances extData=FileUtility.loadDataFromExtCSVFile(firstFile);
-			Instances extDataSecond=FileUtility.loadDataFromExtCSVFile(secondFile);
-		
-			
-			//如果不是用这种copy的方式和setDataSet的方式，String和nominal数据会全乱掉。
-			Instance oldRow=null;
-			int colSize=extData.numAttributes()-1;
-			for (int i=0;i<extDataSecond.numInstances();i++){
-				Instance newRow=new DenseInstance(extData.numAttributes());
-				newRow.setDataset(extData);
-				oldRow=extDataSecond.instance(i);
-				InstanceUtility.copyToNewInstance(oldRow,newRow,0,colSize,0);
-				extData.add(newRow);
-			}
-		
-			return extData;
-		}
-
 		//数据必须是以ID排序的。
 		private static Instances mergeTransactionWithExtension(Instances transData,Instances extData,String[] extDataFormat) throws Exception{
 		
@@ -421,7 +394,7 @@ public class UpdateHistoryArffFile {
 			for (int i=0;i<ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length;i++){
 				attToCompare[i]=transData.attribute(ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[i]);
 			}
-		    Instances mergedResult=UpdateHistoryArffFile.prepareMergedFormat(new Instances(transData,0), new Instances(extData,0));
+		    Instances mergedResult=prepareMergedFormat(new Instances(transData,0), new Instances(extData,0));
 		    System.out.println("merged output column number="+mergedResult.numAttributes());
 		
 		    

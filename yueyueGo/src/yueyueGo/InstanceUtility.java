@@ -176,5 +176,33 @@ public class InstanceUtility {
 		}
 	}
 
+	/**
+	 * 合并两个Instances集（从txt文件读取） ，此处的合并是纵向合并，两个instances需要是同样格式的 
+	 * @param firstFile
+	 * @param secondFile
+	 * @return
+	 * @throws Exception
+	 * @throws IllegalStateException
+	 */
+	public static Instances mergeInstancesFromTwoFiles(String firstFile,
+			String secondFile) throws Exception, IllegalStateException {
+		Instances extData=FileUtility.loadDataFromExtCSVFile(firstFile);
+		Instances extDataSecond=FileUtility.loadDataFromExtCSVFile(secondFile);
+	
+		
+		//如果不是用这种copy的方式和setDataSet的方式，String和nominal数据会全乱掉。
+		Instance oldRow=null;
+		int colSize=extData.numAttributes()-1;
+		for (int i=0;i<extDataSecond.numInstances();i++){
+			Instance newRow=new DenseInstance(extData.numAttributes());
+			newRow.setDataset(extData);
+			oldRow=extDataSecond.instance(i);
+			copyToNewInstance(oldRow,newRow,0,colSize,0);
+			extData.add(newRow);
+		}
+	
+		return extData;
+	}
+
 
 }
