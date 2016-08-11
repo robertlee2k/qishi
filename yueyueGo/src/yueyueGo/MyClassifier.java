@@ -192,7 +192,7 @@ public abstract class MyClassifier {
 		// There is additional ID attribute in test instances, so we should save it and remove before doing prediction
 		double[] ids=test.attributeToDoubleArray(ArffFormat.ID_POSITION - 1);  
 		//删除已保存的ID 列，让待分类数据与模型数据一致 （此处的index是从1开始）
-		test=FilterData.removeAttribs(test,  Integer.toString(ArffFormat.ID_POSITION));
+		test=InstanceUtility.removeAttribs(test,  Integer.toString(ArffFormat.ID_POSITION));
 		//验证数据格式是否一致
 		verifyDataFormat(test, header);
 		

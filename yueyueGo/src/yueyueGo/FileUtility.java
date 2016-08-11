@@ -53,10 +53,10 @@ public class FileUtility {
 		Instances datasrc = loader.getDataSet();
 		
 		//全部读进来之后再转nominal，这里读入的数据可能只是子集，所以nominal的index值会不对，所以后续会用calibrateAttributes处理
-		datasrc=FilterData.numToNominal(datasrc, "2,48-56");
+		datasrc=InstanceUtility.numToNominal(datasrc, "2,48-56");
 		
 		//读入数据后最后一行加上为空的收益率
-		datasrc = FilterData.AddAttribute(datasrc, ArffFormat.SHOUYILV,datasrc.numAttributes());
+		datasrc = InstanceUtility.AddAttribute(datasrc, ArffFormat.SHOUYILV,datasrc.numAttributes());
 		
 		// 把读入的数据改名 以适应内部训练的arff格式，注意读入的数据里多了第一列的ID
 		datasrc=ArffFormat.trainingAttribMapper(datasrc,ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT,1);
@@ -77,11 +77,11 @@ public class FileUtility {
 			//数据全部读进来之后再看怎么转nominal，否则直接加载， nominal的值的顺序会和文件顺序有关，造成数据不对
 			Instances datasrc = loader.getDataSet();
 			
-			datasrc=FilterData.numToNominal(datasrc, "2-7,53-61");
+			datasrc=InstanceUtility.numToNominal(datasrc, "2-7,53-61");
 			// I do the following according to a saying from the weka forum:
 			//"You can't add a value to a nominal attribute once it has been created. 
 			//If you want to do this, you need to use a string attribute instead." 
-			datasrc=FilterData.NominalToString(datasrc, "2-5");
+			datasrc=InstanceUtility.NominalToString(datasrc, "2-5");
 			
 			// 把读入的数据改名 以适应内部训练的arff格式，更名从均线策略这里开始
 			datasrc=ArffFormat.trainingAttribMapper(datasrc,ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT,ArffFormat.INCREMENTAL_ARFF_FORMAT.length-1);
@@ -96,8 +96,8 @@ public class FileUtility {
 			loader.setSource(new File(fileName));
 			//数据全部读进来之后再看怎么转nominal，否则直接加载， nominal的值的顺序会和文件顺序有关，造成数据不对
 			Instances datasrc = loader.getDataSet();
-			datasrc=FilterData.numToNominal(datasrc, "2-6,8");
-			datasrc=FilterData.NominalToString(datasrc, "2-6,8");
+			datasrc=InstanceUtility.numToNominal(datasrc, "2-6,8");
+			datasrc=InstanceUtility.NominalToString(datasrc, "2-6,8");
 			
 			// 把读入的数据改名 以适应内部训练的arff格式，更名均线策略、bias5前日差、指数code
 			datasrc.renameAttribute(5, ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[5]);

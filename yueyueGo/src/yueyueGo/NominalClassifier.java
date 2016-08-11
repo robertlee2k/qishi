@@ -85,7 +85,7 @@ public class NominalClassifier extends MyClassifier{
 		// add HS300
 		if (m_sepeperate_eval_HS300==true){
 			System.out.println(" -----------evaluating for HS300 INDEX....");
-			Instances hs300=FilterData.filterDataForIndex(train, ArffFormat.IS_HS300);
+			Instances hs300=InstanceUtility.filterDataForIndex(train, ArffFormat.IS_HS300);
 			Vector<Double> v_hs300 = doModelEvaluation(hs300, model, sample_limit,sample_upper, tp_fp_ratio*0.9); //对沪深300的TPFP降低要求
 			v.addAll(v_hs300);
 			System.out.println(" *********** end of evaluating for HS300 INDEX....");		
@@ -240,7 +240,7 @@ public class NominalClassifier extends MyClassifier{
 			}
 		}
 		//删除shouyilv
-		inData=FilterData.removeAttribs(inData, ""+inData.numAttributes());
+		inData=InstanceUtility.removeAttribs(inData, ""+inData.numAttributes());
 		//设置新属性的位置
 		inData.setClassIndex(inData.numAttributes()-1);
 		System.out.println("class value replaced for nominal classifier");

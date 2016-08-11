@@ -64,10 +64,10 @@ public class DBAccess  {
 
 		Instances data = query.retrieveInstances();
 		//全部读进来之后再转nominal，这里读入的数据可能只是子集，所以nominal的index值会不对，所以后续会用calibrateAttributes处理
-		data=FilterData.numToNominal(data, "2,48-56");
+		data=InstanceUtility.numToNominal(data, "2,48-56");
 
 		//读入数据后最后一行加上为空的收益率
-		data = FilterData.AddAttribute(data, ArffFormat.SHOUYILV,data.numAttributes());
+		data = InstanceUtility.AddAttribute(data, ArffFormat.SHOUYILV,data.numAttributes());
 		
 		//把读入的数据改名 以适应内部训练的arff格式,读入的数据里多了第一列的ID
 		data=ArffFormat.trainingAttribMapper(data,ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT,1);

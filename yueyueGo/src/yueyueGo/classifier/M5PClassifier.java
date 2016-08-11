@@ -1,8 +1,10 @@
-package yueyueGo;
+package yueyueGo.classifier;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.trees.M5P;
 import weka.core.Instances;
+import yueyueGo.ArffFormat;
+import yueyueGo.ContinousClassifier;
 
 
 //结论1： 5单元格的不可靠，偶然性因素太大， 应该在10-30单元格中间选择

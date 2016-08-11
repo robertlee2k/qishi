@@ -71,6 +71,13 @@ public class ArffFormat {
 		"zhangdieting","shangying","xiaying","index_shangying","index_xiaying","yearhighbias","yearlowbias","monthhighbias","monthlowbias","index_yearhighbias","index_yearlowbias","index_monthhighbias","index_monthlowbias"
 	};
 	
+	//单次交易收益率的扩展ARFF格式之第四批数据
+	public static final String[] INCREMENTAL_EXT_ARFF_RIGHT3= {
+		"circulation_marketVal_gears","PE_TTM","PE_TTM_gears","PE_LYR","PE_LYR_gears","listed_days_gears"	
+	};
+	
+	
+	
 	// 交易ARFF数据全集数据的格式 （从ID到均线策略，后面都和trainingarff的相同了）， 总共10个字段
 	public static final String[] ORIGINAL_TRANSACTION_ARFF_FORMAT = { ID,
 			"yearmonth", TRADE_DATE, "code", SELL_DATE, "股票名称", "year",
@@ -125,10 +132,12 @@ public class ArffFormat {
 	public static final String ARFF_DATE_FORMAT = "M/d/yyyy";
 
 	protected static final String[] create_ext_daily_data_to_predict(){
-		String[] ext_formatString=new String[DAILY_DATA_TO_PREDICT_FORMAT.length+INCREMENTAL_EXT_ARFF_RIGHT.length+INCREMENTAL_EXT_ARFF_RIGHT2.length];
+		String[] ext_formatString=new String[DAILY_DATA_TO_PREDICT_FORMAT.length+INCREMENTAL_EXT_ARFF_RIGHT.length+INCREMENTAL_EXT_ARFF_RIGHT2.length+INCREMENTAL_EXT_ARFF_RIGHT3.length];
 		System.arraycopy(DAILY_DATA_TO_PREDICT_FORMAT, 0, ext_formatString, 0, DAILY_DATA_TO_PREDICT_FORMAT.length);  
 		System.arraycopy(INCREMENTAL_EXT_ARFF_RIGHT, 0, ext_formatString, DAILY_DATA_TO_PREDICT_FORMAT.length, INCREMENTAL_EXT_ARFF_RIGHT.length);
 		System.arraycopy(INCREMENTAL_EXT_ARFF_RIGHT2, 0, ext_formatString, DAILY_DATA_TO_PREDICT_FORMAT.length+INCREMENTAL_EXT_ARFF_RIGHT.length,INCREMENTAL_EXT_ARFF_RIGHT2.length); 
+		System.arraycopy(INCREMENTAL_EXT_ARFF_RIGHT3, 0, ext_formatString, DAILY_DATA_TO_PREDICT_FORMAT.length+INCREMENTAL_EXT_ARFF_RIGHT.length+INCREMENTAL_EXT_ARFF_RIGHT2.length,INCREMENTAL_EXT_ARFF_RIGHT3.length);
+		System.out.println("ext daily data to predict format: "+ext_formatString);
 		return ext_formatString;
 		
 	}
@@ -136,7 +145,7 @@ public class ArffFormat {
 	// 从All Transaction Data中删除无关字段remove attribute: 3-9 (tradeDate到均线策略）
 	public static Instances processAllTransaction(Instances allData)
 			throws Exception {
-		Instances result = FilterData.removeAttribs(allData, "3-9");
+		Instances result = InstanceUtility.removeAttribs(allData, "3-9");
 		return result;
 	}
 
@@ -155,7 +164,7 @@ public class ArffFormat {
 				codeEnd = left_column_number + i + 1;
 			}
 		}
-		Instances result = FilterData.removeAttribs(allData, bias10Index + "-"
+		Instances result = InstanceUtility.removeAttribs(allData, bias10Index + "-"
 				+ codeBegin + "," + codeEnd + "-"
 				+ (allData.numAttributes() - 1)); // 第10-11个字段（均线策略，bias5）保留下来做校验用
 		return result;
