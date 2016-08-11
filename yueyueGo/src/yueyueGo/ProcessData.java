@@ -642,12 +642,12 @@ public class ProcessData {
 				fullSetData = FileUtility.loadDataFromFile( C_ROOT_DIRECTORY+arffFile);
 				System.out.println("finish loading fullset Data. row : "+ fullSetData.numInstances() + " column:"+ fullSetData.numAttributes());
 
-				if (clModel instanceof NominalClassifier ){
-					//TODO 因为历史原因，201605018之前build的二分类器模型 “均线策略" 都叫"policy"，所以调用模型前先改一下名，调用模型后再改回来
-					//获得”均线策略"的位置属性
-					int maIndex=FilterData.findATTPosition(fullSetData,ArffFormat.SELECTED_MA);
-					fullSetData.renameAttribute(maIndex-1, "policy");
-				}
+//				if (clModel instanceof NominalClassifier ){
+//					//TODO 因为历史原因，201605018之前build的二分类器模型 “均线策略" 都叫"policy"，所以调用模型前先改一下名，调用模型后再改回来
+//					//获得”均线策略"的位置属性
+//					int maIndex=FilterData.findATTPosition(fullSetData,ArffFormat.SELECTED_MA);
+//					fullSetData.renameAttribute(maIndex-1, "policy");
+//				}
 			}
 			// 准备输出数据格式
 			if (result == null) {// initialize result instances
@@ -728,11 +728,11 @@ public class ProcessData {
 		
 
 		FileUtility.write(BACKTEST_RESULT_DIR+clModel.classifierName+"-monthlySummary.csv", evalResultSummary.toString(), "GBK");
-		if (clModel instanceof NominalClassifier ){
-			//TODO 因为历史原因，201605018之前build的二分类器模型 “均线策略" 都叫"policy"，所以调用模型前先改一下名，调用模型后再改回来
-			int maIndex=FilterData.findATTPosition(result,"policy");
-			result.renameAttribute(maIndex-1, ArffFormat.SELECTED_MA);
-		}		
+//		if (clModel instanceof NominalClassifier ){
+//			//TODO 因为历史原因，201605018之前build的二分类器模型 “均线策略" 都叫"policy"，所以调用模型前先改一下名，调用模型后再改回来
+//			int maIndex=FilterData.findATTPosition(result,"policy");
+//			result.renameAttribute(maIndex-1, ArffFormat.SELECTED_MA);
+//		}		
 		saveBacktestResultFile(result,clModel.classifierName);
 		
 		System.out.println(clModel.classifierName+" test result file saved.");
