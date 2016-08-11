@@ -176,7 +176,7 @@ public class ProcessData {
 
 
 	//使用文件预测每天的增量数据
-	protected static void predictWithFile(MyClassifier clModel, String pathName,
+	protected static void predictWithFile(BaseClassifier clModel, String pathName,
 			String dataFileName) throws Exception {
 		System.out.println("-----------------------------");
 		Instances fullData = FileUtility.loadDailyNewDataFromCSVFile(pathName + dataFileName
@@ -188,7 +188,7 @@ public class ProcessData {
 	}
 	
 	//直接访问数据库预测每天的增量数据
-	protected static void predictWithDB(MyClassifier clModel, String pathName) throws Exception {
+	protected static void predictWithDB(BaseClassifier clModel, String pathName) throws Exception {
 		System.out.println("-----------------------------");
 		Instances fullData = DBAccess.LoadDataFromDB(clModel.arff_format);
 
@@ -198,14 +198,14 @@ public class ProcessData {
 	}
 	
 	//用模型预测数据
-	private static Instances predict(MyClassifier clModel, String pathName, Instances inData) throws Exception {
+	private static Instances predict(BaseClassifier clModel, String pathName, Instances inData) throws Exception {
 		Instances newData = null;
 		Instances result = null;
 
 		Instances fullData=calibrateAttributesForDailyData(pathName, inData,clModel.arff_format);
 	
 		//如果模型需要计算字段，则把计算字段加上
-		if (clModel.inputAttShouldBeIndependent==false){
+		if (clModel.noCaculationAttrib==false){
 			fullData=ArffFormat.addCalculateAttribute(fullData);		
 		}
 		
@@ -243,22 +243,22 @@ public class ProcessData {
 				modelFileName = pathName+"\\"+clModel.classifierName+ MLP_PREDICT_MODEL
 						+ clModel.m_policySubGroup[j]	;				
 				evalFileName = pathName+"\\"+clModel.classifierName+MLP_EVAL_MODEL
-						 + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
+						 + clModel.m_policySubGroup[j]+BaseClassifier.THRESHOLD_EXTENSION	;				
 			}else if (clModel instanceof M5PClassifier ){
 				modelFileName = pathName+"\\"+clModel.classifierName+M5P_PREDICT_MODEL
 						+  clModel.m_policySubGroup[j]	;
 				evalFileName = pathName+"\\"+clModel.classifierName+M5P_EVAL_MODEL
-						 + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
+						 + clModel.m_policySubGroup[j]+BaseClassifier.THRESHOLD_EXTENSION	;				
 			}else if (clModel instanceof M5PABClassifier ){
 				modelFileName = pathName+"\\"+clModel.classifierName+M5PAB_PREDICT_MODEL
 						+  clModel.m_policySubGroup[j]	;
 				evalFileName = pathName+"\\"+clModel.classifierName+M5PAB_EVAL_MODEL
-						 + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
+						 + clModel.m_policySubGroup[j]+BaseClassifier.THRESHOLD_EXTENSION	;				
 			}else if (clModel instanceof MLPABClassifier ){
 				modelFileName = pathName+"\\"+clModel.classifierName+MLPAB_PREDICT_MODEL
 						+  clModel.m_policySubGroup[j]	;
 				evalFileName = pathName+"\\"+clModel.classifierName+MLPAB_EVAL_MODEL
-						 + clModel.m_policySubGroup[j]+MyClassifier.THRESHOLD_EXTENSION	;				
+						 + clModel.m_policySubGroup[j]+BaseClassifier.THRESHOLD_EXTENSION	;				
 			}else {
 				throw new Exception("undefined predict model");
 			}
@@ -303,7 +303,7 @@ public class ProcessData {
 
 
 	//历史回测
-	protected static Instances testBackward(MyClassifier clModel) throws Exception,
+	protected static Instances testBackward(BaseClassifier clModel) throws Exception,
 			IOException {
 		Instances fullSetData = null;
 		Instances result = null;
@@ -322,7 +322,7 @@ public class ProcessData {
 
 				// 根据模型来决定是否要使用有计算字段的ARFF
 				String arffFile=null;
-				if (clModel.inputAttShouldBeIndependent==true){
+				if (clModel.noCaculationAttrib==true){
 					arffFile=ArffFormat.SHORT_ARFF_FILE;
 				}else{
 					arffFile=ArffFormat.LONG_ARFF_FILE;
@@ -430,7 +430,7 @@ public class ProcessData {
 	}
 
 	// paremeter result will be changed in the method! 
-	protected static String doOneModel(MyClassifier clModel,
+	protected static String doOneModel(BaseClassifier clModel,
 			Instances fullSetData, Instances result, String yearSplit,
 			String policySplit, double lower_limit, double upper_limit, double tp_fp_ratio,
 			String splitTrainClause, String splitTestClause) throws Exception,

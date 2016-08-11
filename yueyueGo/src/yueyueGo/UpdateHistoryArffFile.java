@@ -1,5 +1,6 @@
 package yueyueGo;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -209,7 +210,7 @@ public class UpdateHistoryArffFile {
 		
 	
 		for (int i=startYear;i<=endYear;i++){
-			fullData = UpdateHistoryArffFile.refreshArffForOneYear(i,ProcessData.C_ROOT_DIRECTORY+"sourceData\\onceyield"+i+".txt",fullData);
+			fullData = refreshArffForOneYear(i,ProcessData.C_ROOT_DIRECTORY+"sourceData\\onceyield"+i+".txt",fullData);
 		}
 	
 		//保险起见把新数据按日期重新排序，虽然这样比较花时间，但可以确保日后处理时按tradeDate升序。
@@ -294,27 +295,44 @@ public class UpdateHistoryArffFile {
 	}
 
 	//这是处理历史全量数据，重新切割生成各种长、短以及格式文件的方法
-		protected static void processHistoryFile() throws Exception {
-			System.out.println("loading history file into memory "  );
-			String originFileName=ProcessData.C_ROOT_DIRECTORY+ProcessData.TRANSACTION_ARFF_PREFIX;
-			Instances fullSetData = FileUtility.loadDataFromFile(originFileName+".arff");
-			System.out.println("finish  loading fullset File  row : "+ fullSetData.numInstances() + " column:"+ fullSetData.numAttributes());
-			// 去除与训练无关的字段
-			Instances result=ArffFormat.processAllTransaction(fullSetData);
-	//		//保存训练用的format，用于做日后的校验 
-			Instances format=new Instances(result,0);
-			FileUtility.SaveDataIntoFile(format, originFileName+"-format.arff");	
-			//保存短格式
-			FileUtility.SaveDataIntoFile(result, originFileName+"-short.arff");
-			result=ArffFormat.addCalculateAttribute(result);
-			FileUtility.SaveDataIntoFile(result, originFileName+"-new.arff");
-			System.out.println("full Set Data File saved "  );
-			
-			// 存下用于计算收益率的数据
-			Instances left=ArffFormat.getTransLeftPartFromAllTransaction(fullSetData);
-			FileUtility.SaveDataIntoFile(left, ProcessData.C_ROOT_DIRECTORY+ProcessData.TRANSACTION_ARFF_PREFIX+"-left.arff");
-			System.out.println("history Data left File saved: "+ProcessData.TRANSACTION_ARFF_PREFIX+"-left.arff"  );
-		}
+	protected static void processHistoryFile() throws Exception {
+		System.out.println("loading history file into memory "  );
+		String originFileName=ProcessData.C_ROOT_DIRECTORY+ProcessData.TRANSACTION_ARFF_PREFIX;
+		Instances fullSetData = FileUtility.loadDataFromFile(originFileName+".arff");
+		System.out.println("finish  loading fullset File  row : "+ fullSetData.numInstances() + " column:"+ fullSetData.numAttributes());
+		generateArffFileSet(originFileName, fullSetData);
+	}
+
+	/**
+	 * @param originFileName
+	 * @param fullSetData
+	 * @throws Exception
+	 * @throws IOException
+	 */
+	private static void generateArffFileSet(String originFileName,
+			Instances fullSetData) throws Exception, IOException {
+
+		// 存下用于计算收益率的数据
+		Instances left=ArffFormat.getTransLeftPartFromAllTransaction(fullSetData);
+		FileUtility.SaveDataIntoFile(left, originFileName+"-left.arff");
+		System.out.println("history Data left File saved: "+originFileName+"-left.arff"  );
+		
+		// 去除与训练无关的字段
+		Instances result=ArffFormat.processAllTransaction(fullSetData);
+		//保存训练用的format，用于做日后的校验 
+		Instances format=new Instances(result,0);
+		FileUtility.SaveDataIntoFile(format, originFileName+"-format.arff");	
+		//保存短格式
+		FileUtility.SaveDataIntoFile(result, originFileName+"-short.arff");
+		//添加计算字段
+		result=ArffFormat.addCalculateAttribute(result);
+		FileUtility.SaveDataIntoFile(result, originFileName+"-new.arff");
+		System.out.println("full Set Data File saved "  );
+
+	}
+		
+		
+		
 
 		//这个函数是将原有的历史arff文件数据（比如说只有第一二三组）合并上新的数据列
 		protected static void mergeExtData() throws Exception{
@@ -325,11 +343,17 @@ public class UpdateHistoryArffFile {
 			file1=ProcessData.C_ROOT_DIRECTORY+"sourceData\\第四组数据\\追加的增量\\test_onceyield_add2005_2010(20160809).txt";
 			file2=ProcessData.C_ROOT_DIRECTORY+"sourceData\\第四组数据\\追加的增量\\test_onceyield_add2011_2016(20160809).txt";
 			extData = InstanceUtility.mergeInstancesFromTwoFiles(file1, file2);
+
 			System.out.println("NewGroup data loaded. number="+extData.numInstances());
 			
 			//加载原始arff文件
 			String originFileName=ProcessData.C_ROOT_DIRECTORY+"AllTransaction20052016";
 			Instances fullData = FileUtility.loadDataFromFile(originFileName+"-ext-origin.arff");
+
+			//将文件里201603以后的数据删除（这只是针对特殊文件的临时处理，以后可以不用)
+			String yearClause = " ATT" + ArffFormat.YEAR_MONTH_INDEX + " < 201603 ";
+			fullData=InstanceUtility.getInstancesSubset(fullData, yearClause);
+
 			System.out.println("full trans data loaded. number="+fullData.numInstances());
 			
 			//将两边数据以ID排序
@@ -363,31 +387,13 @@ public class UpdateHistoryArffFile {
 			//保留原始的ext文件
 			FileUtility.SaveDataIntoFile(result, originFileName+"-ext.arff");
 			System.out.println("history Data File saved: "+originFileName+"-ext.arff");
-			
-			// 存下用于计算收益率的数据
-			Instances left=ArffFormat.getTransLeftPartFromAllTransaction(result);
-			FileUtility.SaveDataIntoFile(left, ProcessData.C_ROOT_DIRECTORY+originFileName+"-ext-left.arff");
-			System.out.println("history Data left File saved: "+originFileName+"-ext-left.arff");	
-			
-			// 去除与训练无关的字段
-			result=ArffFormat.processAllTransaction(result);
-		//	//保存训练用的format，用于做日后的校验 
-			Instances format=new Instances(result,0);
-			FileUtility.SaveDataIntoFile(format, originFileName+"-ext-format.arff");	
-			//保存短格式
-			FileUtility.SaveDataIntoFile(result, originFileName+"-ext-short.arff");
-			//添加计算字段
-			result=ArffFormat.addCalculateAttribute(result);
-			FileUtility.SaveDataIntoFile(result, originFileName+"-ext-new.arff");
-			System.out.println("full ext Data File saved "  );
-			
-		
+				
+			//生成相应的一套Arff文件
+			generateArffFileSet(originFileName+"-ext",result);
 		}
 
 		//数据必须是以ID排序的。
 		private static Instances mergeTransactionWithExtension(Instances transData,Instances extData,String[] extDataFormat) throws Exception{
-		
-		
 		
 			//找出transData中的所有待校验字段
 			Attribute[] attToCompare=new Attribute[ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length];
@@ -396,7 +402,6 @@ public class UpdateHistoryArffFile {
 			}
 		    Instances mergedResult=prepareMergedFormat(new Instances(transData,0), new Instances(extData,0));
 		    System.out.println("merged output column number="+mergedResult.numAttributes());
-		
 		    
 			//开始准备合并
 			if (transData.numInstances()!=extData.numInstances()){

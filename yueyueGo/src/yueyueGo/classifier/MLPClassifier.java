@@ -68,7 +68,7 @@ public class MLPClassifier extends NominalClassifier {
 		WORK_PATH =WORK_PATH+classifierName+"\\";
 		WORK_FILE_PREFIX = "extData2005-2016 month-new";
 		
-		inputAttShouldBeIndependent=true; //这个模型是用短格式的
+		noCaculationAttrib=true; //这个模型是用短格式的
 //		//TODO 这个只影响每日增量数据
 //		arff_format=ArffFormat.LEGACY_FORMAT; 
 		m_policySubGroup = new String[]{"5","10","20","30","60" };

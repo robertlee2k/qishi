@@ -16,7 +16,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class NominalClassifier extends MyClassifier{
+public class NominalClassifier extends BaseClassifier{
 	protected double DEFAULT_THRESHOLD=0.7; // 找不出threshold时缺省值。
 	protected Instances cachedOldClassInstances=null;
 

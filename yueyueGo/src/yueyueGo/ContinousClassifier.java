@@ -11,7 +11,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public abstract class ContinousClassifier extends MyClassifier {
+public abstract class ContinousClassifier extends BaseClassifier {
 	
 
 	public ContinousClassifier() {

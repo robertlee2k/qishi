@@ -13,7 +13,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SerializationHelper;
 
-public abstract class MyClassifier {
+public abstract class BaseClassifier {
 	//统一常量
 	public static final String MA_PREFIX = " MA ";
 	public static final String ARFF_EXTENSION = ".arff";
@@ -29,7 +29,7 @@ public abstract class MyClassifier {
 	public String WORK_FILE_PREFIX;
 	
 
-	public boolean inputAttShouldBeIndependent=false;  //缺省情况下，不限制输入文件中的计算字段 （在子类中覆盖）
+	public boolean noCaculationAttrib=false;  //缺省情况下，不限制输入文件中的计算字段 （在子类中覆盖）
 	public int arff_format=ArffFormat.EXT_FORMAT; //缺省使用扩展arff
 
 	//用于策略分组
@@ -76,7 +76,7 @@ public abstract class MyClassifier {
 	}
 
 
-	public MyClassifier() {
+	public BaseClassifier() {
 		summary_selected_TPR= new DescriptiveStatistics();
 		summary_selected_positive= new DescriptiveStatistics();
 		summary_lift= new DescriptiveStatistics();

@@ -24,7 +24,7 @@ public class VotedPerceptionClassifier extends NominalClassifier {
 		super();
 		classifierName="voted";
 		WORK_PATH =WORK_PATH+classifierName+"\\";
-		inputAttShouldBeIndependent=false; //这个模型是用长格式的 		
+		noCaculationAttrib=false; //这个模型是用长格式的 		
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = true;
 		m_skipEvalInBacktest = true;

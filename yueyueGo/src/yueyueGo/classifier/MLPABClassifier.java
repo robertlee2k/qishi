@@ -93,7 +93,7 @@ public class MLPABClassifier extends NominalClassifier {
 		WORK_PATH =WORK_PATH+classifierName+"\\";
 		WORK_FILE_PREFIX = "extData2005-2016 month-new";
 		
-		inputAttShouldBeIndependent=true; //这个模型是用短格式的
+		noCaculationAttrib=true; //这个模型是用短格式的
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = true;
 		m_skipEvalInBacktest = true;
