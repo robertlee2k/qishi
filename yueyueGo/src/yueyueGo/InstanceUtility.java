@@ -40,9 +40,18 @@ public class InstanceUtility {
 	}
 	
 	
+	//删除指定的列（此处的index是从1开始）	
+	public static Instances removeAttribs(Instances data, String attribPos) throws Exception{
+		return removeAttribs(data,attribPos,false);
+	}
 	
-	//删除指定的列（此处的index是从1开始）
-	public static Instances removeAttribs(Instances data, String attribPos)
+	//保留指定的列，删除其他列（此处的index是从1开始）	
+	public static Instances filterAttribs(Instances data, String attribPos) throws Exception{
+		return removeAttribs(data,attribPos,true);
+	}
+	
+	// 实际处理的方法
+	private static Instances removeAttribs(Instances data, String attribPos, boolean invert)
 			throws Exception {
 		String[] options = new String[2];
 		options[0] = "-R"; // "range"
@@ -51,9 +60,11 @@ public class InstanceUtility {
 		remove.setOptions(options); // set options
 		remove.setInputFormat(data); // inform filter about dataset **AFTER**
 										// setting options
+		remove.setInvertSelection(invert);
 		Instances newData = Filter.useFilter(data, remove); // apply filter
 		return newData;
 	}
+
 	
 	// 根据给定公式，获取数据集的子集
 	public static Instances getInstancesSubset(Instances data, String expression)

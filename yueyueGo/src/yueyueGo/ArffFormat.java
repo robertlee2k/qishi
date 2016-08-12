@@ -4,6 +4,8 @@ import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
 
 public class ArffFormat {
 	public static final int LEGACY_FORMAT=-1;
@@ -42,25 +44,24 @@ public class ArffFormat {
 	public static final String ARFF_DATE_FORMAT = "M/d/yyyy";
 
 	// 用于training的数据顺序（最短格式，无计算字段的），这个是要过期的
-	@Deprecated
-	private static final String[] OLD_TRAINING_ARFF_SHORT_FORMAT = { "均线策略", "bias5",
-			"bias10", "bias20", "bias30", "bias60", "bias5前日差", "bias10前日差",
-			"bias20前日差", "bias30前日差", "bias60前日差", "bias5二日差", "bias10二日差",
-			"bias20二日差", "bias30二日差", "bias60二日差", "ma5前日比", "ma10前日比",
-			"ma20前日比", "ma30前日比", "ma60前日比", "ma5二日比", "ma10二日比", "ma20二日比",
-			"ma30二日比", "ma60二日比", "ma5三日比", "ma10三日比", "ma20三日比", "ma30三日比",
-			"ma60三日比", "ma5四日比", "ma10四日比", "ma20四日比", "ma30四日比", "ma60四日比",
-			"ma5五日比", "ma10五日比", "ma20五日比", "ma30五日比", "ma60五日比", "涨跌幅", "换手率",
-			"换手前日比", "换手二日比", "换手三日比", "指数code", "申万行业指数code", "属上证50指数",
-			"属沪深300指数", "属中证100指数", "属中证500指数", "属深证100指数", "属沪股通标的", "属融资标的",
-			"sw行业bias5", "sw行业bias10", "sw行业bias20", "sw行业bias30",
-			"sw行业bias60", "swbias5前日差", "swbias10前日差", "swbias20前日差",
-			"swbias30前日差", "swbias60前日差", "swbias5二日差", "swbias10二日差",
-			"swbias20二日差", "swbias30二日差", "swbias60二日差", "指数bias5", "指数bias10",
-			"指数bias20", "指数bias30", "指数bias60", "指数bias5前日差", "指数bias10前日差",
-			"指数bias20前日差", "指数bias30前日差", "指数bias60前日差", "指数bias5二日差",
-			"指数bias10二日差", "指数bias20二日差", "指数bias30二日差", "指数bias60二日差"
-	};
+//	private static final String[] OLD_TRAINING_ARFF_SHORT_FORMAT = { "均线策略", "bias5",
+//			"bias10", "bias20", "bias30", "bias60", "bias5前日差", "bias10前日差",
+//			"bias20前日差", "bias30前日差", "bias60前日差", "bias5二日差", "bias10二日差",
+//			"bias20二日差", "bias30二日差", "bias60二日差", "ma5前日比", "ma10前日比",
+//			"ma20前日比", "ma30前日比", "ma60前日比", "ma5二日比", "ma10二日比", "ma20二日比",
+//			"ma30二日比", "ma60二日比", "ma5三日比", "ma10三日比", "ma20三日比", "ma30三日比",
+//			"ma60三日比", "ma5四日比", "ma10四日比", "ma20四日比", "ma30四日比", "ma60四日比",
+//			"ma5五日比", "ma10五日比", "ma20五日比", "ma30五日比", "ma60五日比", "涨跌幅", "换手率",
+//			"换手前日比", "换手二日比", "换手三日比", "指数code", "申万行业指数code", "属上证50指数",
+//			"属沪深300指数", "属中证100指数", "属中证500指数", "属深证100指数", "属沪股通标的", "属融资标的",
+//			"sw行业bias5", "sw行业bias10", "sw行业bias20", "sw行业bias30",
+//			"sw行业bias60", "swbias5前日差", "swbias10前日差", "swbias20前日差",
+//			"swbias30前日差", "swbias60前日差", "swbias5二日差", "swbias10二日差",
+//			"swbias20二日差", "swbias30二日差", "swbias60二日差", "指数bias5", "指数bias10",
+//			"指数bias20", "指数bias30", "指数bias60", "指数bias5前日差", "指数bias10前日差",
+//			"指数bias20前日差", "指数bias30前日差", "指数bias60前日差", "指数bias5二日差",
+//			"指数bias10二日差", "指数bias20二日差", "指数bias30二日差", "指数bias60二日差"
+//	};
 	
 	
 	//模型用的训练字段 （最基础部分）
@@ -122,18 +123,15 @@ public class ArffFormat {
 	// 每日预测扩展格式数据（数据库和数据文件都是如此)的格式
 	public static String[] DAILY_DATA_TO_PREDICT_FORMAT_NEW = FormatUtility.concatStrings(new String[]{ID},MODEL_ATTRIB_FORMAT_NEW);
 	
-	
-	// 交易ARFF数据全集数据的格式 （从ID到均线策略之前，后面都和trainingarff的相同了）， 总共10个字段
-	public static final String[] ORIGINAL_TRANSACTION_ARFF_FORMAT = { ID,
-			"yearmonth", TRADE_DATE, "code", SELL_DATE, "股票名称", "year",
-			DATA_DATE, IS_POSITIVE, SELECTED_AVG_LINE };
 
+	//单次收益率数据中不用保存在ARFF文件中的字段
+	private static final String[] TRANS_DATA_NOT_SAVED_IN_ARFF={ 
+		TRADE_DATE,"code", SELL_DATE, DATA_DATE, IS_POSITIVE
+	};
 	// 单次收益率增量数据的格式 （从ID到均线策略之前的字段），后面都和dailyArff的相同了
-	private static final String[] INCREMENTAL_ARFF_FORMAT_LEFT = { ID, TRADE_DATE,
-			"code", SELL_DATE, DATA_DATE, IS_POSITIVE
-			 };
-	public static final String[] INCREMENTAL_ARFF_FORMAT_LEGACY=FormatUtility.concatStrings(INCREMENTAL_ARFF_FORMAT_LEFT,MODEL_ATTRIB_FORMAT_LEGACY);
-	public static final String[] INCREMENTAL_ARFF_FORMAT_NEW=FormatUtility.concatStrings(INCREMENTAL_ARFF_FORMAT_LEFT,MODEL_ATTRIB_FORMAT_NEW);
+	private static final String[] TRANS_DATA_LEFT = FormatUtility.concatStrings(new String[]{ID},TRANS_DATA_NOT_SAVED_IN_ARFF);
+	public static final String[] TRANS_DATA_FORMAT_LEGACY=FormatUtility.concatStrings(TRANS_DATA_LEFT,MODEL_ATTRIB_FORMAT_LEGACY);
+	public static final String[] TRANS_DATA_FORMAT_NEW=FormatUtility.concatStrings(TRANS_DATA_LEFT,MODEL_ATTRIB_FORMAT_NEW);
 
 	//所有数据中需要作为STRING/nominal 处理的数据
 	private static final String[] NOMINAL_ATTRIBS={
@@ -146,10 +144,15 @@ public class ArffFormat {
 	
 	//返回给定数据集里与NOMINAL_ATTRIBS同名字段的位置字符串（从1开始），这主要是为filter使用
 	public static String findNominalAttribs(Instances data){
+		return returnAttribsPosition(data,NOMINAL_ATTRIBS);
+	}
+	
+	//返回给定数据集里与searchAttribues内同名字段的位置字符串（从1开始），这主要是为filter使用
+	private static String returnAttribsPosition(Instances data, String[] searchAttributes){
 		String nominalAttribPosition=null;
 		Attribute incomingAttribue=null;
-		for (int i = 0; i < NOMINAL_ATTRIBS.length; i++) {
-			incomingAttribue=data.attribute(NOMINAL_ATTRIBS[i]);
+		for (int i = 0; i < searchAttributes.length; i++) {
+			incomingAttribue=data.attribute(searchAttributes[i]);
 			if (incomingAttribue!=null){
 				int pos=incomingAttribue.index()+1;//在内部的attribute index是0开始的
 				if (nominalAttribPosition==null){ //找到的第一个
@@ -162,31 +165,25 @@ public class ArffFormat {
 		return nominalAttribPosition;
 	}
 	
-	// 从All Transaction Data中删除无关字段remove attribute: 3-9 (tradeDate到均线策略）
-	public static Instances processAllTransaction(Instances allData)
+	// 从All Transaction Data中删除无关字段 (tradeDate到均线策略之前）
+	public static Instances prepareTransData(Instances allData)
 			throws Exception {
-		Instances result = InstanceUtility.removeAttribs(allData, "3-9");
+		String removeString=returnAttribsPosition(allData,TRANS_DATA_NOT_SAVED_IN_ARFF);
+		Instances result = InstanceUtility.removeAttribs(allData,removeString);// "3-9");
 		return result;
 	}
 
-	// 此方法与上面方法正好相反，从All Transaction Data中保留计算收益率的相关字段保留1-9，以及最后的收益率，删除其他计算字段
+	// 交易ARFF数据全集数据的格式 （从ID到均线策略之前，后面都和trainingarff的相同了）
+	private static final String[] TRANS_DATA_LEFT_PART = { ID,
+			"yearmonth", TRADE_DATE, "code", SELL_DATE,  
+			DATA_DATE, IS_POSITIVE, SELECTED_AVG_LINE,"bias5",IS_SZ50 ,IS_HS300 , 
+			IS_ZZ500 };
+
+	// 此方法从All Transaction Data中保留计算收益率的相关字段，以及最后的收益率，删除其他计算字段
 	public static Instances getTransLeftPartFromAllTransaction(Instances allData)
 			throws Exception {
-		// 用查找的方式保留下来中间的属性字段
-		int left_column_number = ORIGINAL_TRANSACTION_ARFF_FORMAT.length;
-		int bias10Index = left_column_number + 2;
-		int codeBegin = 0;
-		int codeEnd = 0;
-		for (int i = 0; i < OLD_TRAINING_ARFF_SHORT_FORMAT.length; i++) {
-			if (IS_SZ50.equals(OLD_TRAINING_ARFF_SHORT_FORMAT[i])) {
-				codeBegin = left_column_number + i - 1;
-			} else if (IS_ZZ500.equals(OLD_TRAINING_ARFF_SHORT_FORMAT[i])) {
-				codeEnd = left_column_number + i + 1;
-			}
-		}
-		Instances result = InstanceUtility.removeAttribs(allData, bias10Index + "-"
-				+ codeBegin + "," + codeEnd + "-"
-				+ (allData.numAttributes() - 1)); // 第10-11个字段（均线策略，bias5）保留下来做校验用
+		String saveString=returnAttribsPosition(allData,TRANS_DATA_LEFT_PART);
+		Instances result = InstanceUtility.filterAttribs(allData,saveString);
 		return result;
 	}
 

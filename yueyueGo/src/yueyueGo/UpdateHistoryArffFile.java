@@ -322,7 +322,7 @@ public class UpdateHistoryArffFile {
 		System.out.println("history Data left File saved: "+originFileName+"-left.arff"  );
 		
 		// 去除与训练无关的字段
-		Instances result=ArffFormat.processAllTransaction(fullSetData);
+		Instances result=ArffFormat.prepareTransData(fullSetData);
 		//保存训练用的format，用于做日后的校验 
 		Instances format=new Instances(result,0);
 		FileUtility.SaveDataIntoFile(format, originFileName+"-format.arff");	
