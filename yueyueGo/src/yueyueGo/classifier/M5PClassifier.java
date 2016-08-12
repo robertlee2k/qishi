@@ -119,7 +119,7 @@ public class M5PClassifier extends ContinousClassifier {
 		super();
 		classifierName = "m5p";
 		WORK_PATH =WORK_PATH+classifierName+"\\";
-		m_noCaculationAttrib=false; //添加计算字段
+		m_noCaculationAttrib=false; //添加计算
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = false;
 		m_skipEvalInBacktest = false;

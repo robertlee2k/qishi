@@ -75,7 +75,7 @@ public class ProcessData {
 			UpdateHistoryArffFile.addCalculationsToFile(C_ROOT_DIRECTORY, ArffFormat.TRANSACTION_ARFF_PREFIX);
 			
 			//调用回测函数回测
-			callTestBack();
+//			callTestBack();
 			
 			//用最新的单次交易数据，更新原始的交易数据文件
 //			UpdateHistoryArffFile.callRefreshInstances();

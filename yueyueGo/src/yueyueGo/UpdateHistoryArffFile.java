@@ -624,7 +624,7 @@ public class UpdateHistoryArffFile {
 
 		protected static void addCalculationsToFile(String path, String arffName) throws Exception{
 			System.out.println("start to load File for data "  );
-			Instances fullSetData = FileUtility.loadDataFromFile(path+arffName + ".arff");
+			Instances fullSetData = FileUtility.loadDataFromFile(path+arffName + "-short.arff");
 			System.out.println("finish  loading fullset File  row : "
 					+ fullSetData.numInstances() + " column:"
 					+ fullSetData.numAttributes());
