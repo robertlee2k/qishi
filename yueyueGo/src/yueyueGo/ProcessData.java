@@ -38,7 +38,7 @@ import yueyueGo.classifier.MLPClassifier;
 public class ProcessData {
 
 	
-	public static final String C_ROOT_DIRECTORY = "C:\\Users\\robert\\Desktop\\提升均线策略\\";
+	public static final String C_ROOT_DIRECTORY = "C:\\trend\\";//C:\\Users\\robert\\Desktop\\提升均线策略\\";
 	public static final String NOMINAL_CLASSIFIER_DIR = C_ROOT_DIRECTORY+"models\\01-二分类器\\";
 	public static final String CONTINOUS_CLASSIFIER_DIR = C_ROOT_DIRECTORY+"models\\02-连续分类器\\";
 	public static final String BACKTEST_RESULT_DIR=C_ROOT_DIRECTORY+"testResult\\";
