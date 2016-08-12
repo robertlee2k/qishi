@@ -274,12 +274,16 @@ public class ArffFormat {
 			incomingColumnName=data.attribute(i + bypassColumnCount).name();
 			if (incomingColumnName.equals(standardFormat[i])){
 				System.out.println("PASSED. input data column name ["
-						+ data.attribute(i + bypassColumnCount).name()
+						+ incomingColumnName
 						+ "] equals to model attribuate name ["
 						+ standardFormat[i] + "]");
 			}else {
 				throw new Exception("input data column name is invalid! input column="+incomingColumnName+ " valid column should be:"+standardFormat[i]);
 			}
+		}
+		for (int j=bypassColumnCount+standardFormat.length;j<data.numAttributes();j++){
+			incomingColumnName=data.attribute(j).name();
+			System.out.println("WARNING!!!! input data has additional column. name="+incomingColumnName);
 		}
 		return data;
 	}

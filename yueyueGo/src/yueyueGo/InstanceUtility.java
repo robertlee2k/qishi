@@ -188,19 +188,14 @@ public class InstanceUtility {
 	}
 
 	/**
-	 * 合并两个Instances集（从txt文件读取） ，此处的合并是纵向合并，两个instances需要是同样格式的 
-	 * @param firstFile
-	 * @param secondFile
+	 * 合并两个Instances集 ，此处的合并是纵向合并，两个instances需要是同样格式的 
+	 * @param extData
+	 * @param extDataSecond
 	 * @return
-	 * @throws Exception
 	 * @throws IllegalStateException
 	 */
-	public static Instances mergeInstancesFromTwoFiles(String firstFile,
-			String secondFile) throws Exception, IllegalStateException {
-		Instances extData=FileUtility.loadDataFromExtCSVFile(firstFile);
-		Instances extDataSecond=FileUtility.loadDataFromExtCSVFile(secondFile);
-	
-		
+	public static Instances mergeTwoInstances(Instances extData,
+			Instances extDataSecond) throws IllegalStateException {
 		//如果不是用这种copy的方式和setDataSet的方式，String和nominal数据会全乱掉。
 		Instance oldRow=null;
 		int colSize=extData.numAttributes()-1;

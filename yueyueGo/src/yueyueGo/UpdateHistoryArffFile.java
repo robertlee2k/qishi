@@ -27,6 +27,49 @@ public class UpdateHistoryArffFile {
 //		compareRefreshedInstancesForYear(2015,100);
 //		compareRefreshedInstancesForYear(2016,5);
 	}
+	
+	
+	protected static void createTransInstances() throws Exception {
+
+		String arffFileName=ProcessData.C_ROOT_DIRECTORY+ProcessData.TRANSACTION_ARFF_PREFIX;
+		String sourceFilePrefix=ProcessData.C_ROOT_DIRECTORY+"sourceData\\full4group\\test_onceyield_group4allhis";
+		Instances fullData = FileUtility.loadDataFromIncrementalCSVFile(sourceFilePrefix+"2005-2006.txt");
+		Instances addData = FileUtility.loadDataFromIncrementalCSVFile(sourceFilePrefix+"2007-2008.txt");
+		fullData=InstanceUtility.mergeTwoInstances(fullData, addData);
+		System.out.println("merged one File,now row : "+ fullData.numInstances() + " column:"+ fullData.numAttributes());
+		
+		int startYear=2009;
+		int endYear=2016;
+		for (int i=startYear;i<=endYear;i++){
+			addData = FileUtility.loadDataFromIncrementalCSVFile(sourceFilePrefix+i+".txt");
+			fullData=InstanceUtility.mergeTwoInstances(fullData, addData);
+			System.out.println("merged one File,now row : "+ fullData.numInstances() + " column:"+ fullData.numAttributes());
+		}
+		
+		//处理所有的日期字段，并插入yearmonth
+		processDateColumns(fullData);
+
+		//处理各种nominal字段
+		Instances format=FileUtility.loadDataFromFile(ProcessData.C_ROOT_DIRECTORY+"fullTranFormat.arff");
+		System.out.println("!!!!!verifying input data format , you should read this .... "+ format.equalHeadersMsg(fullData));
+		InstanceUtility.calibrateAttributes(fullData, format);
+		
+		//获取tradeDateIndex （从1开始）， 并按其排序
+		int tradeDateIndex=InstanceUtility.findATTPosition(fullData, ArffFormat.TRADE_DATE);
+		fullData.sort(tradeDateIndex-1);
+
+		System.out.println("trans arff file sorted, start to save.... number of rows="+fullData.numInstances());
+		FileUtility.SaveDataIntoFile(fullData, arffFileName+".arff");
+		System.out.println("trans arff file saved. ");
+	
+		//取出前半年的旧数据和当年的新数据作为验证的sample数据
+		String splitSampleClause = "( ATT" + ArffFormat.YEAR_MONTH_INDEX + " >= " + (endYear-1) + "06) and ( ATT" + ArffFormat.YEAR_MONTH_INDEX+ " <= "	+ endYear + "12) ";
+		Instances sampleData=InstanceUtility.getInstancesSubset(fullData, splitSampleClause);
+		FileUtility.SaveDataIntoFile(sampleData, arffFileName+"-sample.arff");
+		
+		//生成全套文件
+		generateArffFileSet(arffFileName,fullData);
+	}
 
 	// replaced by compareRefreshedInstances which is more effecient 
 	//此方法用于比较原始文件和refreshed文件之间的差异
@@ -257,18 +300,34 @@ public class UpdateHistoryArffFile {
 				
 		
 		
-		//将单次收益率增量数据修正成为原始文件数据格式（yearmonth重新计算，插入一列空的股票代码和year（这两列暂时用不上），改名“均线策略”）
-		int yearMonthIndex=InstanceUtility.findATTPosition(newData, ArffFormat.ID); //在ID之后插入
+		//将单次收益率增量数据修正成为原始文件数据格式,插入一列空的股票代码和year（这两列暂时用不上），改名“均线策略”）
 		int stockNameIndex=InstanceUtility.findATTPosition(newData, ArffFormat.SELL_DATE); //在MC_DATA之后插入
-		newData.insertAttributeAt(new Attribute("yearmonth"), yearMonthIndex);
 		List<String> attLabels=null;
-		newData.insertAttributeAt(new Attribute("股票名称",attLabels),stockNameIndex+1);//加1的原因是上面已经插入了yearmonth
-		newData.insertAttributeAt(new Attribute("year"),stockNameIndex+2);//加2的原因是上面已经插入了两个属性 
+		newData.insertAttributeAt(new Attribute("股票名称",attLabels),stockNameIndex);
+		newData.insertAttributeAt(new Attribute("year"),stockNameIndex+1);//加1的原因是上面已经插入了两个属性 
 	     
-	    
-	    
+    
+	    processDateColumns(newData);
+
 	    System.out.println("!!!!!verifying new data format , you should read this .... "+ fullData.equalHeadersMsg(newData));
-	    //重新计算yearmonth
+		System.out.println("number of new rows added or updated= "+ newData.numInstances());
+
+		InstanceUtility.calibrateAttributes(newData,fullData);
+	
+		System.out.println("number of refreshed dataset = "+fullData.numInstances());
+		return fullData;
+	}
+
+
+	/**
+	 * @param newData
+	 * @throws ParseException
+	 */
+	private static void processDateColumns(Instances newData)
+			throws ParseException {
+		int yearMonthIndex=InstanceUtility.findATTPosition(newData, ArffFormat.ID); //在ID之后插入
+		newData.insertAttributeAt(new Attribute("yearmonth"), yearMonthIndex);
+		//重新计算yearmonth
 	    Attribute tradeDateAtt=newData.attribute(ArffFormat.TRADE_DATE);
 	    Attribute mcDateAtt=newData.attribute(ArffFormat.SELL_DATE);
 	    Attribute dataDateAtt=newData.attribute(ArffFormat.DATA_DATE);
@@ -278,7 +337,6 @@ public class UpdateHistoryArffFile {
 	    double ym;
 	    for (int i=0;i<newData.numInstances();i++){
 	    	curr=newData.instance(i);
-	    	
 	    	tradeDate=curr.stringValue(tradeDateAtt);
 	    	//设置yearmonth
 	    	ym=FormatUtility.parseYearMonth(tradeDate);
@@ -287,15 +345,7 @@ public class UpdateHistoryArffFile {
 		    curr.setValue(tradeDateAtt, FormatUtility.convertDate(tradeDate));
 		    curr.setValue(mcDateAtt, FormatUtility.convertDate(curr.stringValue(mcDateAtt)));
 		    curr.setValue(dataDateAtt, FormatUtility.convertDate(curr.stringValue(dataDateAtt)));
-		    
 	    }
-		
-		System.out.println("number of new rows added or updated= "+ newData.numInstances());
-	
-		InstanceUtility.calibrateAttributes(newData,fullData);
-	
-		System.out.println("number of refreshed dataset = "+fullData.numInstances());
-		return fullData;
 	}
 
 	//这是处理历史全量数据，重新切割生成各种长、短以及格式文件的方法
@@ -346,7 +396,7 @@ public class UpdateHistoryArffFile {
 			
 			file1=ProcessData.C_ROOT_DIRECTORY+"sourceData\\第四组数据\\追加的增量\\test_onceyield_add2005_2010(20160809).txt";
 			file2=ProcessData.C_ROOT_DIRECTORY+"sourceData\\第四组数据\\追加的增量\\test_onceyield_add2011_2016(20160809).txt";
-			extData = InstanceUtility.mergeInstancesFromTwoFiles(file1, file2);
+			extData = UpdateHistoryArffFile.mergeExtDataFromTwoFiles(file1, file2);
 
 			System.out.println("NewGroup data loaded. number="+extData.numInstances());
 			
@@ -554,6 +604,24 @@ public class UpdateHistoryArffFile {
 			Instances result=ArffFormat.addCalculateAttribute(fullSetData);
 			FileUtility.SaveDataIntoFile(result, path+arffName+"-new.arff");
 			System.out.println("file saved "  );
+		}
+
+
+		/**
+		 * 合并两个Instances集（从txt文件读取） ，此处的合并是纵向合并，两个instances需要是同样格式的 
+		 * @param firstFile
+		 * @param secondFile
+		 * @return
+		 * @throws Exception
+		 * @throws IllegalStateException
+		 */
+		private static Instances mergeExtDataFromTwoFiles(String firstFile,
+				String secondFile) throws Exception, IllegalStateException {
+			Instances extData=FileUtility.loadDataFromExtCSVFile(firstFile);
+			Instances extDataSecond=FileUtility.loadDataFromExtCSVFile(secondFile);
+		
+			
+			return InstanceUtility.mergeTwoInstances(extData, extDataSecond);
 		}
 
 }

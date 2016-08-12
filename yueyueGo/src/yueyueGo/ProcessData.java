@@ -43,7 +43,7 @@ public class ProcessData {
 	public static final String CONTINOUS_CLASSIFIER_DIR = C_ROOT_DIRECTORY+"models\\02-连续分类器\\";
 	public static final String BACKTEST_RESULT_DIR=C_ROOT_DIRECTORY+"testResult\\";
 	public static final String PREDICT_WORK_DIR=C_ROOT_DIRECTORY+"03-预测模型\\";
-	public static final String TRANSACTION_ARFF_PREFIX="AllTransaction20052016-ext";
+	public static final String TRANSACTION_ARFF_PREFIX="trans20052016-ext";//"AllTransaction20052016-ext";
 	public static final String RESULT_EXTENSION = "-Test Result.csv";
 	
 //	public static final String MLP_PREDICT_MODEL= "\\交易分析2005-2016 by month-new-mlp-201605 MA ";
@@ -70,7 +70,7 @@ public class ProcessData {
 	public static void main(String[] args) {
 		try {
 			//用模型预测每日增量数据
-			callDailyPredict();
+//			callDailyPredict();
 
 			//调用回测函数回测
 //			callTestBack();
@@ -83,6 +83,9 @@ public class ProcessData {
 			
 			//合并历史扩展数据
 //			UpdateHistoryArffFile.mergeExtData();
+			
+			UpdateHistoryArffFile.createTransInstances();
+			
 		} catch (Exception e) {
 			
 			e.printStackTrace();
