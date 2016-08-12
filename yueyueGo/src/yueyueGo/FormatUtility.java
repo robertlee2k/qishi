@@ -96,4 +96,11 @@ public class FormatUtility {
 		}
 		return compare;
 	}
+
+	public static final String[] concatStrings(String[] first,String[] second){
+		String[] resultString=new String[first.length+second.length];
+		System.arraycopy(first, 0, resultString, 0, first.length);
+		System.arraycopy(second, 0, resultString, first.length, second.length);
+		return resultString;
+	}
 }

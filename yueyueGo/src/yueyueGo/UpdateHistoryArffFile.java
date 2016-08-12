@@ -366,7 +366,7 @@ public class UpdateHistoryArffFile {
 			System.out.println("all data sorted by id");
 			
 		
-			Instances result=mergeTransactionWithExtension(fullData,extData,ArffFormat.INCREMENTAL_EXT_ARFF_RIGHT3);
+			Instances result=mergeTransactionWithExtension(fullData,extData,ArffFormat.EXT_ARFF_COLUMNS);
 			System.out.println("NewGroup data processed. number="+result.numInstances()+" columns="+result.numAttributes());
 			extData=null;
 			fullData=null;
@@ -400,9 +400,9 @@ public class UpdateHistoryArffFile {
 		private static Instances mergeTransactionWithExtension(Instances transData,Instances extData,String[] extDataFormat) throws Exception{
 		
 			//找出transData中的所有待校验字段
-			Attribute[] attToCompare=new Attribute[ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length];
-			for (int i=0;i<ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length;i++){
-				attToCompare[i]=transData.attribute(ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[i]);
+			Attribute[] attToCompare=new Attribute[ArffFormat.EXT_ARFF_CRC.length];
+			for (int i=0;i<ArffFormat.EXT_ARFF_CRC.length;i++){
+				attToCompare[i]=transData.attribute(ArffFormat.EXT_ARFF_CRC[i]);
 			}
 		    Instances mergedResult=prepareMergedFormat(new Instances(transData,0), new Instances(extData,0));
 		    System.out.println("merged output column number="+mergedResult.numAttributes());
@@ -438,7 +438,7 @@ public class UpdateHistoryArffFile {
 					continue;
 				}else if (leftID==rightID ){//找到相同ID的记录了
 					//先对所有的冗余数据进行校验
-					for (int j=0;j<ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length;j++){
+					for (int j=0;j<ArffFormat.EXT_ARFF_CRC.length;j++){
 						Attribute att = attToCompare[j];
 						if (att.isNominal() || att.isString()) {
 							String leftLabel = leftCurr.stringValue(att);
@@ -451,7 +451,7 @@ public class UpdateHistoryArffFile {
 								if (leftLabel.equals(rightLabel)==false){
 									System.out.println("current left====="+ leftCurr.toString());
 									System.out.println("current right===="+ rightCurr.toString());		
-									throw new Exception("data not equal! at attribute:"+ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[j]+ " left= "+leftLabel+" while right= "+rightLabel +" @id="+leftID);
+									throw new Exception("data not equal! at attribute:"+ArffFormat.EXT_ARFF_CRC[j]+ " left= "+leftLabel+" while right= "+rightLabel +" @id="+leftID);
 								}
 							}
 						} else if (att.isNumeric()) {
@@ -462,7 +462,7 @@ public class UpdateHistoryArffFile {
 							}else {
 								System.out.println("current left====="+ leftCurr.toString());
 								System.out.println("current right===="+ rightCurr.toString());						
-								System.out.println("=========data not equal! at attribute:"+ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[j]+ " left= "+leftValue+" while right= "+rightValue);							
+								System.out.println("=========data not equal! at attribute:"+ArffFormat.EXT_ARFF_CRC[j]+ " left= "+leftValue+" while right= "+rightValue);							
 							}
 						} else {
 							throw new IllegalStateException("Unhandled attribute type!");
@@ -480,8 +480,8 @@ public class UpdateHistoryArffFile {
 					InstanceUtility.copyToNewInstance(leftCurr, newData, srcStartIndex, srcEndIndex,targetStartIndex);
 		
 					//再拷贝extData中除校验数据之外的数据				
-					srcStartIndex=ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length;
-					srcEndIndex=ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length+extDataFormat.length-1;
+					srcStartIndex=ArffFormat.EXT_ARFF_CRC.length;
+					srcEndIndex=ArffFormat.EXT_ARFF_CRC.length+extDataFormat.length-1;
 					targetStartIndex=leftCurr.numAttributes()-1; //接着拷贝
 					InstanceUtility.copyToNewInstance(rightCurr, newData, srcStartIndex, srcEndIndex,targetStartIndex);
 		
@@ -520,7 +520,7 @@ public class UpdateHistoryArffFile {
 		private static Instances prepareMergedFormat(Instances transData, Instances extData) {
 			// Create the vector of merged attributes
 		    ArrayList<Attribute> newAttributes = new ArrayList<Attribute>(transData.numAttributes() +
-		    		extData.numAttributes()-ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length);
+		    		extData.numAttributes()-ArffFormat.EXT_ARFF_CRC.length);
 		    Enumeration<Attribute> enu = transData.enumerateAttributes();
 		    while (enu.hasMoreElements()) {
 		    	newAttributes.add((Attribute) (enu.nextElement().copy()));// Need to copy because indices will change.
@@ -530,7 +530,7 @@ public class UpdateHistoryArffFile {
 		    	//去掉冗余字段，将有效数据字段加入新数据集
 		    	// Need to copy because indices will change.
 		    	Attribute att=(Attribute)enu.nextElement().copy();
-		    	if (att.index()>= ArffFormat.INCREMENTAL_EXT_ARFF_LEFT.length){
+		    	if (att.index()>= ArffFormat.EXT_ARFF_CRC.length){
 		    		newAttributes.add(att);
 		    	}
 		    }
@@ -543,6 +543,17 @@ public class UpdateHistoryArffFile {
 		    merged.setClassIndex(merged.numAttributes()-1);
 		    
 		    return merged;
+		}
+
+		protected static void addCalculationsToFile(String path, String arffName) throws Exception{
+			System.out.println("start to load File for data "  );
+			Instances fullSetData = FileUtility.loadDataFromFile(path+arffName + ".arff");
+			System.out.println("finish  loading fullset File  row : "
+					+ fullSetData.numInstances() + " column:"
+					+ fullSetData.numAttributes());
+			Instances result=ArffFormat.addCalculateAttribute(fullSetData);
+			FileUtility.SaveDataIntoFile(result, path+arffName+"-new.arff");
+			System.out.println("file saved "  );
 		}
 
 }

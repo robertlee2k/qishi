@@ -12,7 +12,7 @@ public class DBAccess  {
 	
 	
 	public DBAccess() {
-		// TODO Auto-generated constructor stub
+
 	}
 	
 	private static String generateQueryData(int format){
@@ -27,7 +27,7 @@ public class DBAccess  {
 			target_view="t_stock_avgline_increment_zuixin_v";
 			break;
 		case ArffFormat.EXT_FORMAT:
-			target_columns=ArffFormat.EXT_DAILY_DATA_TO_PREDICT_FORMAT;
+			target_columns=ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT_NEW;
 			target_view="t_stock_avgline_increment_zuixin_group3";
 			break;			
 		default:
@@ -45,15 +45,18 @@ public class DBAccess  {
 	}
 	
 	public static Instances LoadDataFromDB(int format) throws Exception{
-//		DatabaseLoader loader = new DatabaseLoader();
-//		loader.setUrl(URL);
-//		loader.setUser(USER);
-//		loader.setPassword(PASSWORD);
-//		String queryData=generateQueryData();
-//		loader.setQuery(queryData); 
-//		Instances data=loader.getDataSet();
 
-		
+		String[] validateFormat=null;
+		switch (format) {
+		case ArffFormat.LEGACY_FORMAT:
+			validateFormat=ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT;
+			break;
+		case ArffFormat.EXT_FORMAT:
+			validateFormat=ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT_NEW;
+			break;			
+		default:
+			break;
+		}	
 		//load data from database that needs predicting
 		InstanceQuery query = new InstanceQuery();
 		query.setDatabaseURL(URL);
@@ -61,16 +64,17 @@ public class DBAccess  {
 		query.setPassword(PASSWORD);
 		String queryData=generateQueryData(format);
 		query.setQuery(queryData); 
-
 		Instances data = query.retrieveInstances();
-		//全部读进来之后再转nominal，这里读入的数据可能只是子集，所以nominal的index值会不对，所以后续会用calibrateAttributes处理
-		data=InstanceUtility.numToNominal(data, "2,48-56");
 
 		//读入数据后最后一行加上为空的收益率
 		data = InstanceUtility.AddAttribute(data, ArffFormat.SHOUYILV,data.numAttributes());
-		
-		//对读入的数据校验以对应内部训练的arff格式
-		data=ArffFormat.validateAttributeNames(data,ArffFormat.EXT_DAILY_DATA_TO_PREDICT_FORMAT,0);
+		// 对读入的数据字段名称校验 确保其顺序完全和内部训练的arff格式一致
+		data=ArffFormat.validateAttributeNames(data,validateFormat,0);
+		//全部读进来之后再转nominal，这里读入的数据可能只是子集，所以nominal的index值会不对，所以后续会用calibrateAttributes处理
+		String nominalAttribString=ArffFormat.findNominalAttribs(data);
+		data=InstanceUtility.numToNominal(data, nominalAttribString);//"2,48-56");
+
+
 		data.setClassIndex(data.numAttributes()-1);
 		System.out.println("records loaded from database: "+data.numInstances());
 		return data;

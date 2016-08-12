@@ -42,6 +42,7 @@ public class FileUtility {
 	}
 
 	// 从文件中加载每天的预测数据（该方法不常用，仅限于数据库加载失败时使用）
+	@Deprecated
 	public static Instances loadDailyNewDataFromCSVFile(String fileName)
 			throws Exception {
 		CSVLoader loader = new CSVLoader();
@@ -49,17 +50,17 @@ public class FileUtility {
 
 		
 //		 永远别把数据文件里的ID变成Nominal的，否则读出来的ID就变成相对偏移量了
-		
 		Instances datasrc = loader.getDataSet();
-		
-		//全部读进来之后再转nominal，这里读入的数据可能只是子集，所以nominal的index值会不对，所以后续会用calibrateAttributes处理
-		datasrc=InstanceUtility.numToNominal(datasrc, "2,48-56");
-		
+
 		//读入数据后最后一行加上为空的收益率
 		datasrc = InstanceUtility.AddAttribute(datasrc, ArffFormat.SHOUYILV,datasrc.numAttributes());
-		
 		// 对读入的数据校验以适应内部训练的arff格式
-		datasrc=ArffFormat.validateAttributeNames(datasrc,ArffFormat.EXT_DAILY_DATA_TO_PREDICT_FORMAT,0);
+		datasrc=ArffFormat.validateAttributeNames(datasrc,ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT_NEW,0);
+
+		//数据先作为String全部读进来之后再看怎么转nominal，否则直接加载， nominal的值的顺序会和文件顺序有关，造成数据不对
+		String nominalAttribString=ArffFormat.findNominalAttribs(datasrc);
+		datasrc=InstanceUtility.numToNominal(datasrc, nominalAttribString);// "2,48-56";
+		
 		if (datasrc.classIndex() == -1)
 			  datasrc.setClassIndex(datasrc.numAttributes() - 1);
 		return datasrc;
@@ -72,37 +73,38 @@ public class FileUtility {
 			CSVLoader loader = new CSVLoader();
 			loader.setSource(new File(fileName));
 
-			//loader.setNumericAttributes("1-91");//先把所有的数据设为numeric,
-			
-			//数据全部读进来之后再看怎么转nominal，否则直接加载， nominal的值的顺序会和文件顺序有关，造成数据不对
 			Instances datasrc = loader.getDataSet();
+			// 对读入的数据字段名称校验 确保其顺序完全和内部训练的arff格式一致
+			datasrc=ArffFormat.validateAttributeNames(datasrc,ArffFormat.INCREMENTAL_ARFF_FORMAT_NEW,0);
 			
-			datasrc=InstanceUtility.numToNominal(datasrc, "2-7,53-61");
+			//数据先作为String全部读进来之后再看怎么转nominal，否则直接加载， nominal的值的顺序会和文件顺序有关，造成数据不对
+			String nominalAttribString=ArffFormat.findNominalAttribs(datasrc);
+			datasrc=InstanceUtility.numToNominal(datasrc, nominalAttribString);//"2-7,53-61");
 			// I do the following according to a saying from the weka forum:
 			//"You can't add a value to a nominal attribute once it has been created. 
 			//If you want to do this, you need to use a string attribute instead." 
-			datasrc=InstanceUtility.NominalToString(datasrc, "2-5");
+			datasrc=InstanceUtility.NominalToString(datasrc, nominalAttribString);//"2-5");
 			
-			// 对读入的数据校验 以适应内部训练的arff格式，从均线策略这里开始
-			datasrc=ArffFormat.validateAttributeNames(datasrc,ArffFormat.EXT_DAILY_DATA_TO_PREDICT_FORMAT,ArffFormat.INCREMENTAL_ARFF_FORMAT.length-1);
 			if (datasrc.classIndex() == -1)
 				  datasrc.setClassIndex(datasrc.numAttributes() - 1);
 			return datasrc;
 		}
 	
-	// 从扩展交易CSV文件中加载数据，根据后续处理需要这里不设classIndex
+	// 从扩展ARFF的CSV文件中加载数据，根据后续处理需要这里不设classIndex
 	public static Instances loadDataFromExtCSVFile(String fileName)		throws Exception {
 			CSVLoader loader = new CSVLoader();
 			loader.setSource(new File(fileName));
-			//数据全部读进来之后再看怎么转nominal，否则直接加载， nominal的值的顺序会和文件顺序有关，造成数据不对
 			Instances datasrc = loader.getDataSet();
-			datasrc=InstanceUtility.numToNominal(datasrc, "2-6,8");
-			datasrc=InstanceUtility.NominalToString(datasrc, "2-6,8");
+
+			// 对读入的数据字段名称校验 确保其顺序完全和内部训练的arff格式一致
+			datasrc=ArffFormat.validateAttributeNames(datasrc,ArffFormat.EXT_ARFF_FILE_FORMAT,0);
+
 			
-			// 把读入的数据改名 以适应内部训练的arff格式，更名均线策略、bias5前日差、指数code
-			datasrc.renameAttribute(5, ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[5]);
-			datasrc.renameAttribute(6, ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[6]);
-			datasrc.renameAttribute(7, ArffFormat.INCREMENTAL_EXT_ARFF_LEFT[7]);
+			//数据先作为String全部读进来之后再看怎么转nominal，否则直接加载， nominal的值的顺序会和文件顺序有关，造成数据不对
+			String nominalAttribString=ArffFormat.findNominalAttribs(datasrc);
+			datasrc=InstanceUtility.numToNominal(datasrc, nominalAttribString);
+			datasrc=InstanceUtility.NominalToString(datasrc, nominalAttribString);
+			
 			return datasrc;
 		}	
 	

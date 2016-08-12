@@ -64,7 +64,7 @@ public class ArffFormat {
 	
 	
 	//模型用的训练字段 （最基础部分）
-	public static final String[] MODEL_ATTRIB_FORMAT_SHORT={
+	public static final String[] MODEL_ATTRIB_FORMAT_LEGACY={
 		SELECTED_AVG_LINE, "bias5", "bias10", "bias20", "bias30",
 		"bias60", "bias5_preday_dif", "bias10_preday_dif",
 		"bias20_preday_dif", "bias30_preday_dif", "bias60_preday_dif",
@@ -95,60 +95,71 @@ public class ArffFormat {
 		"zhishu_bias10_pre2day_dif", "zhishu_bias20_pre2day_dif",
 		"zhishu_bias30_pre2day_dif", "zhishu_bias60_pre2day_dif"
 	};
+	//模型扩展ARFF格式之第二、三批数据
+	private static final String[] MODEL_ATTRIB_EXT= {
+		"zhishu_quantity_preday_perc","zhishu_quantity_pre2day_perc","zhishu_quantity_pre3day_perc","zhishu_ma5_indicator","zhishu_ma10_indicator","zhishu_ma20_indicator","zhishu_ma30_indicator","zhishu_ma60_indicator","sw_ma5_indicator","sw_ma10_indicator","sw_ma20_indicator","sw_ma30_indicator","sw_ma60_indicator","ma5_signal_scale","ma10_signal_scale","ma20_signal_scale","ma30_signal_scale","ma60_signal_scale"
+		,"zhangdieting","shangying","xiaying","index_shangying","index_xiaying","yearhighbias","yearlowbias","monthhighbias","monthlowbias","index_yearhighbias","index_yearlowbias","index_monthhighbias","index_monthlowbias"
+	};
+	//模型用的训练字段 （基础+扩展部分）
+	public static final String[] MODEL_ATTRIB_FORMAT_NEW=FormatUtility.concatStrings(MODEL_ATTRIB_FORMAT_LEGACY,MODEL_ATTRIB_EXT);
 	
-	//单次交易收益率的扩展ARFF格式之校验位
-	public static final String[] INCREMENTAL_EXT_ARFF_LEFT= {
+	
+	//每次新扩展ARFF格式的校验位
+	public static final String[] EXT_ARFF_CRC= {
 		ID,TRADE_DATE,"code",SELL_DATE,DATA_DATE,SELECTED_AVG_LINE,"bias5_preday_dif","zhishu_code",
 	};
-	//单次交易收益率的扩展ARFF格式之第二批数据
-	public static final String[] INCREMENTAL_EXT_ARFF_RIGHT= {
-		"zhishu_quantity_preday_perc","zhishu_quantity_pre2day_perc","zhishu_quantity_pre3day_perc","zhishu_ma5_indicator","zhishu_ma10_indicator","zhishu_ma20_indicator","zhishu_ma30_indicator","zhishu_ma60_indicator","sw_ma5_indicator","sw_ma10_indicator","sw_ma20_indicator","sw_ma30_indicator","sw_ma60_indicator","ma5_signal_scale","ma10_signal_scale","ma20_signal_scale","ma30_signal_scale","ma60_signal_scale"
-	};
-	//单次交易收益率的扩展ARFF格式之第三批数据
-	public static final String[] INCREMENTAL_EXT_ARFF_RIGHT2= {
-		"zhangdieting","shangying","xiaying","index_shangying","index_xiaying","yearhighbias","yearlowbias","monthhighbias","monthlowbias","index_yearhighbias","index_yearlowbias","index_monthhighbias","index_monthlowbias"
-	};
-	
-	//单次交易收益率的扩展ARFF格式之第四批数据
-	public static final String[] INCREMENTAL_EXT_ARFF_RIGHT3= {
+	//每次新扩展ARFF格式增加的数据
+	public static final String[] EXT_ARFF_COLUMNS= {
 		"circulation_marketVal_gears","PE_TTM","PE_TTM_gears","PE_LYR","PE_LYR_gears","listed_days_gears"	
 	};
+	//每次新扩展ARFF文件整体格式
+	public static final String[] EXT_ARFF_FILE_FORMAT= FormatUtility.concatStrings(EXT_ARFF_CRC,EXT_ARFF_COLUMNS);
 	
 	
+	// 每日预测数据（数据库和数据文件都是如此)的格式
+	public static final String[] DAILY_DATA_TO_PREDICT_FORMAT = FormatUtility.concatStrings(new String[]{ID},MODEL_ATTRIB_FORMAT_LEGACY);
 	
-	// 交易ARFF数据全集数据的格式 （从ID到均线策略，后面都和trainingarff的相同了）， 总共10个字段
+	// 每日预测扩展格式数据（数据库和数据文件都是如此)的格式
+	public static String[] DAILY_DATA_TO_PREDICT_FORMAT_NEW = FormatUtility.concatStrings(new String[]{ID},MODEL_ATTRIB_FORMAT_NEW);
+	
+	
+	// 交易ARFF数据全集数据的格式 （从ID到均线策略之前，后面都和trainingarff的相同了）， 总共10个字段
 	public static final String[] ORIGINAL_TRANSACTION_ARFF_FORMAT = { ID,
 			"yearmonth", TRADE_DATE, "code", SELL_DATE, "股票名称", "year",
 			DATA_DATE, IS_POSITIVE, SELECTED_AVG_LINE };
 
-	// 单次收益率增量数据的格式 （从ID到均线策略，后面都和dailyArff的相同了）
-	public static final String[] INCREMENTAL_ARFF_FORMAT = { ID, TRADE_DATE,
-			"code", SELL_DATE, DATA_DATE, IS_POSITIVE,
-			SELECTED_AVG_LINE };
+	// 单次收益率增量数据的格式 （从ID到均线策略之前的字段），后面都和dailyArff的相同了
+	private static final String[] INCREMENTAL_ARFF_FORMAT_LEFT = { ID, TRADE_DATE,
+			"code", SELL_DATE, DATA_DATE, IS_POSITIVE
+			 };
+	public static final String[] INCREMENTAL_ARFF_FORMAT_LEGACY=FormatUtility.concatStrings(INCREMENTAL_ARFF_FORMAT_LEFT,MODEL_ATTRIB_FORMAT_LEGACY);
+	public static final String[] INCREMENTAL_ARFF_FORMAT_NEW=FormatUtility.concatStrings(INCREMENTAL_ARFF_FORMAT_LEFT,MODEL_ATTRIB_FORMAT_NEW);
 
-	// 每日数据（数据库和数据文件都是如此)的格式
-	public static final String[] DAILY_DATA_TO_PREDICT_FORMAT = create_daily_data_to_predict();
+	//所有数据中需要作为STRING/nominal 处理的数据
+	private static final String[] NOMINAL_ATTRIBS={
+		TRADE_DATE, "code", SELL_DATE, 
+		DATA_DATE, SELECTED_AVG_LINE, 
+		"zhangdiefu",
+		"zhishu_code", "sw_zhishu_code",IS_SZ50 ,IS_HS300 , "iszz100",
+		IS_ZZ500, "issz100", "ishgtb", "isrzbd"
+	};
 	
-	// 每日扩展数据（数据库和数据文件都是如此)的格式
-	public static String[] EXT_DAILY_DATA_TO_PREDICT_FORMAT = create_ext_daily_data_to_predict();
-	
-	private static final String[] create_daily_data_to_predict(){
-		String[] formatString=new String[1+MODEL_ATTRIB_FORMAT_SHORT.length];
-		formatString[0]=ID;
-		System.arraycopy(MODEL_ATTRIB_FORMAT_SHORT, 0, formatString, 1, MODEL_ATTRIB_FORMAT_SHORT.length);
-		return formatString;
-	}
-
-
-	private static final String[] create_ext_daily_data_to_predict(){
-		String[] ext_formatString=new String[DAILY_DATA_TO_PREDICT_FORMAT.length+INCREMENTAL_EXT_ARFF_RIGHT.length+INCREMENTAL_EXT_ARFF_RIGHT2.length];//+INCREMENTAL_EXT_ARFF_RIGHT3.length];
-		System.arraycopy(DAILY_DATA_TO_PREDICT_FORMAT, 0, ext_formatString, 0, DAILY_DATA_TO_PREDICT_FORMAT.length);  
-		System.arraycopy(INCREMENTAL_EXT_ARFF_RIGHT, 0, ext_formatString, DAILY_DATA_TO_PREDICT_FORMAT.length, INCREMENTAL_EXT_ARFF_RIGHT.length);
-		System.arraycopy(INCREMENTAL_EXT_ARFF_RIGHT2, 0, ext_formatString, DAILY_DATA_TO_PREDICT_FORMAT.length+INCREMENTAL_EXT_ARFF_RIGHT.length,INCREMENTAL_EXT_ARFF_RIGHT2.length); 
-//		System.arraycopy(INCREMENTAL_EXT_ARFF_RIGHT3, 0, ext_formatString, DAILY_DATA_TO_PREDICT_FORMAT.length+INCREMENTAL_EXT_ARFF_RIGHT.length+INCREMENTAL_EXT_ARFF_RIGHT2.length,INCREMENTAL_EXT_ARFF_RIGHT3.length);
-		System.out.println("ext daily data to predict format: "+ext_formatString);
-		return ext_formatString;
-		
+	//返回给定数据集里与NOMINAL_ATTRIBS同名字段的位置字符串（从1开始），这主要是为filter使用
+	public static String findNominalAttribs(Instances data){
+		String nominalAttribPosition=null;
+		Attribute incomingAttribue=null;
+		for (int i = 0; i < NOMINAL_ATTRIBS.length; i++) {
+			incomingAttribue=data.attribute(NOMINAL_ATTRIBS[i]);
+			if (incomingAttribue!=null){
+				int pos=incomingAttribue.index()+1;//在内部的attribute index是0开始的
+				if (nominalAttribPosition==null){ //找到的第一个
+					nominalAttribPosition+=pos; 
+				}else{
+					nominalAttribPosition+=","+pos;
+				}
+			}
+		}
+		return nominalAttribPosition;
 	}
 	
 	// 从All Transaction Data中删除无关字段remove attribute: 3-9 (tradeDate到均线策略）

@@ -162,18 +162,6 @@ public class ProcessData {
 
 
 
-	protected static void addCalculationsToFile(String path, String arffName) throws Exception{
-		System.out.println("start to load File for data "  );
-		Instances fullSetData = FileUtility.loadDataFromFile(path+arffName + ".arff");
-		System.out.println("finish  loading fullset File  row : "
-				+ fullSetData.numInstances() + " column:"
-				+ fullSetData.numAttributes());
-		Instances result=ArffFormat.addCalculateAttribute(fullSetData);
-		FileUtility.SaveDataIntoFile(result, path+arffName+"-new.arff");
-		System.out.println("file saved "  );
-	}
-
-
 	//使用文件预测每天的增量数据
 	protected static void predictWithFile(BaseClassifier clModel, String pathName,
 			String dataFileName) throws Exception {
