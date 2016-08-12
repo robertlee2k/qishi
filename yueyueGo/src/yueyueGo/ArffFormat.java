@@ -4,18 +4,16 @@ import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Remove;
 
 public class ArffFormat {
 	public static final int LEGACY_FORMAT=-1;
 	public static final int EXT_FORMAT=2;
-	
-	public static final String LONG_ARFF_FILE = "AllTransaction20052016-ext-new.arff";//"AllTransaction20052016-new.arff"; // 包含计算字段的ARFF格式，这是提供给各输入属性独立的分类器使用的，如分类树
-	public static final String SHORT_ARFF_FILE = "AllTransaction20052016-ext-short.arff";//"AllTransaction20052016-short.arff";// 不包含计算字段的ARFF格式，这是提供给各输入属性独立的分类器使用的，如神经网络
+
+	public static final String TRANSACTION_ARFF_PREFIX="trans20052016-ext";//"AllTransaction20052016-ext";
+	public static final String LONG_ARFF_FILE = TRANSACTION_ARFF_PREFIX+"-new.arff";//"AllTransaction20052016-new.arff"; // 包含计算字段的ARFF格式，这是提供给各输入属性独立的分类器使用的，如分类树
+	public static final String SHORT_ARFF_FILE = TRANSACTION_ARFF_PREFIX+"-short.arff";//"AllTransaction20052016-short.arff";// 不包含计算字段的ARFF格式，这是提供给各输入属性独立的分类器使用的，如神经网络
 
 	
-//	public static final String SELECTED_MA = "均线策略";
 	public static final String SELECTED_AVG_LINE = "selected_avgline"; // 输入输出文件中的“均线策略”名称
 	public static final String IS_HS300 = "ishs300";
 	public static final String IS_ZZ500 = "iszz500";
@@ -42,30 +40,44 @@ public class ArffFormat {
 	public static final String INPUT_DATE_FORMAT = "yyyy/M/d";
 	// ARFF文件中的日期格式
 	public static final String ARFF_DATE_FORMAT = "M/d/yyyy";
-
+	
+	
 	// 用于training的数据顺序（最短格式，无计算字段的），这个是要过期的
-//	private static final String[] OLD_TRAINING_ARFF_SHORT_FORMAT = { "均线策略", "bias5",
-//			"bias10", "bias20", "bias30", "bias60", "bias5前日差", "bias10前日差",
-//			"bias20前日差", "bias30前日差", "bias60前日差", "bias5二日差", "bias10二日差",
-//			"bias20二日差", "bias30二日差", "bias60二日差", "ma5前日比", "ma10前日比",
-//			"ma20前日比", "ma30前日比", "ma60前日比", "ma5二日比", "ma10二日比", "ma20二日比",
-//			"ma30二日比", "ma60二日比", "ma5三日比", "ma10三日比", "ma20三日比", "ma30三日比",
-//			"ma60三日比", "ma5四日比", "ma10四日比", "ma20四日比", "ma30四日比", "ma60四日比",
-//			"ma5五日比", "ma10五日比", "ma20五日比", "ma30五日比", "ma60五日比", "涨跌幅", "换手率",
-//			"换手前日比", "换手二日比", "换手三日比", "指数code", "申万行业指数code", "属上证50指数",
-//			"属沪深300指数", "属中证100指数", "属中证500指数", "属深证100指数", "属沪股通标的", "属融资标的",
-//			"sw行业bias5", "sw行业bias10", "sw行业bias20", "sw行业bias30",
-//			"sw行业bias60", "swbias5前日差", "swbias10前日差", "swbias20前日差",
-//			"swbias30前日差", "swbias60前日差", "swbias5二日差", "swbias10二日差",
-//			"swbias20二日差", "swbias30二日差", "swbias60二日差", "指数bias5", "指数bias10",
-//			"指数bias20", "指数bias30", "指数bias60", "指数bias5前日差", "指数bias10前日差",
-//			"指数bias20前日差", "指数bias30前日差", "指数bias60前日差", "指数bias5二日差",
-//			"指数bias10二日差", "指数bias20二日差", "指数bias30二日差", "指数bias60二日差"
-//	};
+	@Deprecated
+	private static final String[] OLD_TRAINING_ARFF_SHORT_FORMAT = { "均线策略", "bias5",
+			"bias10", "bias20", "bias30", "bias60", "bias5前日差", "bias10前日差",
+			"bias20前日差", "bias30前日差", "bias60前日差", "bias5二日差", "bias10二日差",
+			"bias20二日差", "bias30二日差", "bias60二日差", "ma5前日比", "ma10前日比",
+			"ma20前日比", "ma30前日比", "ma60前日比", "ma5二日比", "ma10二日比", "ma20二日比",
+			"ma30二日比", "ma60二日比", "ma5三日比", "ma10三日比", "ma20三日比", "ma30三日比",
+			"ma60三日比", "ma5四日比", "ma10四日比", "ma20四日比", "ma30四日比", "ma60四日比",
+			"ma5五日比", "ma10五日比", "ma20五日比", "ma30五日比", "ma60五日比", "涨跌幅", "换手率",
+			"换手前日比", "换手二日比", "换手三日比", "指数code", "申万行业指数code", "属上证50指数",
+			"属沪深300指数", "属中证100指数", "属中证500指数", "属深证100指数", "属沪股通标的", "属融资标的",
+			"sw行业bias5", "sw行业bias10", "sw行业bias20", "sw行业bias30",
+			"sw行业bias60", "swbias5前日差", "swbias10前日差", "swbias20前日差",
+			"swbias30前日差", "swbias60前日差", "swbias5二日差", "swbias10二日差",
+			"swbias20二日差", "swbias30二日差", "swbias60二日差", "指数bias5", "指数bias10",
+			"指数bias20", "指数bias30", "指数bias60", "指数bias5前日差", "指数bias10前日差",
+			"指数bias20前日差", "指数bias30前日差", "指数bias60前日差", "指数bias5二日差",
+			"指数bias10二日差", "指数bias20二日差", "指数bias30二日差", "指数bias60二日差"
+	};
+	
+	@Deprecated
+	protected static Instances renameOldArffName(Instances oldInstances){
+		Attribute oldAttribute=null;
+		for (int i=0;i<OLD_TRAINING_ARFF_SHORT_FORMAT.length;i++){
+			oldAttribute=oldInstances.attribute(OLD_TRAINING_ARFF_SHORT_FORMAT[i]);
+			oldInstances.renameAttribute(oldAttribute, MODEL_ATTRIB_FORMAT_BASE[i]);
+			System.out.println("attribute renamed. from "+oldAttribute.name()+" ----->" + MODEL_ATTRIB_FORMAT_BASE[i]);
+		}
+		return oldInstances;
+	}
+
 	
 	
 	//模型用的训练字段 （最基础部分）
-	public static final String[] MODEL_ATTRIB_FORMAT_LEGACY={
+	public static final String[] MODEL_ATTRIB_FORMAT_BASE={
 		SELECTED_AVG_LINE, "bias5", "bias10", "bias20", "bias30",
 		"bias60", "bias5_preday_dif", "bias10_preday_dif",
 		"bias20_preday_dif", "bias30_preday_dif", "bias60_preday_dif",
@@ -103,7 +115,7 @@ public class ArffFormat {
 		,"circulation_marketVal_gears","PE_TTM","PE_TTM_gears","PE_LYR","PE_LYR_gears","listed_days_gears"	
 	};
 	//模型用的训练字段 （基础+扩展部分）
-	public static final String[] MODEL_ATTRIB_FORMAT_NEW=FormatUtility.concatStrings(MODEL_ATTRIB_FORMAT_LEGACY,MODEL_ATTRIB_EXT);
+	public static final String[] MODEL_ATTRIB_FORMAT_NEW=FormatUtility.concatStrings(MODEL_ATTRIB_FORMAT_BASE,MODEL_ATTRIB_EXT);
 	
 	
 	//每次新扩展ARFF格式的校验位
@@ -119,7 +131,7 @@ public class ArffFormat {
 	
 	
 	// 每日预测数据（数据库和数据文件都是如此)的格式
-	public static final String[] DAILY_DATA_TO_PREDICT_FORMAT = FormatUtility.concatStrings(new String[]{ID},MODEL_ATTRIB_FORMAT_LEGACY);
+	public static final String[] DAILY_DATA_TO_PREDICT_FORMAT = FormatUtility.concatStrings(new String[]{ID},MODEL_ATTRIB_FORMAT_BASE);
 	
 	// 每日预测扩展格式数据（数据库和数据文件都是如此)的格式
 	public static String[] DAILY_DATA_TO_PREDICT_FORMAT_NEW = FormatUtility.concatStrings(new String[]{ID},MODEL_ATTRIB_FORMAT_NEW);
@@ -131,7 +143,7 @@ public class ArffFormat {
 	};
 	// 单次收益率增量数据的格式 （从ID到均线策略之前的字段），后面都和dailyArff的相同了
 	private static final String[] TRANS_DATA_LEFT = FormatUtility.concatStrings(new String[]{ID},TRANS_DATA_NOT_SAVED_IN_ARFF);
-	public static final String[] TRANS_DATA_FORMAT_LEGACY=FormatUtility.concatStrings(TRANS_DATA_LEFT,MODEL_ATTRIB_FORMAT_LEGACY);
+	public static final String[] TRANS_DATA_FORMAT_LEGACY=FormatUtility.concatStrings(TRANS_DATA_LEFT,MODEL_ATTRIB_FORMAT_BASE);
 	public static final String[] TRANS_DATA_FORMAT_NEW=FormatUtility.concatStrings(TRANS_DATA_LEFT,MODEL_ATTRIB_FORMAT_NEW);
 
 	//所有数据中需要作为STRING/nominal 处理的数据
@@ -339,6 +351,7 @@ public class ArffFormat {
 		}
 		return result;
 	}
+
 
 
 }

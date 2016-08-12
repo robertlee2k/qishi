@@ -31,7 +31,7 @@ public class UpdateHistoryArffFile {
 	
 	protected static void createTransInstances() throws Exception {
 
-		String arffFileName=ProcessData.C_ROOT_DIRECTORY+ProcessData.TRANSACTION_ARFF_PREFIX;
+		String arffFileName=ProcessData.C_ROOT_DIRECTORY+ArffFormat.TRANSACTION_ARFF_PREFIX;
 		Instances rawData = mergeSrcTransFiles();
 		
 		//处理所有的日期字段，并插入yearmonth
@@ -86,6 +86,15 @@ public class UpdateHistoryArffFile {
 		return fullData;
 	}
 
+	@Deprecated
+	//用于将以前的Arff文件变量改名另存为CSV文件 （临时给SPSS使用 20160812）
+	protected static void renameOldArffFile() throws Exception{
+		Instances oldInstances=FileUtility.loadDataFromFile(ProcessData.C_ROOT_DIRECTORY+"AllTransaction20052016-ext-origin-backup.arff");
+		oldInstances=ArffFormat.renameOldArffName(oldInstances);
+		FileUtility.saveCSVFile(oldInstances, ProcessData.C_ROOT_DIRECTORY+"AllTransaction20052016-used201607.csv");
+	}
+	
+	
 	// replaced by compareRefreshedInstances which is more effecient 
 	//此方法用于比较原始文件和refreshed文件之间的差异
 	// 根据原始文件的格式ORIGINAL_TRANSACTION_ARFF_FORMAT
@@ -94,7 +103,7 @@ public class UpdateHistoryArffFile {
 	protected static void compareRefreshedInstancesForYear(int year,int checkSample) throws Exception {
 		
 		String splitSampleClause = "( ATT" + ArffFormat.YEAR_MONTH_INDEX + " >= " + year + "01) and ( ATT" + ArffFormat.YEAR_MONTH_INDEX+ " <= "	+ year + "12) ";
-		String filePrefix=ProcessData.C_ROOT_DIRECTORY+ProcessData.TRANSACTION_ARFF_PREFIX;
+		String filePrefix=ProcessData.C_ROOT_DIRECTORY+ArffFormat.TRANSACTION_ARFF_PREFIX;
 		Instances originData=FileUtility.loadDataFromFile(filePrefix+"-origin.arff");
 		originData=InstanceUtility.getInstancesSubset(originData, splitSampleClause);
 		
@@ -257,7 +266,7 @@ public class UpdateHistoryArffFile {
 	//这里是用最近一年的数据刷新最原始的文件，调整完再用processHistoryData生成有计算字段之后的数据
 	protected static void refreshArffFile(int startYear,int endYear) throws Exception {
 		System.out.println("loading original history file into memory "  );
-		String originFileName=ProcessData.C_ROOT_DIRECTORY+ProcessData.TRANSACTION_ARFF_PREFIX;
+		String originFileName=ProcessData.C_ROOT_DIRECTORY+ArffFormat.TRANSACTION_ARFF_PREFIX;
 		Instances fullData = FileUtility.loadDataFromFile(originFileName+"-origin.arff");
 		
 		//做这个处理是因为不知为何有时id之前会出现全角空格
@@ -366,7 +375,7 @@ public class UpdateHistoryArffFile {
 	//这是处理历史全量数据，重新切割生成各种长、短以及格式文件的方法
 	protected static void processHistoryFile() throws Exception {
 		System.out.println("loading history file into memory "  );
-		String originFileName=ProcessData.C_ROOT_DIRECTORY+ProcessData.TRANSACTION_ARFF_PREFIX;
+		String originFileName=ProcessData.C_ROOT_DIRECTORY+ArffFormat.TRANSACTION_ARFF_PREFIX;
 		Instances fullSetData = FileUtility.loadDataFromFile(originFileName+".arff");
 		System.out.println("finish  loading fullset File  row : "+ fullSetData.numInstances() + " column:"+ fullSetData.numAttributes());
 		generateArffFileSet(originFileName, fullSetData);

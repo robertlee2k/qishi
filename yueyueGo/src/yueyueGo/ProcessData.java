@@ -43,7 +43,6 @@ public class ProcessData {
 	public static final String CONTINOUS_CLASSIFIER_DIR = C_ROOT_DIRECTORY+"models\\02-连续分类器\\";
 	public static final String BACKTEST_RESULT_DIR=C_ROOT_DIRECTORY+"testResult\\";
 	public static final String PREDICT_WORK_DIR=C_ROOT_DIRECTORY+"03-预测模型\\";
-	public static final String TRANSACTION_ARFF_PREFIX="trans20052016-ext";//"AllTransaction20052016-ext";
 	public static final String RESULT_EXTENSION = "-Test Result.csv";
 	
 //	public static final String MLP_PREDICT_MODEL= "\\交易分析2005-2016 by month-new-mlp-201605 MA ";
@@ -63,8 +62,8 @@ public class ProcessData {
 	public static final String MLPAB_EVAL_MODEL="\\extData2005-2016 month-new-mlpAB-201606 MA ";
 	
 	public static final String[] splitYear ={
-//		"2008","2009","2010","2011","2012","2013","2014","2015","2016"
-		  "200801","200802","200803","200804","200805","200806","200807","200808","200809","200810","200811","200812","200901","200902","200903","200904","200905","200906","200907","200908","200909","200910","200911","200912","201001","201002","201003","201004","201005","201006","201007","201008","201009","201010","201011","201012","201101","201102","201103","201104","201105","201106","201107","201108","201109","201110","201111","201112","201201","201202","201203","201204","201205","201206","201207","201208","201209","201210","201211","201212","201301","201302","201303","201304","201305","201306","201307","201308","201309","201310","201311","201312","201401","201402","201403","201404","201405","201406","201407","201408","201409","201410","201411","201412","201501","201502","201503","201504","201505","201506","201507","201508","201509","201510","201511","201512","201601","201602","201603", "201604","201605","201606"
+		"2008","2009","2010","2011","2012","2013","2014","2015","2016"
+//		  "200801","200802","200803","200804","200805","200806","200807","200808","200809","200810","200811","200812","200901","200902","200903","200904","200905","200906","200907","200908","200909","200910","200911","200912","201001","201002","201003","201004","201005","201006","201007","201008","201009","201010","201011","201012","201101","201102","201103","201104","201105","201106","201107","201108","201109","201110","201111","201112","201201","201202","201203","201204","201205","201206","201207","201208","201209","201210","201211","201212","201301","201302","201303","201304","201305","201306","201307","201308","201309","201310","201311","201312","201401","201402","201403","201404","201405","201406","201407","201408","201409","201410","201411","201412","201501","201502","201503","201504","201505","201506","201507","201508","201509","201510","201511","201512","201601","201602","201603", "201604","201605","201606"
 		};
 
 	public static void main(String[] args) {
@@ -73,7 +72,7 @@ public class ProcessData {
 //			callDailyPredict();
 
 			//调用回测函数回测
-//			callTestBack();
+			callTestBack();
 			
 			//用最新的单次交易数据，更新原始的交易数据文件
 //			UpdateHistoryArffFile.callRefreshInstances();
@@ -84,7 +83,8 @@ public class ProcessData {
 			//合并历史扩展数据
 //			UpdateHistoryArffFile.mergeExtData();
 			
-			UpdateHistoryArffFile.createTransInstances();
+//			UpdateHistoryArffFile.createTransInstances();
+//			UpdateHistoryArffFile.renameOldArffFile();
 			
 		} catch (Exception e) {
 			
@@ -141,16 +141,16 @@ public class ProcessData {
 		//神经网络
 //		MLPClassifier nModel = new MLPClassifier();
 		MLPABClassifier nModel = new MLPABClassifier();
-		Instances nominalResult=testBackward(nModel);
+//		Instances nominalResult=testBackward(nModel);
 		//不真正回测了，直接从以前的结果文件中加载
-//		Instances nominalResult=loadBackTestResultFromFile(nModel.classifierName);
+		Instances nominalResult=loadBackTestResultFromFile(nModel.classifierName);
 
 		//按连续分类器回测历史数据
 //		M5PClassifier cModel=new M5PClassifier();
 		M5PABClassifier cModel=new M5PABClassifier();
-//		Instances continuousResult=testBackward(cModel);
+		Instances continuousResult=testBackward(cModel);
 		//不真正回测了，直接从以前的结果文件中加载
-		Instances continuousResult=loadBackTestResultFromFile(cModel.classifierName);
+//		Instances continuousResult=loadBackTestResultFromFile(cModel.classifierName);
 		
 		//统一输出统计结果
 		nModel.outputClassifySummary();
@@ -500,7 +500,7 @@ public class ProcessData {
 			formatFile="AllTransaction20052016-format.arff";
 			break;
 		case ArffFormat.EXT_FORMAT:
-			formatFile=TRANSACTION_ARFF_PREFIX+"-format.arff";
+			formatFile=ArffFormat.TRANSACTION_ARFF_PREFIX+"-format.arff";
 			break;
 		default:
 			break;
@@ -519,7 +519,7 @@ public class ProcessData {
 		
 		//TODO 过渡期 有少量模型尚使用原有格式
 		if (format==ArffFormat.EXT_FORMAT){
-			left=FileUtility.loadDataFromFile(C_ROOT_DIRECTORY+TRANSACTION_ARFF_PREFIX+"-left.arff");
+			left=FileUtility.loadDataFromFile(C_ROOT_DIRECTORY+ArffFormat.TRANSACTION_ARFF_PREFIX+"-left.arff");
 		}else if (format==ArffFormat.LEGACY_FORMAT){ //LEGACY 有少量模型尚使用原有格式
 			left=FileUtility.loadDataFromFile(C_ROOT_DIRECTORY+"AllTransaction20052016-left.arff");
 		}
