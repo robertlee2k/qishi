@@ -58,9 +58,8 @@ public class InstanceUtility {
 		options[1] = attribPos; // first attribute
 		Remove remove = new Remove(); // new instance of filter
 		remove.setOptions(options); // set options
-		remove.setInputFormat(data); // inform filter about dataset **AFTER**
-										// setting options
 		remove.setInvertSelection(invert);
+		remove.setInputFormat(data); // inform filter about dataset **AFTER** setting options
 		Instances newData = Filter.useFilter(data, remove); // apply filter
 		return newData;
 	}
@@ -162,13 +161,13 @@ public class InstanceUtility {
 					if (formatAtt.isNominal()) {
 						String label = curr.stringValue(incomingAtt);
 						if ("?".equals(label)){
-							System.out.println("Attribute value is empty. value= "+ label+" @ "+ incomingAttName );
+							System.out.println("Attribute value is empty. value= "+ label+" @ "+ incomingAttName + " current ID ="+curr.value(0));
 						}else {
 							int index = formatAtt.indexOfValue(label);
 							if (index != -1) {
 								inst.setValue(n, index);
 							}else{
-								throw new Exception("Attribute value is invalid. value= "+ label+" @ "+ incomingAttName + " & "+ formatAttName);
+								throw new Exception("Attribute value is invalid. value= "+ label+" @ "+ incomingAttName + " & "+ formatAttName+ " current ID ="+curr.value(0));
 							}
 						}
 					} else if (formatAtt.isString()) {

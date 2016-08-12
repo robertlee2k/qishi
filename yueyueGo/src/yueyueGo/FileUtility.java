@@ -54,7 +54,7 @@ public class FileUtility {
 		//读入数据后最后一行加上为空的收益率
 		datasrc = InstanceUtility.AddAttribute(datasrc, ArffFormat.SHOUYILV,datasrc.numAttributes());
 		// 对读入的数据校验以适应内部训练的arff格式
-		datasrc=ArffFormat.validateAttributeNames(datasrc,ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT_NEW,0);
+		datasrc=ArffFormat.validateAttributeNames(datasrc,ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT_NEW);
 
 		//全部读进来之后再转nominal，这里读入的数据可能只是子集，所以nominal的index值会不对，所以后续会用calibrateAttributes处理
 		String nominalAttribString=ArffFormat.findNominalAttribs(datasrc);
@@ -74,7 +74,7 @@ public class FileUtility {
 
 			Instances datasrc = loader.getDataSet();
 			// 对读入的数据字段名称校验 确保其顺序完全和内部训练的arff格式一致
-			datasrc=ArffFormat.validateAttributeNames(datasrc,ArffFormat.TRANS_DATA_FORMAT_NEW,0);
+			datasrc=ArffFormat.validateAttributeNames(datasrc,ArffFormat.TRANS_DATA_FORMAT_NEW);
 			
 			//数据先作为String全部读进来之后再看怎么转nominal，否则直接加载， nominal的值的顺序会和文件顺序有关，造成数据不对
 			String nominalAttribString=ArffFormat.findNominalAttribs(datasrc);
@@ -96,7 +96,7 @@ public class FileUtility {
 			Instances datasrc = loader.getDataSet();
 
 			// 对读入的数据字段名称校验 确保其顺序完全和内部训练的arff格式一致
-			datasrc=ArffFormat.validateAttributeNames(datasrc,ArffFormat.EXT_ARFF_FILE_FORMAT,0);
+			datasrc=ArffFormat.validateAttributeNames(datasrc,ArffFormat.EXT_ARFF_FILE_FORMAT);
 
 			
 			//数据先作为String全部读进来之后再看怎么转nominal，否则直接加载， nominal的值的顺序会和文件顺序有关，造成数据不对

@@ -100,6 +100,7 @@ public class ArffFormat {
 	private static final String[] MODEL_ATTRIB_EXT= {
 		"zhishu_quantity_preday_perc","zhishu_quantity_pre2day_perc","zhishu_quantity_pre3day_perc","zhishu_ma5_indicator","zhishu_ma10_indicator","zhishu_ma20_indicator","zhishu_ma30_indicator","zhishu_ma60_indicator","sw_ma5_indicator","sw_ma10_indicator","sw_ma20_indicator","sw_ma30_indicator","sw_ma60_indicator","ma5_signal_scale","ma10_signal_scale","ma20_signal_scale","ma30_signal_scale","ma60_signal_scale"
 		,"zhangdieting","shangying","xiaying","index_shangying","index_xiaying","yearhighbias","yearlowbias","monthhighbias","monthlowbias","index_yearhighbias","index_yearlowbias","index_monthhighbias","index_monthlowbias"
+		,"circulation_marketVal_gears","PE_TTM","PE_TTM_gears","PE_LYR","PE_LYR_gears","listed_days_gears"	
 	};
 	//模型用的训练字段 （基础+扩展部分）
 	public static final String[] MODEL_ATTRIB_FORMAT_NEW=FormatUtility.concatStrings(MODEL_ATTRIB_FORMAT_LEGACY,MODEL_ATTRIB_EXT);
@@ -136,8 +137,8 @@ public class ArffFormat {
 	//所有数据中需要作为STRING/nominal 处理的数据
 	private static final String[] NOMINAL_ATTRIBS={
 		TRADE_DATE, "code", SELL_DATE, 
-		DATA_DATE, SELECTED_AVG_LINE, 
-		"zhangdiefu",
+		DATA_DATE, SELECTED_AVG_LINE, IS_POSITIVE,
+		"zhangdieting",
 		"zhishu_code", "sw_zhishu_code",IS_SZ50 ,IS_HS300 , "iszz100",
 		IS_ZZ500, "issz100", "ishgtb", "isrzbd"
 	};
@@ -156,7 +157,7 @@ public class ArffFormat {
 			if (incomingAttribue!=null){
 				int pos=incomingAttribue.index()+1;//在内部的attribute index是0开始的
 				if (nominalAttribPosition==null){ //找到的第一个
-					nominalAttribPosition+=pos; 
+					nominalAttribPosition=new Integer(pos).toString(); 
 				}else{
 					nominalAttribPosition+=","+pos;
 				}
@@ -177,7 +178,7 @@ public class ArffFormat {
 	private static final String[] TRANS_DATA_LEFT_PART = { ID,
 			"yearmonth", TRADE_DATE, "code", SELL_DATE,  
 			DATA_DATE, IS_POSITIVE, SELECTED_AVG_LINE,"bias5",IS_SZ50 ,IS_HS300 , 
-			IS_ZZ500 };
+			IS_ZZ500,SHOUYILV };
 
 	// 此方法从All Transaction Data中保留计算收益率的相关字段，以及最后的收益率，删除其他计算字段
 	public static Instances getTransLeftPartFromAllTransaction(Instances allData)
@@ -266,22 +267,26 @@ public class ArffFormat {
 	}
 
 	// 将输入文件和standardFormat数据字段名称顺序对比 ，不一致则报错。
-	//	bypassColumnCount是指data中需要忽略掉的colum数
-	public static Instances validateAttributeNames(Instances data,String[] standardFormat,
-			int bypassColumnCount) throws Exception {
+	public static Instances validateAttributeNames(Instances data,String[] standardFormat) throws Exception {
 		String incomingColumnName=null;
+		int ignoredColumns=0; //当需要忽略standardFormat中的某列时
 		for (int i = 0; i < standardFormat.length; i++) {
-			incomingColumnName=data.attribute(i + bypassColumnCount).name();
+			incomingColumnName=data.attribute(i + ignoredColumns).name();
 			if (incomingColumnName.equals(standardFormat[i])){
 				System.out.println("PASSED. input data column name ["
 						+ incomingColumnName
 						+ "] equals to model attribuate name ["
 						+ standardFormat[i] + "]");
 			}else {
-				throw new Exception("input data column name is invalid! input column="+incomingColumnName+ " valid column should be:"+standardFormat[i]);
+				//TODO 暂时忽略沪股通标志
+				if (incomingColumnName.equals("isrzbd") && standardFormat[i].equals("ishgtb")){
+					ignoredColumns-=1; //忽略standFormat里的这个沪股通字段
+				}else{
+					throw new Exception("input data column name is invalid! input column="+incomingColumnName+ " valid column should be:"+standardFormat[i]);
+				}
 			}
 		}
-		for (int j=bypassColumnCount+standardFormat.length;j<data.numAttributes();j++){
+		for (int j=standardFormat.length;j<data.numAttributes();j++){
 			incomingColumnName=data.attribute(j).name();
 			System.out.println("WARNING!!!! input data has additional column. name="+incomingColumnName);
 		}

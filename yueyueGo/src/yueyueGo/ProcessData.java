@@ -506,11 +506,11 @@ public class ProcessData {
 			break;
 		}
 
-		Instances format=FileUtility.loadDataFromFile(C_ROOT_DIRECTORY+formatFile);
-		format=InstanceUtility.removeAttribs(format, "2");
-		System.out.println("!!!!!verifying input data format , you should read this .... "+ format.equalHeadersMsg(incomingData));
-		InstanceUtility.calibrateAttributes(incomingData, format);
-		return format;
+		Instances outputData=FileUtility.loadDataFromFile(C_ROOT_DIRECTORY+formatFile);
+		outputData=InstanceUtility.removeAttribs(outputData, "2");
+		System.out.println("!!!!!verifying input data format , you should read this .... "+ outputData.equalHeadersMsg(incomingData));
+		InstanceUtility.calibrateAttributes(incomingData, outputData);
+		return outputData;
 	}
 
 	protected static Instances mergeResultWithData(Instances resultData,Instances referenceData,String dataToAdd,int format) throws Exception{

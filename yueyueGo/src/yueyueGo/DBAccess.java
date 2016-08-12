@@ -69,7 +69,7 @@ public class DBAccess  {
 		//读入数据后最后一行加上为空的收益率
 		data = InstanceUtility.AddAttribute(data, ArffFormat.SHOUYILV,data.numAttributes());
 		// 对读入的数据字段名称校验 确保其顺序完全和内部训练的arff格式一致
-		data=ArffFormat.validateAttributeNames(data,validateFormat,0);
+		data=ArffFormat.validateAttributeNames(data,validateFormat);
 		//全部读进来之后再转nominal，这里读入的数据可能只是子集，所以nominal的index值会不对，所以后续会用calibrateAttributes处理
 		String nominalAttribString=ArffFormat.findNominalAttribs(data);
 		data=InstanceUtility.numToNominal(data, nominalAttribString);//"2,48-56");
