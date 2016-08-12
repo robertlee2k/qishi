@@ -29,7 +29,7 @@ public abstract class BaseClassifier {
 	public String WORK_FILE_PREFIX;
 	
 
-	public boolean noCaculationAttrib=true;  //缺省情况下，限制输入文件中的计算字段 （在子类中覆盖）
+	public boolean m_noCaculationAttrib=true;  //缺省情况下，限制输入文件中的计算字段 （在子类中覆盖）
 	public int arff_format=ArffFormat.EXT_FORMAT; //缺省使用扩展arff
 
 	//用于策略分组

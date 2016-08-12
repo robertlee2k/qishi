@@ -71,6 +71,9 @@ public class ProcessData {
 			//用模型预测每日增量数据
 //			callDailyPredict();
 
+			//添加计算字段
+			UpdateHistoryArffFile.addCalculationsToFile(C_ROOT_DIRECTORY, ArffFormat.TRANSACTION_ARFF_PREFIX);
+			
 			//调用回测函数回测
 			callTestBack();
 			
@@ -84,7 +87,8 @@ public class ProcessData {
 //			UpdateHistoryArffFile.mergeExtData();
 			
 //			UpdateHistoryArffFile.createTransInstances();
-//			UpdateHistoryArffFile.renameOldArffFile();
+			
+			
 			
 		} catch (Exception e) {
 			
@@ -146,8 +150,8 @@ public class ProcessData {
 		Instances nominalResult=loadBackTestResultFromFile(nModel.classifierName);
 
 		//按连续分类器回测历史数据
-//		M5PClassifier cModel=new M5PClassifier();
-		M5PABClassifier cModel=new M5PABClassifier();
+		M5PClassifier cModel=new M5PClassifier();
+//		M5PABClassifier cModel=new M5PABClassifier();
 		Instances continuousResult=testBackward(cModel);
 		//不真正回测了，直接从以前的结果文件中加载
 //		Instances continuousResult=loadBackTestResultFromFile(cModel.classifierName);
@@ -195,7 +199,7 @@ public class ProcessData {
 		Instances fullData=calibrateAttributesForDailyData(pathName, inData,clModel.arff_format);
 	
 		//如果模型需要计算字段，则把计算字段加上
-		if (clModel.noCaculationAttrib==false){
+		if (clModel.m_noCaculationAttrib==false){
 			fullData=ArffFormat.addCalculateAttribute(fullData);		
 		}
 		
@@ -312,7 +316,7 @@ public class ProcessData {
 
 				// 根据模型来决定是否要使用有计算字段的ARFF
 				String arffFile=null;
-				if (clModel.noCaculationAttrib==true){
+				if (clModel.m_noCaculationAttrib==true){
 					arffFile=ArffFormat.SHORT_ARFF_FILE;
 				}else{
 					arffFile=ArffFormat.LONG_ARFF_FILE;

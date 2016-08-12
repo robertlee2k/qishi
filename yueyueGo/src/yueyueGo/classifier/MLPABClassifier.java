@@ -92,7 +92,7 @@ public class MLPABClassifier extends NominalClassifier {
 		classifierName="mlpAB";
 		WORK_PATH =WORK_PATH+classifierName+"\\";
 		
-		noCaculationAttrib=true; //这个模型是用短格式的
+		m_noCaculationAttrib=true; //这个模型是用短格式的
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = true;
 		m_skipEvalInBacktest = true;

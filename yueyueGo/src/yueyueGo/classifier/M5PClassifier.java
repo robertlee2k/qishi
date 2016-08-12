@@ -119,13 +119,14 @@ public class M5PClassifier extends ContinousClassifier {
 		super();
 		classifierName = "m5p";
 		WORK_PATH =WORK_PATH+classifierName+"\\";
+		m_noCaculationAttrib=false; //添加计算字段
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
-		m_skipTrainInBacktest = true;
-		m_skipEvalInBacktest = true;
+		m_skipTrainInBacktest = false;
+		m_skipEvalInBacktest = false;
 		m_sepeperate_eval_HS300=false;//单独为HS300评估阀值
 		m_seperate_classify_HS300=false; //M5P不适用沪深300，缺省不单独评估HS300
-		//TODO 试验旧模型
-		arff_format=ArffFormat.LEGACY_FORMAT; 
+//		//TODO 试验旧模型
+//		arff_format=ArffFormat.LEGACY_FORMAT; 
 		EVAL_RECENT_PORTION = 0.9; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
 		SAMPLE_LOWER_LIMIT = new double[]{ 0.03, 0.03, 0.03, 0.03, 0.03 }; // 各条均线选择样本的下限 
 		SAMPLE_UPPER_LIMIT = new double[]  { 0.06, 0.07, 0.1, 0.11, 0.12 };
