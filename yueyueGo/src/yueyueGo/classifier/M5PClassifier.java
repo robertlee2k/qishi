@@ -121,8 +121,8 @@ public class M5PClassifier extends ContinousClassifier {
 		WORK_PATH =WORK_PATH+classifierName+"\\";
 		m_noCaculationAttrib=false; //添加计算
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
-		m_skipTrainInBacktest = false;
-		m_skipEvalInBacktest = false;
+		m_skipTrainInBacktest = true;
+		m_skipEvalInBacktest = true;
 		m_sepeperate_eval_HS300=false;//单独为HS300评估阀值
 		m_seperate_classify_HS300=false; //M5P不适用沪深300，缺省不单独评估HS300
 //		//TODO 试验旧模型

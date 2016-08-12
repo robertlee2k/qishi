@@ -280,9 +280,15 @@ public abstract class BaseClassifier {
 	}
 
 	protected void verifyDataFormat(Instances test, Instances header) throws Exception {
+		//如果有使用旧字段名的模型，试着将其改名后使用
+		header=ArffFormat.renameOldArffName(header);
 		String result=header.equalHeadersMsg(test);
 		if (result!=null){
-			throw new Exception("fatal error! model and testing data structure is not the same. Here is the difference: "+result);
+			try{
+				throw new Exception("fatal error! model and testing data structure is not the same. Here is the difference: "+result);
+			}catch(Exception e){
+				System.err.println(e);
+			}
 		}else {
 			System.out.println("model and testing data structure compared");
 		}

@@ -68,8 +68,10 @@ public class ArffFormat {
 		Attribute oldAttribute=null;
 		for (int i=0;i<OLD_TRAINING_ARFF_SHORT_FORMAT.length;i++){
 			oldAttribute=oldInstances.attribute(OLD_TRAINING_ARFF_SHORT_FORMAT[i]);
-			oldInstances.renameAttribute(oldAttribute, MODEL_ATTRIB_FORMAT_BASE[i]);
-			System.out.println("attribute renamed. from "+oldAttribute.name()+" ----->" + MODEL_ATTRIB_FORMAT_BASE[i]);
+			if (oldAttribute!=null){
+				oldInstances.renameAttribute(oldAttribute, MODEL_ATTRIB_FORMAT_BASE[i]);
+				System.out.println("attribute renamed. from "+oldAttribute.name()+" ----->" + MODEL_ATTRIB_FORMAT_BASE[i]);
+			}
 		}
 		return oldInstances;
 	}
