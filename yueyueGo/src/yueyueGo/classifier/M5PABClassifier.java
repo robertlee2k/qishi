@@ -36,7 +36,7 @@ public class M5PABClassifier extends ContinousClassifier {
 		classifierName = "m5pAB";
 		WORK_PATH =WORK_PATH+classifierName+"\\";
 		m_noCaculationAttrib=false; //添加计算字段
-		m_skipTrainInBacktest = false;
+		m_skipTrainInBacktest = true;
 		m_skipEvalInBacktest = false;
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_sepeperate_eval_HS300=false;//单独为HS300评估阀值
