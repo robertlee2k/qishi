@@ -3,7 +3,6 @@ package yueyueGo.classifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.trees.M5P;
 import weka.core.Instances;
-import yueyueGo.ArffFormat;
 import yueyueGo.ContinousClassifier;
 
 

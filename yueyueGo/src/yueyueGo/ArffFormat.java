@@ -68,7 +68,7 @@ public class ArffFormat {
 		Attribute oldAttribute=null;
 		for (int i=0;i<OLD_TRAINING_ARFF_SHORT_FORMAT.length;i++){
 			oldAttribute=oldInstances.attribute(OLD_TRAINING_ARFF_SHORT_FORMAT[i]);
-			if (oldAttribute!=null){
+			if (oldAttribute!=null && (oldAttribute.name().equals(MODEL_ATTRIB_FORMAT_BASE[i])==false)){
 				oldInstances.renameAttribute(oldAttribute, MODEL_ATTRIB_FORMAT_BASE[i]);
 				System.out.println("attribute renamed. from "+oldAttribute.name()+" ----->" + MODEL_ATTRIB_FORMAT_BASE[i]);
 			}
@@ -114,7 +114,7 @@ public class ArffFormat {
 	private static final String[] MODEL_ATTRIB_EXT= {
 		"zhishu_quantity_preday_perc","zhishu_quantity_pre2day_perc","zhishu_quantity_pre3day_perc","zhishu_ma5_indicator","zhishu_ma10_indicator","zhishu_ma20_indicator","zhishu_ma30_indicator","zhishu_ma60_indicator","sw_ma5_indicator","sw_ma10_indicator","sw_ma20_indicator","sw_ma30_indicator","sw_ma60_indicator","ma5_signal_scale","ma10_signal_scale","ma20_signal_scale","ma30_signal_scale","ma60_signal_scale"
 		,"zhangdieting","shangying","xiaying","index_shangying","index_xiaying","yearhighbias","yearlowbias","monthhighbias","monthlowbias","index_yearhighbias","index_yearlowbias","index_monthhighbias","index_monthlowbias"
-		,"circulation_marketVal_gears","PE_TTM","PE_TTM_gears","PE_LYR","PE_LYR_gears","listed_days_gears"	
+		,"circulation_marketVal_gears","PE_TTM","PE_TTM_gears","PE_LYR","PE_LYR_gears","listed_days_gears","is_st"	
 	};
 	//模型用的训练字段 （基础+扩展部分）
 	public static final String[] MODEL_ATTRIB_FORMAT_NEW=FormatUtility.concatStrings(MODEL_ATTRIB_FORMAT_BASE,MODEL_ATTRIB_EXT);
@@ -126,7 +126,7 @@ public class ArffFormat {
 	};
 	//每次新扩展ARFF格式增加的数据
 	public static final String[] EXT_ARFF_COLUMNS= {
-		"circulation_marketVal_gears","PE_TTM","PE_TTM_gears","PE_LYR","PE_LYR_gears","listed_days_gears"	
+		"circulation_marketVal_gears","PE_TTM","PE_TTM_gears","PE_LYR","PE_LYR_gears","listed_days_gears","is_st"	
 	};
 	//每次新扩展ARFF文件整体格式
 	public static final String[] EXT_ARFF_FILE_FORMAT= FormatUtility.concatStrings(EXT_ARFF_CRC,EXT_ARFF_COLUMNS);
@@ -154,7 +154,7 @@ public class ArffFormat {
 		DATA_DATE, SELECTED_AVG_LINE, IS_POSITIVE,
 		"zhangdieting",
 		"zhishu_code", "sw_zhishu_code",IS_SZ50 ,IS_HS300 , "iszz100",
-		IS_ZZ500, "issz100", "ishgtb", "isrzbd"
+		IS_ZZ500, "issz100", "ishgtb", "isrzbd","is_st"
 	};
 	
 	//返回给定数据集里与NOMINAL_ATTRIBS同名字段的位置字符串（从1开始），这主要是为filter使用
@@ -202,8 +202,7 @@ public class ArffFormat {
 		return result;
 	}
 
-	// 为原始的Arff文件加上计算属性，拟取消
-	@Deprecated
+	// 为原始的Arff文件加上计算属性
 	public static Instances addCalculateAttribute(Instances data) {
 		Instances result = new Instances(data, 0);
 

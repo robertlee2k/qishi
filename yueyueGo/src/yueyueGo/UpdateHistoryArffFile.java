@@ -75,8 +75,11 @@ public class UpdateHistoryArffFile {
 		Instances addData = FileUtility.loadDataFromIncrementalCSVFile(sourceFilePrefix+"2007-2008.txt");
 		fullData=InstanceUtility.mergeTwoInstances(fullData, addData);
 		System.out.println("merged one File,now row : "+ fullData.numInstances() + " column:"+ fullData.numAttributes());
+		addData = FileUtility.loadDataFromIncrementalCSVFile(sourceFilePrefix+"2009-2010.txt");
+		fullData=InstanceUtility.mergeTwoInstances(fullData, addData);
+		System.out.println("merged one File,now row : "+ fullData.numInstances() + " column:"+ fullData.numAttributes());
 		
-		int startYear=2009;
+		int startYear=2011;
 		int endYear=2016;
 		for (int i=startYear;i<=endYear;i++){
 			addData = FileUtility.loadDataFromIncrementalCSVFile(sourceFilePrefix+i+".txt");
@@ -406,8 +409,8 @@ public class UpdateHistoryArffFile {
 		FileUtility.SaveDataIntoFile(result, originFileName+"-short.arff");
 		
 		//添加计算字段
-//		result=ArffFormat.addCalculateAttribute(result);
-//		FileUtility.SaveDataIntoFile(result, originFileName+"-new.arff");
+		result=ArffFormat.addCalculateAttribute(result);
+		FileUtility.SaveDataIntoFile(result, originFileName+"-new.arff");
 		System.out.println("full Set Data File saved "  );
 
 	}
