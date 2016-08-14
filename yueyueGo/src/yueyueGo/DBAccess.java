@@ -28,7 +28,7 @@ public class DBAccess  {
 			break;
 		case ArffFormat.EXT_FORMAT:
 			target_columns=ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT_NEW;
-			target_view="t_stock_avgline_increment_zuixin_group3";
+			target_view="t_stock_avgline_increment_zuixin_group4"; //"t_stock_avgline_increment_zuixin_group3";
 			break;			
 		default:
 			break;
