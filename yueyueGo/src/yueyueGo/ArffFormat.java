@@ -327,17 +327,12 @@ public class ArffFormat {
 						+ "] equals to model attribuate name ["
 						+ standardFormat[i] + "]");
 			}else {
-//				//TODO 暂时忽略沪股通标志
-//				if (incomingColumnName.equals("isrzbd") && standardFormat[i].equals("ishgtb")){
-//					ignoredColumns-=1; //忽略standFormat里的这个沪股通字段
-//				}else{
-					throw new Exception("input data column name is invalid! input column="+incomingColumnName+ " valid column should be:"+standardFormat[i]);
-//				}
+				throw new Exception("input data column name is invalid! input column="+incomingColumnName+ " valid column should be:"+standardFormat[i]);
 			}
 		}
 		for (int j=standardFormat.length;j<data.numAttributes();j++){
 			incomingColumnName=data.attribute(j).name();
-			System.out.println("WARNING!!!! input data has additional column. name="+incomingColumnName);
+			System.err.println("WARNING!!!! input data has additional column. name="+incomingColumnName);
 		}
 		return data;
 	}
