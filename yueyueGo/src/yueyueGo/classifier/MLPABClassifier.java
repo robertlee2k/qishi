@@ -141,7 +141,7 @@ public class MLPABClassifier extends NominalClassifier {
 		int inputYear=Integer.parseInt(yearSplit.substring(0,4));
 		
 		// TODO: 临时处理
-		if (inputYear>2010) inputYear=2010;
+		if (inputYear>2010 && inputYear<2016) inputYear=2010;
 
 		String filename=this.WORK_PATH+this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + inputYear + MA_PREFIX + policySplit;//如果使用固定模型
 		
