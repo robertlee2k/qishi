@@ -64,13 +64,50 @@ public class ArffFormat {
 	};
 	
 	@Deprecated
+	private static final String[] OLD_TRAINING_ATTRIB_MAPPER = {
+		SELECTED_AVG_LINE, "bias5", "bias10", "bias20", "bias30",
+		"bias60", "bias5_preday_dif", "bias10_preday_dif",
+		"bias20_preday_dif", "bias30_preday_dif", "bias60_preday_dif",
+		"bias5_pre2day_dif", "bias10_pre2day_dif", "bias20_pre2day_dif",
+		"bias30_pre2day_dif", "bias60_pre2day_dif", "ma5_preday_perc",
+		"ma10_preday_perc", "ma20_preday_perc", "ma30_preday_perc",
+		"ma60_preday_perc", "ma5_pre2day_perc", "ma10_pre2day_perc",
+		"ma20_pre2day_perc", "ma30_pre2day_perc", "ma60_pre2day_perc",
+		"ma5_pre3day_perc", "ma10_pre3day_perc", "ma20_pre3day_perc",
+		"ma30_pre3day_perc", "ma60_pre3day_perc", "ma5_pre4day_perc",
+		"ma10_pre4day_perc", "ma20_pre4day_perc", "ma30_pre4day_perc",
+		"ma60_pre4day_perc", "ma5_pre5day_perc", "ma10_pre5day_perc",
+		"ma20_pre5day_perc", "ma30_pre5day_perc", "ma60_pre5day_perc",
+		"zhangdiefu", "huanshoulv", "huanshoulv_preday_perc",
+		"huanshoulv_pre2day_perc", "huanshoulv_pre3day_perc",
+		"zhishu_code", "sw_zhishu_code",IS_SZ50 ,IS_HS300 , "iszz100",
+		IS_ZZ500, "issz100",
+		"ishgtb",
+		"isrzbd", "sw_bias5", "sw_bias10",
+		"sw_bias20", "sw_bias30", "sw_bias60", "sw_bias5_preday_dif",
+		"sw_bias10_preday_dif", "sw_bias20_preday_dif",
+		"sw_bias30_preday_dif", "sw_bias60_preday_dif",
+		"sw_bias5_pre2day_dif", "sw_bias10_pre2day_dif",
+		"sw_bias20_pre2day_dif", "sw_bias30_pre2day_dif",
+		"sw_bias60_pre2day_dif", "zhishu_bias5", "zhishu_bias10",
+		"zhishu_bias20", "zhishu_bias30", "zhishu_bias60",
+		"zhishu_bias5_preday_dif", "zhishu_bias10_preday_dif",
+		"zhishu_bias20_preday_dif", "zhishu_bias30_preday_dif",
+		"zhishu_bias60_preday_dif", "zhishu_bias5_pre2day_dif",
+		"zhishu_bias10_pre2day_dif", "zhishu_bias20_pre2day_dif",
+		"zhishu_bias30_pre2day_dif", "zhishu_bias60_pre2day_dif"
+	};
+	// 每日预测数据（数据库和数据文件都是如此)的旧格式
+	public static final String[] DAILY_DATA_TO_PREDICT_FORMAT_LEGACY = FormatUtility.concatStrings(new String[]{ID},OLD_TRAINING_ATTRIB_MAPPER);
+	
+	@Deprecated
 	protected static Instances renameOldArffName(Instances oldInstances){
 		Attribute oldAttribute=null;
 		for (int i=0;i<OLD_TRAINING_ARFF_SHORT_FORMAT.length;i++){
 			oldAttribute=oldInstances.attribute(OLD_TRAINING_ARFF_SHORT_FORMAT[i]);
-			if (oldAttribute!=null && (oldAttribute.name().equals(MODEL_ATTRIB_FORMAT_BASE[i])==false)){
-				oldInstances.renameAttribute(oldAttribute, MODEL_ATTRIB_FORMAT_BASE[i]);
-				System.out.println("attribute renamed. from "+oldAttribute.name()+" ----->" + MODEL_ATTRIB_FORMAT_BASE[i]);
+			if (oldAttribute!=null && (oldAttribute.name().equals(OLD_TRAINING_ATTRIB_MAPPER[i])==false)){
+				oldInstances.renameAttribute(oldAttribute, OLD_TRAINING_ATTRIB_MAPPER[i]);
+				System.out.println("attribute renamed. from "+oldAttribute.name()+" ----->" + OLD_TRAINING_ATTRIB_MAPPER[i]);
 			}
 		}
 		return oldInstances;
@@ -134,8 +171,6 @@ public class ArffFormat {
 	public static final String[] EXT_ARFF_FILE_FORMAT= FormatUtility.concatStrings(EXT_ARFF_CRC,EXT_ARFF_COLUMNS);
 	
 	
-	// 每日预测数据（数据库和数据文件都是如此)的格式
-	public static final String[] DAILY_DATA_TO_PREDICT_FORMAT = FormatUtility.concatStrings(new String[]{ID},MODEL_ATTRIB_FORMAT_BASE);
 	
 	// 每日预测扩展格式数据（数据库和数据文件都是如此)的格式
 	public static String[] DAILY_DATA_TO_PREDICT_FORMAT_NEW = FormatUtility.concatStrings(new String[]{ID},MODEL_ATTRIB_FORMAT_NEW);
@@ -147,7 +182,6 @@ public class ArffFormat {
 	};
 	// 单次收益率增量数据的格式 （从ID到均线策略之前的字段），后面都和dailyArff的相同了
 	private static final String[] TRANS_DATA_LEFT = FormatUtility.concatStrings(new String[]{ID},TRANS_DATA_NOT_SAVED_IN_ARFF);
-	public static final String[] TRANS_DATA_FORMAT_LEGACY=FormatUtility.concatStrings(TRANS_DATA_LEFT,MODEL_ATTRIB_FORMAT_BASE);
 	public static final String[] TRANS_DATA_FORMAT_NEW=FormatUtility.concatStrings(TRANS_DATA_LEFT,MODEL_ATTRIB_FORMAT_NEW);
 
 	//所有数据中需要作为STRING/nominal 处理的数据
@@ -293,12 +327,12 @@ public class ArffFormat {
 						+ "] equals to model attribuate name ["
 						+ standardFormat[i] + "]");
 			}else {
-				//TODO 暂时忽略沪股通标志
-				if (incomingColumnName.equals("isrzbd") && standardFormat[i].equals("ishgtb")){
-					ignoredColumns-=1; //忽略standFormat里的这个沪股通字段
-				}else{
+//				//TODO 暂时忽略沪股通标志
+//				if (incomingColumnName.equals("isrzbd") && standardFormat[i].equals("ishgtb")){
+//					ignoredColumns-=1; //忽略standFormat里的这个沪股通字段
+//				}else{
 					throw new Exception("input data column name is invalid! input column="+incomingColumnName+ " valid column should be:"+standardFormat[i]);
-				}
+//				}
 			}
 		}
 		for (int j=standardFormat.length;j<data.numAttributes();j++){

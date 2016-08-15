@@ -23,7 +23,7 @@ public class DBAccess  {
 		
 		switch (format) {
 		case ArffFormat.LEGACY_FORMAT:
-			target_columns=ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT;
+			target_columns=ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT_LEGACY;
 			target_view="t_stock_avgline_increment_zuixin_v";
 			break;
 		case ArffFormat.EXT_FORMAT:
@@ -49,7 +49,7 @@ public class DBAccess  {
 		String[] validateFormat=null;
 		switch (format) {
 		case ArffFormat.LEGACY_FORMAT:
-			validateFormat=ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT;
+			validateFormat=ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT_LEGACY;
 			break;
 		case ArffFormat.EXT_FORMAT:
 			validateFormat=ArffFormat.DAILY_DATA_TO_PREDICT_FORMAT_NEW;

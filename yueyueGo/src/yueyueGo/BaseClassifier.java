@@ -280,8 +280,10 @@ public abstract class BaseClassifier {
 	}
 
 	protected void verifyDataFormat(Instances test, Instances header) throws Exception {
-		//如果有使用旧字段名的模型，试着将其改名后使用
-		header=ArffFormat.renameOldArffName(header);
+		//在使用旧格式时，如果有使用旧字段名的模型，试着将其改名后使用
+		if (arff_format==ArffFormat.LEGACY_FORMAT){
+			header=ArffFormat.renameOldArffName(header);
+		}
 		String result=header.equalHeadersMsg(test);
 		if (result!=null){
 			try{
