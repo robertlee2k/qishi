@@ -82,16 +82,16 @@ public class M5PABClassifier extends ContinousClassifier {
 		return classifier;
 	}
 	
-//	@Override
-//	public Classifier loadModel(String yearSplit, String policySplit) throws Exception{
-//		//这是为M5PAP单独准备的模型，模型文件是按年读取，但evaluation文件不变仍按月
-//		int inputYear=Integer.parseInt(yearSplit.substring(0,4));
-//
-//		String filename=this.WORK_PATH+this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + inputYear + MA_PREFIX + policySplit;//如果使用固定模型
-//		
-//		this.setModelFileName(filename);
-//
-//	
-//		return loadModelFromFile();
-//	}	
+	@Override
+	public Classifier loadModel(String yearSplit, String policySplit) throws Exception{
+		//这是为M5PAP单独准备的模型，模型文件是按年读取，但evaluation文件不变仍按月
+		int inputYear=Integer.parseInt(yearSplit.substring(0,4));
+
+		String filename=this.WORK_PATH+this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + inputYear + MA_PREFIX + policySplit;//如果使用固定模型
+		
+		this.setModelFileName(filename);
+
+	
+		return loadModelFromFile();
+	}	
 }
