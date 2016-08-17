@@ -2,13 +2,13 @@ package yueyueGo.classifier;
 //attribution Selection for M5P 用主成份分析法
 
 
-import weka.attributeSelection.PrincipalComponents;
 import weka.attributeSelection.Ranker;
 import weka.classifiers.Classifier;
 import weka.classifiers.meta.AttributeSelectedClassifier;
 import weka.classifiers.trees.M5P;
 import weka.core.Instances;
 import yueyueGo.ContinousClassifier;
+import yueyueGo.MyPrincipalComponents;
 
 
 // 2016-07-19 选择 
@@ -47,8 +47,8 @@ public class M5PABClassifier extends ContinousClassifier {
 		classifierName = "m5pAB";
 		WORK_PATH =WORK_PATH+classifierName+"\\";
 		m_noCaculationAttrib=false; //添加计算字段
-		m_skipTrainInBacktest = true;
-		m_skipEvalInBacktest = true;
+		m_skipTrainInBacktest = false;
+		m_skipEvalInBacktest = false;
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_sepeperate_eval_HS300=false;//单独为HS300评估阀值
 		m_seperate_classify_HS300=false; //M5P不适用沪深300，缺省不单独评估HS300
@@ -70,7 +70,7 @@ public class M5PABClassifier extends ContinousClassifier {
 //		classifier.setEvaluator(eval);
 //		classifier.setSearch(search);
 
-		PrincipalComponents pca = new PrincipalComponents();
+		MyPrincipalComponents pca = new MyPrincipalComponents();
 		Ranker rank = new Ranker();
 		classifier.setEvaluator(pca);
 		classifier.setSearch(rank);	
@@ -89,6 +89,8 @@ public class M5PABClassifier extends ContinousClassifier {
 	
 		classifier.buildClassifier(train);
 		System.out.println("finish buiding m5p-AB model. minNumObj value:"+minNumObj);
+		pca.cleanUpInstanceAfterBuilt();
+		System.out.println("clean the PCA");
 
 		return classifier;
 	}
