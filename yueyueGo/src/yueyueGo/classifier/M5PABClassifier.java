@@ -29,6 +29,17 @@ import yueyueGo.ContinousClassifier;
 //Monthly summary_judge_result summary: good number= 281 bad number=229
 //===============================end of summary=====================================for : m5pAB
 
+//新模型
+//===============================output summary===================================== for : m5pAB
+//Monthly selected_TPR mean: 24.80% standard deviation=25.64% Skewness=0.99 Kurtosis=0.39
+//Monthly selected_LIFT mean : 0.79
+//Monthly selected_positive summary: 9,008
+//Monthly selected_count summary: 23,894
+//Monthly selected_shouyilv average: 0.69% standard deviation=8.01% Skewness=9.06 Kurtosis=133.61
+//Monthly total_shouyilv average: 0.98% standard deviation=6.13% Skewness=3.04 Kurtosis=15.43
+//mixed selected positive rate: 37.70%
+//Monthly summary_judge_result summary: good number= 260 bad number=255
+//===============================end of summary=====================================for : m5pAB
 
 public class M5PABClassifier extends ContinousClassifier {
 	public M5PABClassifier() {

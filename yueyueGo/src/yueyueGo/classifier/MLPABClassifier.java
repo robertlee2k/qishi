@@ -85,6 +85,18 @@ import yueyueGo.NominalClassifier;
 //Monthly summary_judge_result summary: good number= 272 bad number=238
 //===============================end of summary=====================================for : mlpAB
 
+//新模型
+//===============================output summary===================================== for : mlpAB
+//Monthly selected_TPR mean: 28.06% standard deviation=28.29% Skewness=0.83 Kurtosis=-0.31
+//Monthly selected_LIFT mean : 0.94
+//Monthly selected_positive summary: 16,813
+//Monthly selected_count summary: 43,898
+//Monthly selected_shouyilv average: 0.88% standard deviation=7.62% Skewness=3.11 Kurtosis=15.19
+//Monthly total_shouyilv average: 0.98% standard deviation=6.13% Skewness=3.04 Kurtosis=15.43
+//mixed selected positive rate: 38.30%
+//Monthly summary_judge_result summary: good number= 265 bad number=250
+//===============================end of summary=====================================for : mlpAB
+
 public class MLPABClassifier extends NominalClassifier {
 
 	public MLPABClassifier() {
