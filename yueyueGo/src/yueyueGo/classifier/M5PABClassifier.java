@@ -8,6 +8,7 @@ import weka.classifiers.meta.AttributeSelectedClassifier;
 import weka.classifiers.trees.M5P;
 import weka.core.Instances;
 import yueyueGo.ContinousClassifier;
+import yueyueGo.MyAttributionSelectorWithPCA;
 import yueyueGo.MyPrincipalComponents;
 
 
@@ -63,17 +64,7 @@ public class M5PABClassifier extends ContinousClassifier {
 	@Override
 	protected Classifier buildModel(Instances train) throws Exception {
 
-		AttributeSelectedClassifier classifier = new AttributeSelectedClassifier();
-//		CfsSubsetEval eval = new CfsSubsetEval();
-//		GreedyStepwise search = new GreedyStepwise();
-//		search.setSearchBackwards(true);
-//		classifier.setEvaluator(eval);
-//		classifier.setSearch(search);
-
-		MyPrincipalComponents pca = new MyPrincipalComponents();
-		Ranker rank = new Ranker();
-		classifier.setEvaluator(pca);
-		classifier.setSearch(rank);	
+		MyAttributionSelectorWithPCA classifier = new MyAttributionSelectorWithPCA();
 
 		M5P model = new M5P();
 		int minNumObj=train.numInstances()/300;
@@ -89,8 +80,6 @@ public class M5PABClassifier extends ContinousClassifier {
 	
 		classifier.buildClassifier(train);
 		System.out.println("finish buiding m5p-AB model. minNumObj value:"+minNumObj);
-		pca.cleanUpInstanceAfterBuilt();
-		System.out.println("clean the PCA");
 
 		return classifier;
 	}
