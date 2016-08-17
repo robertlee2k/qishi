@@ -98,10 +98,13 @@ import weka.filters.unsupervised.attribute.Standardize;
 	public class MyPrincipalComponents extends UnsupervisedAttributeEvaluator
 	  implements AttributeTransformer, OptionHandler {
 
-	  /** for serialization */
-	  private static final long serialVersionUID = -3675307197777734007L;
 
-	  /** The data to transform analyse/transform */
+	  /**
+		 * 
+		 */
+		private static final long serialVersionUID = -9080649068006571268L;
+
+	/** The data to transform analyse/transform */
 	  private Instances m_trainInstances;
 
 	  /** Keep a copy for the class attribute (if set) */
