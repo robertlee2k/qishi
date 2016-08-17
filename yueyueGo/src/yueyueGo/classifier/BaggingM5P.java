@@ -50,8 +50,7 @@ public class BaggingM5P extends ContinousClassifier {
 	    bagger.setNumIterations(10);
 	    bagger.setNumExecutionSlots(3);
 	    bagger.buildClassifier(train);
-	    
-		return classifier;
+		return bagger;
 	}
 	
 	@Override

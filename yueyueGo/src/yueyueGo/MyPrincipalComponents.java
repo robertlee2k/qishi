@@ -1088,7 +1088,8 @@ import weka.filters.unsupervised.attribute.Standardize;
 
 
 	  public void cleanUpInstanceAfterBuilt(){
-		  m_trainInstances=null;
+		  //save space
+		  m_trainInstances=new Instances(m_trainInstances, 0);
 		  System.out.println("PCA trainInstances cleaned up");
 	  }
 	}

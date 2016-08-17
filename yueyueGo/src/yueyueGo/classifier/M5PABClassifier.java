@@ -80,7 +80,7 @@ public class M5PABClassifier extends ContinousClassifier {
 	
 		classifier.buildClassifier(train);
 		System.out.println("finish buiding m5p-AB model. minNumObj value:"+minNumObj);
-
+		
 		return classifier;
 	}
 	

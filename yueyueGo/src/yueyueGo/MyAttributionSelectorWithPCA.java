@@ -19,9 +19,12 @@ public class MyAttributionSelectorWithPCA extends AttributeSelectedClassifier {
 		setSearch(rank);	
 	}
 	
-	public void buildClassifier(Instances data) throws Exception {
-		super.buildClassifier(data);
-
+	 public void buildClassifier(Instances data) throws Exception {
+		 super.buildClassifier(data);
+		 releasePCAData();
+	 }
+	
+	private void releasePCAData() {
 		MyPrincipalComponents myPCA=null;
 		myPCA=(MyPrincipalComponents)this.getEvaluator();
 		myPCA.cleanUpInstanceAfterBuilt();
