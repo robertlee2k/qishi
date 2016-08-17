@@ -1,6 +1,9 @@
 package yueyueGo.classifier;
 
+import weka.attributeSelection.PrincipalComponents;
+import weka.attributeSelection.Ranker;
 import weka.classifiers.Classifier;
+import weka.classifiers.meta.AttributeSelectedClassifier;
 import weka.classifiers.meta.Bagging;
 import weka.classifiers.trees.M5P;
 import weka.core.Instances;
@@ -26,10 +29,16 @@ public class BaggingM5P extends ContinousClassifier {
 	}
 
 	@Override
-	protected Classifier buildModel(Instances trainData) throws Exception {
+	protected Classifier buildModel(Instances train) throws Exception {
 		//设置基础的m5p classifier参数
+		AttributeSelectedClassifier classifier = new AttributeSelectedClassifier();
+		PrincipalComponents pca = new PrincipalComponents();
+		Ranker rank = new Ranker();
+		classifier.setEvaluator(pca);
+		classifier.setSearch(rank);	
+
 		M5P model = new M5P();
-		int minNumObj=trainData.numInstances()/300;
+		int minNumObj=train.numInstances()/300;
 		if (minNumObj<1000){
 			minNumObj=1000; //防止树过大
 		}
@@ -37,13 +46,14 @@ public class BaggingM5P extends ContinousClassifier {
 		model.setBatchSize(batchSize);
 		model.setMinNumInstances(minNumObj);
 		model.setNumDecimalPlaces(6);
+		
 
 	    // set up the bagger and build the classifier
 	    Bagging bagger = new Bagging();
 	    bagger.setClassifier(model);
 	    bagger.setNumIterations(10);
 	    bagger.setNumExecutionSlots(3);
-	    bagger.buildClassifier(trainData);
+	    bagger.buildClassifier(train);
 		return bagger;
 	}
 	
