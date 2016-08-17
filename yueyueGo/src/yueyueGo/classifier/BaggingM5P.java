@@ -18,7 +18,7 @@ public class BaggingM5P extends ContinousClassifier {
 		m_noCaculationAttrib=false; //添加计算字段
 		m_skipTrainInBacktest = false;
 		m_skipEvalInBacktest = false;
-		m_policySubGroup = new String[]{"5","10","20","30","60" };
+		m_policySubGroup = new String[]{"60"};//{"5","10","20","30","60" };
 		m_sepeperate_eval_HS300=false;//单独为HS300评估阀值
 		m_seperate_classify_HS300=false; //M5P不适用沪深300，缺省不单独评估HS300
 		EVAL_RECENT_PORTION = 0.9; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
@@ -47,10 +47,11 @@ public class BaggingM5P extends ContinousClassifier {
 		model.setMinNumInstances(minNumObj);
 		model.setNumDecimalPlaces(6);
 		
+		classifier.setClassifier(model);
 
 	    // set up the bagger and build the classifier
 	    Bagging bagger = new Bagging();
-	    bagger.setClassifier(model);
+	    bagger.setClassifier(classifier);
 	    bagger.setNumIterations(10);
 	    bagger.setNumExecutionSlots(3);
 	    bagger.buildClassifier(train);
