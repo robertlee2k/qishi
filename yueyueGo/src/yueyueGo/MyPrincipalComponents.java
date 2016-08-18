@@ -492,8 +492,12 @@ import weka.filters.unsupervised.attribute.Standardize;
 	    m_attributeFilter = null;
 	    m_nominalToBinFilter = null;
 	    m_sumOfEigenValues = 0.0;
-	    m_trainInstances = new Instances(data);
-
+	    
+	    System.out.println("now entering buildAttributeConstructor, trainData size="+data.numInstances()+" @address data="+data.hashCode()+" this instance="+this.hashCode());
+	    
+	    //TODO: modified by libo on 20160818
+	    m_trainInstances = data;//new Instances(data);
+	    
 	    // make a copy of the training data so that we can get the class
 	    // column to append to the transformed data (if necessary)
 	    m_trainHeader = new Instances(m_trainInstances, 0);
@@ -501,7 +505,7 @@ import weka.filters.unsupervised.attribute.Standardize;
 	    m_replaceMissingFilter = new ReplaceMissingValues();
 	    m_replaceMissingFilter.setInputFormat(m_trainInstances);
 	    m_trainInstances =
-	      Filter.useFilter(m_trainInstances, m_replaceMissingFilter);
+	    		Filter.useFilter(m_trainInstances, m_replaceMissingFilter);
 
 	    /*
 	     * if (m_normalize) { m_normalizeFilter = new Normalize();
@@ -516,29 +520,29 @@ import weka.filters.unsupervised.attribute.Standardize;
 	    // delete any attributes with only one distinct value or are all missing
 	    Vector<Integer> deleteCols = new Vector<Integer>();
 	    for (int i = 0; i < m_trainInstances.numAttributes(); i++) {
-	      if (m_trainInstances.numDistinctValues(i) <= 1) {
-	        deleteCols.addElement(new Integer(i));
-	      }
+	    	if (m_trainInstances.numDistinctValues(i) <= 1) {
+	    		deleteCols.addElement(new Integer(i));
+	    	}
 	    }
 
 	    if (m_trainInstances.classIndex() >= 0) {
-	      // get rid of the class column
-	      m_hasClass = true;
-	      m_classIndex = m_trainInstances.classIndex();
-	      deleteCols.addElement(new Integer(m_classIndex));
+	    	// get rid of the class column
+	    	m_hasClass = true;
+	    	m_classIndex = m_trainInstances.classIndex();
+	    	deleteCols.addElement(new Integer(m_classIndex));
 	    }
 
 	    // remove columns from the data if necessary
 	    if (deleteCols.size() > 0) {
-	      m_attributeFilter = new Remove();
-	      int[] todelete = new int[deleteCols.size()];
-	      for (int i = 0; i < deleteCols.size(); i++) {
-	        todelete[i] = (deleteCols.elementAt(i)).intValue();
-	      }
-	      m_attributeFilter.setAttributeIndicesArray(todelete);
-	      m_attributeFilter.setInvertSelection(false);
-	      m_attributeFilter.setInputFormat(m_trainInstances);
-	      m_trainInstances = Filter.useFilter(m_trainInstances, m_attributeFilter);
+	    	m_attributeFilter = new Remove();
+	    	int[] todelete = new int[deleteCols.size()];
+	    	for (int i = 0; i < deleteCols.size(); i++) {
+	    		todelete[i] = (deleteCols.elementAt(i)).intValue();
+	    	}
+	    	m_attributeFilter.setAttributeIndicesArray(todelete);
+	    	m_attributeFilter.setInvertSelection(false);
+	    	m_attributeFilter.setInputFormat(m_trainInstances);
+	    	m_trainInstances = Filter.useFilter(m_trainInstances, m_attributeFilter);
 	    }
 
 	    // can evaluator handle the processed data ? e.g., enough attributes?
@@ -548,7 +552,7 @@ import weka.filters.unsupervised.attribute.Standardize;
 	    m_numAttribs = m_trainInstances.numAttributes();
 
 	    fillCovariance();
-
+	    
 	    EigenvalueDecomposition eig = new Matrix(m_correlation).eig();
 	    m_eigenvectors = eig.getV().copy().getArray();
 	    m_eigenvalues = eig.getRealEigenvalues().clone();

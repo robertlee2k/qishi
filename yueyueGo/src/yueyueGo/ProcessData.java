@@ -64,7 +64,8 @@ public class ProcessData {
 	
 	public static final String[] splitYear ={
 		
-		"2008","2009","2010","2011","2012","2013","2014","2015","2016"
+		"2016","2015","2014","2013","2012"
+//		"2008","2009","2010","2011","2012","2013","2014","2015","2016"
 //	  "200801","200802","200803","200804","200805","200806","200807","200808","200809","200810","200811","200812","200901","200902","200903","200904","200905","200906","200907","200908","200909","200910","200911","200912","201001","201002","201003","201004","201005","201006","201007","201008","201009","201010","201011","201012","201101","201102","201103","201104","201105","201106","201107","201108","201109","201110","201111","201112","201201","201202","201203","201204","201205","201206","201207","201208","201209","201210","201211","201212","201301","201302","201303","201304","201305","201306","201307","201308","201309","201310","201311","201312","201401","201402","201403","201404","201405","201406","201407","201408","201409","201410","201411","201412","201501","201502","201503","201504","201505","201506","201507","201508","201509","201510","201511","201512","201601","201602","201603", "201604","201605","201606","201607"
 //  "201411","201412","201501","201502","201503","201504","201505","201506","201507","201508","201509","201510","201511","201512","201601","201602","201603", "201604","201605","201606"	  
 	};
@@ -215,8 +216,6 @@ public class ProcessData {
 
 		if (clModel instanceof NominalClassifier ){
 			fullData=((NominalClassifier)clModel).processDataForNominalClassifier(fullData,false);
-//			//TODO 因为历史原因，201605018之前build的二分类器模型 “均线策略" 都叫"policy"，所以调用模型前先改一下名，调用模型后再改回来
-//			fullData.renameAttribute(maIndex-1, "policy");
 		}
 
 		
@@ -316,46 +315,7 @@ public class ProcessData {
 			
 			String splitMark = splitYear[i];
 			System.out.println("****************************start ****************************   "+splitMark);
-			// 加载原始arff文件
-			if (fullSetData == null) {
 
-				// 根据模型来决定是否要使用有计算字段的ARFF
-				String arffFile=null;
-				if (clModel.m_noCaculationAttrib==true){
-					arffFile=ArffFormat.SHORT_ARFF_FILE;
-				}else{
-					arffFile=ArffFormat.LONG_ARFF_FILE;
-				}
-
-				System.out.println("start to load File for fullset from File: "+ arffFile  );
-				fullSetData = FileUtility.loadDataFromFile( C_ROOT_DIRECTORY+arffFile);
-				System.out.println("finish loading fullset Data. row : "+ fullSetData.numInstances() + " column:"+ fullSetData.numAttributes());
-
-//				if (clModel instanceof NominalClassifier ){
-//					//TODO 因为历史原因，201605018之前build的二分类器模型 “均线策略" 都叫"policy"，所以调用模型前先改一下名，调用模型后再改回来
-//					//获得”均线策略"的位置属性
-//					int maIndex=FilterData.findATTPosition(fullSetData,ArffFormat.SELECTED_MA);
-//					fullSetData.renameAttribute(maIndex-1, "policy");
-//				}
-			}
-			// 准备输出数据格式
-			if (result == null) {// initialize result instances
-				Instances header = new Instances(fullSetData, 0);
-				// 去除不必要的字段，保留ID（第1），均线策略（第3）、bias5（第4）、收益率（最后一列）、增加预测值、是否被选择。
-				result = InstanceUtility.removeAttribs(header, ArffFormat.YEAR_MONTH_INDEX + ",5-"
-						+ (header.numAttributes() - 1));
-				if (clModel instanceof NominalClassifier ){
-					result = InstanceUtility.AddAttribute(result, ArffFormat.RESULT_PREDICTED_WIN_RATE,
-							result.numAttributes());
-				}else{
-					result = InstanceUtility.AddAttribute(result, ArffFormat.RESULT_PREDICTED_PROFIT,
-						result.numAttributes());
-				}
-				result = InstanceUtility.AddAttribute(result, ArffFormat.RESULT_SELECTED,
-						result.numAttributes());
-
-			}
-	
 			String splitTrainYearClause = "";
 			String splitTestYearClause = "";
 
@@ -379,85 +339,118 @@ public class ProcessData {
 			double tp_fp_ratio=0;
 			String splitTrainClause = "";
 			String splitTestClause = "";
+			Instances trainingData = null;
+			Instances testingData = null;
 
-			if (clModel.NO_SUB_GROUP == true) {
-				policy = "ALL";
-				lower_limit = clModel.SAMPLE_LOWER_LIMIT[0];
-				upper_limit = clModel.SAMPLE_UPPER_LIMIT[0];
-				tp_fp_ratio= clModel.TP_FP_RATIO_LIMIT[0];
-				splitTrainClause = splitTrainYearClause;
-				splitTestClause = splitTestYearClause;
-				String resultSummary = doOneModel(clModel, fullSetData, result, splitMark,
-						policy, lower_limit, upper_limit,tp_fp_ratio, splitTrainClause,
-						splitTestClause);
-				evalResultSummary.append(resultSummary);
-			} else {
-				for (int j = 0; j < clModel.m_policySubGroup.length; j++) {
-					policy = clModel.m_policySubGroup[j];
-					lower_limit = clModel.SAMPLE_LOWER_LIMIT[j];
-					upper_limit = clModel.SAMPLE_UPPER_LIMIT[j];
-					tp_fp_ratio= clModel.TP_FP_RATIO_LIMIT[j];
-					if("3060".equals(policy)==false){
-						splitTrainClause = splitTrainYearClause + " and (ATT3 is '"	+ policy + "')";
-						splitTestClause = splitTestYearClause + " and (ATT3 is '"+ policy + "')";
-					}else{ //把30日线与60日线合并处理，因为这两条线的数据太少，模型常常不理想
-						splitTrainClause = splitTrainYearClause + " and ((ATT3 is '30') or (ATT3 is '60'))";								
-						splitTestClause = splitTestYearClause + " and ((ATT3 is '30') or (ATT3 is '60'))";
+			for (int j = 0; j < clModel.m_policySubGroup.length; j++) {
+				// 加载原始arff文件
+				if (fullSetData == null) {
+
+					// 根据模型来决定是否要使用有计算字段的ARFF
+					String arffFile=null;
+					if (clModel.m_noCaculationAttrib==true){
+						arffFile=ArffFormat.SHORT_ARFF_FILE;
+					}else{
+						arffFile=ArffFormat.LONG_ARFF_FILE;
 					}
-					String resultSummary = doOneModel(clModel, fullSetData, result,
-							splitMark, policy, lower_limit, upper_limit,tp_fp_ratio,
-							splitTrainClause, splitTestClause);
-					evalResultSummary.append(resultSummary);
+
+					System.out.println("start to load File for fullset from File: "+ arffFile  );
+					fullSetData = FileUtility.loadDataFromFile( C_ROOT_DIRECTORY+arffFile);
+					System.out.println("finish loading fullset Data. row : "+ fullSetData.numInstances() + " column:"+ fullSetData.numAttributes());
 				}
+
+				// 准备输出数据格式
+				if (result == null) {// initialize result instances
+					Instances header = new Instances(fullSetData, 0);
+					// 去除不必要的字段，保留ID（第1），均线策略（第3）、bias5（第4）、收益率（最后一列）、增加预测值、是否被选择。
+					result = InstanceUtility.removeAttribs(header, ArffFormat.YEAR_MONTH_INDEX + ",5-"
+							+ (header.numAttributes() - 1));
+					if (clModel instanceof NominalClassifier ){
+						result = InstanceUtility.AddAttribute(result, ArffFormat.RESULT_PREDICTED_WIN_RATE,
+								result.numAttributes());
+					}else{
+						result = InstanceUtility.AddAttribute(result, ArffFormat.RESULT_PREDICTED_PROFIT,
+								result.numAttributes());
+					}
+					result = InstanceUtility.AddAttribute(result, ArffFormat.RESULT_SELECTED,
+							result.numAttributes());
+
+				}
+
+				policy = clModel.m_policySubGroup[j];
+				lower_limit = clModel.SAMPLE_LOWER_LIMIT[j];
+				upper_limit = clModel.SAMPLE_UPPER_LIMIT[j];
+				tp_fp_ratio= clModel.TP_FP_RATIO_LIMIT[j];
+				splitTrainClause = splitTrainYearClause + " and (ATT3 is '"	+ policy + "')";
+				splitTestClause = splitTestYearClause + " and (ATT3 is '"+ policy + "')";
+				if (clModel.m_skipTrainInBacktest == false || clModel.m_skipEvalInBacktest==false ) { //如果不需要培训和评估，则无需训练样本
+					System.out.println("start to split training set");
+					trainingData = InstanceUtility.getInstancesSubset(fullSetData,
+							splitTrainClause);
+					trainingData = InstanceUtility.removeAttribs(trainingData,  Integer.toString(ArffFormat.ID_POSITION)+","+ArffFormat.YEAR_MONTH_INDEX);
+
+					//对于二分类器，这里要把输入的收益率转换为分类变量
+					if (clModel instanceof NominalClassifier ){
+						trainingData=((NominalClassifier)clModel).processDataForNominalClassifier(trainingData,false);
+					}
+					System.out.println(" training data size , row : "
+							+ trainingData.numInstances() + " column: "
+							+ trainingData.numAttributes());
+					if (clModel.m_saveArffInBacktest) {
+						clModel.saveArffFile(trainingData,"train", splitMark, policy);
+					}
+				}
+				// prepare testing data
+				System.out.println("start to split testing set");
+				testingData = InstanceUtility
+						.getInstancesSubset(fullSetData, splitTestClause);
+				//对于二分类器，这里要把输入的收益率转换为分类变量
+				if (clModel instanceof NominalClassifier ){
+					testingData=((NominalClassifier)clModel).processDataForNominalClassifier(testingData,true);
+				}
+				testingData = InstanceUtility.removeAttribs(testingData, ArffFormat.YEAR_MONTH_INDEX);
+				System.out.println("testing data size, row: "
+						+ testingData.numInstances() + " column: "
+						+ testingData.numAttributes());
+
+				if (clModel.m_saveArffInBacktest) {
+					clModel.saveArffFile(testingData,"test", splitMark, policy);
+				}
+				
+				//TODO : 应该根据clModel的需要决定是否释放内存
+				fullSetData=null; //释放内存
+				System.gc();
+				String resultSummary = doOneModel(clModel, result,
+						splitMark, policy, lower_limit, upper_limit,tp_fp_ratio,trainingData,testingData	);
+				evalResultSummary.append(resultSummary);
 			}
-			
+
+
 			System.out.println("********************complete **************************** " + splitMark);
 			System.out.println(" ");
 		}
-		
+
 
 		FileUtility.write(BACKTEST_RESULT_DIR+clModel.classifierName+"-monthlySummary.csv", evalResultSummary.toString(), "GBK");
-//		if (clModel instanceof NominalClassifier ){
-//			//TODO 因为历史原因，201605018之前build的二分类器模型 “均线策略" 都叫"policy"，所以调用模型前先改一下名，调用模型后再改回来
-//			int maIndex=FilterData.findATTPosition(result,"policy");
-//			result.renameAttribute(maIndex-1, ArffFormat.SELECTED_MA);
-//		}		
+
 		saveBacktestResultFile(result,clModel.classifierName);
-		
+
 		System.out.println(clModel.classifierName+" test result file saved.");
 		return result;
 	}
 
 	// paremeter result will be changed in the method! 
 	protected static String doOneModel(BaseClassifier clModel,
-			Instances fullSetData, Instances result, String yearSplit,
+			 Instances result, String yearSplit,
 			String policySplit, double lower_limit, double upper_limit, double tp_fp_ratio,
-			String splitTrainClause, String splitTestClause) throws Exception,
+			Instances trainingData, Instances testingData) throws Exception,
 			IOException {
-		Instances trainingData = null;
-		Instances testingData = null;
+
 		
 		System.out.println("-----------------start for " + yearSplit + "-----------均线策略: ------" + policySplit);
 		clModel.generateModelAndEvalFileName(yearSplit,policySplit);
 
 		Classifier model = null;
-		if (clModel.m_skipTrainInBacktest == false || clModel.m_skipEvalInBacktest==false ) { //如果不需要培训和评估，则无需训练样本
-			System.out.println("start to split training set");
-			trainingData = InstanceUtility.getInstancesSubset(fullSetData,
-					splitTrainClause);
-			trainingData = InstanceUtility.removeAttribs(trainingData,  Integer.toString(ArffFormat.ID_POSITION)+","+ArffFormat.YEAR_MONTH_INDEX);
-			
-			//对于二分类器，这里要把输入的收益率转换为分类变量
-			if (clModel instanceof NominalClassifier ){
-				trainingData=((NominalClassifier)clModel).processDataForNominalClassifier(trainingData,false);
-			}
-			System.out.println(" training data size , row : "
-					+ trainingData.numInstances() + " column: "
-					+ trainingData.numAttributes());
-			if (clModel.m_saveArffInBacktest) {
-				clModel.saveArffFile(trainingData,"train", yearSplit, policySplit);
-			}
-		}
 		
 		//是否需要重做训练阶段
 		if (clModel.m_skipTrainInBacktest == false) { 
@@ -473,22 +466,6 @@ public class ProcessData {
 		}
 		trainingData=null;
 
-		// apply model part
-		System.out.println("start to split testing set");
-		testingData = InstanceUtility
-				.getInstancesSubset(fullSetData, splitTestClause);
-		//对于二分类器，这里要把输入的收益率转换为分类变量
-		if (clModel instanceof NominalClassifier ){
-			testingData=((NominalClassifier)clModel).processDataForNominalClassifier(testingData,true);
-		}
-		testingData = InstanceUtility.removeAttribs(testingData, ArffFormat.YEAR_MONTH_INDEX);
-		System.out.println("testing data size, row: "
-				+ testingData.numInstances() + " column: "
-				+ testingData.numAttributes());
-
-		if (clModel.m_saveArffInBacktest) {
-			clModel.saveArffFile(testingData,"test", yearSplit, policySplit);
-		}
 
 		String evalSummary=yearSplit+","+policySplit+",";
 		evalSummary+=clModel.predictData(testingData, result);

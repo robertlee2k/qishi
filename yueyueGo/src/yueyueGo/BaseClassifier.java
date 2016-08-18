@@ -34,7 +34,7 @@ public abstract class BaseClassifier {
 
 	//用于策略分组
     public String[] m_policySubGroup;//在子类构造函数中赋值覆盖 = {"5","10","20","30","60" };
-    public boolean NO_SUB_GROUP = false; //缺省为false，除非想测试混合不分组策略
+
     
     //用于回测中使用
 	public boolean m_skipTrainInBacktest = true; //在子类构造函数中赋值覆盖
