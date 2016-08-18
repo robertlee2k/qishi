@@ -44,7 +44,7 @@ public class M5PABClassifier extends ContinousClassifier {
 		super();
 		classifierName = "m5pAB";
 		WORK_PATH =WORK_PATH+classifierName+"\\";
-		m_noCaculationAttrib=false; //添加计算字段
+		m_noCaculationAttrib=true; //不添加计算字段
 		m_skipTrainInBacktest = false;
 		m_skipEvalInBacktest = false;
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
