@@ -74,7 +74,6 @@ public class M5PABClassifier extends ContinousClassifier {
 		model.setNumDecimalPlaces(6);
 
 		classifier.setClassifier(model);
-//		train=classifier.preprocessData(train);
 		classifier.buildClassifier(train);
 		System.out.println("finish buiding m5p-AB model. minNumObj value:"+minNumObj);
 		
