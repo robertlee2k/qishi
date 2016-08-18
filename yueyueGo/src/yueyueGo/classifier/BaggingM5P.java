@@ -42,15 +42,19 @@ public class BaggingM5P extends ContinousClassifier {
 		model.setMinNumInstances(minNumObj);
 		model.setNumDecimalPlaces(6);
 		
-//		train=classifier.preprocessData(train);
 		classifier.setClassifier(model);
 		
 
 	    // set up the bagger and build the classifier
 	    Bagging bagger = new Bagging();
 	    bagger.setClassifier(classifier);
-	    bagger.setNumIterations(10);
-	    bagger.setNumExecutionSlots(2);
+	    bagger.setNumIterations(6);
+	    bagger.setNumExecutionSlots(3);
+	    double bagsizePercent=80;
+	    if (train.numInstances()>300000){
+	    	bagsizePercent=300000/train.numInstances();
+	    }
+	    bagger.setBagSizePercent(new Double(bagsizePercent).intValue());
 	    
 	    bagger.buildClassifier(train);
 		return bagger;

@@ -2,14 +2,11 @@ package yueyueGo.classifier;
 //attribution Selection for M5P 用主成份分析法
 
 
-import weka.attributeSelection.Ranker;
 import weka.classifiers.Classifier;
-import weka.classifiers.meta.AttributeSelectedClassifier;
 import weka.classifiers.trees.M5P;
 import weka.core.Instances;
 import yueyueGo.ContinousClassifier;
 import yueyueGo.MyAttributionSelectorWithPCA;
-import yueyueGo.MyPrincipalComponents;
 
 
 // 2016-07-19 选择 
