@@ -223,13 +223,7 @@ public class ProcessData {
 
 			System.out.println("start to load data for " + ArffFormat.SELECTED_AVG_LINE+"  : "	+ clModel.m_policySubGroup[j]);
 			String expression=null;
-			if("3060".equals(clModel.m_policySubGroup[j])==false){
-				expression=InstanceUtility.WEKA_ATT_PREFIX+ maIndex+" is '"+ clModel.m_policySubGroup[j] + "'";
-			}else{ //尝试把30日线与60日线合并处理，因为这两条线的数据太少，模型常常不理想
-				String expression30="("+InstanceUtility.WEKA_ATT_PREFIX+ maIndex+" is '30') or (";
-				String expression60=InstanceUtility.WEKA_ATT_PREFIX+ maIndex+" is '60') ";
-				expression=expression30+expression60;
-			}
+			expression=InstanceUtility.WEKA_ATT_PREFIX+ maIndex+" is '"+ clModel.m_policySubGroup[j] + "'";
 			
 			newData = InstanceUtility.getInstancesSubset(fullData, expression);
 

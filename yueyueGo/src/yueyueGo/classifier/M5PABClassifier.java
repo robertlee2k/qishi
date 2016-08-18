@@ -65,8 +65,8 @@ public class M5PABClassifier extends ContinousClassifier {
 
 		M5P model = new M5P();
 		int minNumObj=train.numInstances()/300;
-		if (minNumObj<1000){
-			minNumObj=1000; //防止树过大
+		if (minNumObj<300){
+			minNumObj=300; //防止树过大
 		}
 		String batchSize=Integer.toString(minNumObj);
 		model.setBatchSize(batchSize);

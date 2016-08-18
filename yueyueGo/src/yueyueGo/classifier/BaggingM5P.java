@@ -13,7 +13,7 @@ public class BaggingM5P extends ContinousClassifier {
 		super();
 		classifierName = "baggingM5P";
 		WORK_PATH =WORK_PATH+classifierName+"\\";
-		m_noCaculationAttrib=false; //添加计算字段
+		m_noCaculationAttrib=true; //不添加计算字段
 		m_skipTrainInBacktest = false;
 		m_skipEvalInBacktest = false;
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
@@ -34,8 +34,8 @@ public class BaggingM5P extends ContinousClassifier {
 
 		M5P model = new M5P();
 		int minNumObj=train.numInstances()/300;
-		if (minNumObj<1000){
-			minNumObj=1000; //防止树过大
+		if (minNumObj<300){
+			minNumObj=300; //防止树过大
 		}
 		String batchSize=Integer.toString(minNumObj);
 		model.setBatchSize(batchSize);
@@ -48,7 +48,7 @@ public class BaggingM5P extends ContinousClassifier {
 	    // set up the bagger and build the classifier
 	    Bagging bagger = new Bagging();
 	    bagger.setClassifier(classifier);
-	    bagger.setNumIterations(9);
+	    bagger.setNumIterations(10);
 	    bagger.setNumExecutionSlots(3);
 	    bagger.setBagSizePercent(70);
 	    bagger.buildClassifier(train);

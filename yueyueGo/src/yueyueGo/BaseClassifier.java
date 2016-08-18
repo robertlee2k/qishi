@@ -126,6 +126,7 @@ public abstract class BaseClassifier {
 		}
 			
 		Evaluation eval = new Evaluation(evalTrain);
+		
 		System.out.println("evaluating.....");
 		eval.evaluateModel(model, evalSamples); // evaluate on the training data to get threshold
 		System.out.println(eval.toSummaryString("\nEvaluate Model Results\n\n", true));
