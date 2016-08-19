@@ -9,6 +9,8 @@ import yueyueGo.classifier.MyAttributionSelectorWithPCA;
 
 
 //新模型 按年评估 （取meanabserror和thredsholdbottom均值为阀值）
+// 2008-2016 全市场 收益率优先20-30-50， 15%-14%-14% 只有2014年净值不理想1.07左右 （如果采用胜率优先20单元可做到19%）
+// 沪深300收益率和全市场分布基本一致
 //===============================output summary===================================== for : baggingM5P
 //Monthly selected_TPR mean: 32.32% standard deviation=11.88% Skewness=0.42 Kurtosis=0.9
 //Monthly selected_LIFT mean : 1.07
