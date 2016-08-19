@@ -341,7 +341,7 @@ public class ProcessData {
 			String splitTrainClause = "";
 			String splitTestClause = "";
 			Instances trainingData = null;
-			Instances testingData = null;
+			Instances testingRawData = null;
 
 			for (int j = 0; j < clModel.m_policySubGroup.length; j++) {
 				// 加载原始arff文件
@@ -403,29 +403,21 @@ public class ProcessData {
 				}
 				// prepare testing data
 				System.out.println("start to split testing set");
-				testingData = InstanceUtility
+				testingRawData = InstanceUtility
 						.getInstancesSubset(fullSetData, splitTestClause);
-				//对于二分类器，这里要把输入的收益率转换为分类变量
-				if (clModel instanceof NominalClassifier ){
-					testingData=((NominalClassifier)clModel).processDataForNominalClassifier(testingData,true);
-				}
-				testingData = InstanceUtility.removeAttribs(testingData, ArffFormat.YEAR_MONTH_INDEX);
-				System.out.println("testing data size, row: "
-						+ testingData.numInstances() + " column: "
-						+ testingData.numAttributes());
-
-				if (clModel.m_saveArffInBacktest) {
-					clModel.saveArffFile(testingData,"test", splitMark, policy);
-				}
+				
 				
 				//在做模型训练时释放内存，改为每次从硬盘加载的方式
 				if (clModel.m_skipTrainInBacktest == false){
 					fullSetData=null; //释放内存
 					System.gc();
-				}
+				}				
+				
+
+				
 				
 				String resultSummary = doOneModel(clModel, result,
-						splitMark, policy, lower_limit, upper_limit,tp_fp_ratio,trainingData,testingData	);
+						splitMark, policy, lower_limit, upper_limit,tp_fp_ratio,trainingData,testingRawData);
 				evalResultSummary.append(resultSummary);
 			}
 
@@ -470,7 +462,19 @@ public class ProcessData {
 		}
 		trainingData=null;
 
-
+		//处理testingData
+		//对于二分类器，这里要把输入的收益率转换为分类变量
+		if (clModel instanceof NominalClassifier ){
+			testingData=((NominalClassifier)clModel).processDataForNominalClassifier(testingData,true);
+		}
+		testingData = InstanceUtility.removeAttribs(testingData, ArffFormat.YEAR_MONTH_INDEX);
+		System.out.println("testing data size, row: "
+				+ testingData.numInstances() + " column: "
+				+ testingData.numAttributes());
+		if (clModel.m_saveArffInBacktest) {
+			clModel.saveArffFile(testingData,"test", yearSplit,policySplit);
+		}
+		
 		String evalSummary=yearSplit+","+policySplit+",";
 		evalSummary+=clModel.predictData(testingData, result);
 		testingData=null;
