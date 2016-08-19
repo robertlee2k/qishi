@@ -1,9 +1,9 @@
-package yueyueGo.classifier.nominal;
+package yueyueGo.classifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.functions.MultilayerPerceptron;
 import weka.core.Instances;
-import yueyueGo.classifier.MyAttributionSelectorWithPCA;
-import yueyueGo.classifier.NominalClassifier;
+import yueyueGo.MyAttributionSelectorWithPCA;
+import yueyueGo.NominalClassifier;
 
 
 // NO.1 选股太多全市场收益率只有7%-8%

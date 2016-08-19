@@ -1,4 +1,4 @@
-package yueyueGo.classifier;
+package yueyueGo;
 
 import java.io.IOException;
 import java.util.Vector;
@@ -12,10 +12,6 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SerializationHelper;
-import yueyueGo.ArffFormat;
-import yueyueGo.FileUtility;
-import yueyueGo.FormatUtility;
-import yueyueGo.InstanceUtility;
 
 public abstract class BaseClassifier {
 	//统一常量

@@ -1,9 +1,9 @@
-package yueyueGo.classifier.nominal;
+package yueyueGo.classifier;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.trees.RandomForest;
 import weka.core.Instances;
-import yueyueGo.classifier.NominalClassifier;
+import yueyueGo.NominalClassifier;
 
 public class RandomForestClassifier extends NominalClassifier	 {
 	public RandomForestClassifier() {

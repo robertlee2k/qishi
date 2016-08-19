@@ -1,11 +1,11 @@
-package yueyueGo.classifier.numeric;
+package yueyueGo.classifier;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.meta.Bagging;
 import weka.classifiers.trees.M5P;
 import weka.core.Instances;
-import yueyueGo.classifier.ContinousClassifier;
-import yueyueGo.classifier.MyAttributionSelectorWithPCA;
+import yueyueGo.ContinousClassifier;
+import yueyueGo.MyAttributionSelectorWithPCA;
 
 
 //新模型 按年评估 （取meanabserror和thredsholdbottom均值为阀值）
