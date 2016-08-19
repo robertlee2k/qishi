@@ -1,4 +1,4 @@
-package yueyueGo;
+package yueyueGo.classifier;
 
 import java.util.ArrayList;
 import java.util.Vector;
@@ -15,6 +15,10 @@ import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
+import yueyueGo.ArffFormat;
+import yueyueGo.FormatUtility;
+import yueyueGo.InstanceUtility;
+import yueyueGo.ProcessData;
 
 public class NominalClassifier extends BaseClassifier{
 	protected double DEFAULT_THRESHOLD=0.7; // 找不出threshold时缺省值。

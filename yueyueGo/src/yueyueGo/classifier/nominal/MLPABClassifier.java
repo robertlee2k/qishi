@@ -1,11 +1,9 @@
-package yueyueGo.classifier;
-import weka.attributeSelection.PrincipalComponents;
-import weka.attributeSelection.Ranker;
+package yueyueGo.classifier.nominal;
 import weka.classifiers.Classifier;
 import weka.classifiers.functions.MultilayerPerceptron;
-import weka.classifiers.meta.AttributeSelectedClassifier;
 import weka.core.Instances;
-import yueyueGo.NominalClassifier;
+import yueyueGo.classifier.MyAttributionSelectorWithPCA;
+import yueyueGo.classifier.NominalClassifier;
 
 
 // NO.1 选股太多全市场收益率只有7%-8%
@@ -104,7 +102,7 @@ public class MLPABClassifier extends NominalClassifier {
 		classifierName="mlpAB";
 		WORK_PATH =WORK_PATH+classifierName+"\\";
 		
-		m_noCaculationAttrib=true; //这个模型是用短格式的
+		m_noCaculationAttrib=false; //使用计算字段
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = true;
 		m_skipEvalInBacktest = true;
@@ -122,18 +120,10 @@ public class MLPABClassifier extends NominalClassifier {
 	@Override
 	protected Classifier buildModel(Instances train) throws Exception {
 
-		AttributeSelectedClassifier classifier = new AttributeSelectedClassifier();
-
-		PrincipalComponents pca = new PrincipalComponents();
-		Ranker rank = new Ranker();
-		classifier.setEvaluator(pca);
-		classifier.setSearch(rank);	
+		MyAttributionSelectorWithPCA classifier = new MyAttributionSelectorWithPCA();
 
 		cachedOldClassInstances=null; 
 		int minNumObj=train.numInstances()/300;
-		if (minNumObj<1000){
-			minNumObj=1000; 
-		}
 		String batchSize=Integer.toString(minNumObj);
 		MultilayerPerceptron model=new MultilayerPerceptron();
 		model.setBatchSize(batchSize);

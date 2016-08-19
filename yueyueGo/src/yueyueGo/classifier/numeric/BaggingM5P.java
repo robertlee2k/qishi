@@ -1,22 +1,35 @@
-package yueyueGo.classifier;
+package yueyueGo.classifier.numeric;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.meta.Bagging;
 import weka.classifiers.trees.M5P;
 import weka.core.Instances;
-import yueyueGo.ContinousClassifier;
-import yueyueGo.MyAttributionSelectorWithPCA;
+import yueyueGo.classifier.ContinousClassifier;
+import yueyueGo.classifier.MyAttributionSelectorWithPCA;
 
+
+//新模型 按年评估 （取meanabserror和thredsholdbottom均值为阀值）
+//===============================output summary===================================== for : baggingM5P
+//Monthly selected_TPR mean: 32.32% standard deviation=11.88% Skewness=0.42 Kurtosis=0.9
+//Monthly selected_LIFT mean : 1.07
+//Monthly selected_positive summary: 4,499
+//Monthly selected_count summary: 13,260
+//Monthly selected_shouyilv average: 1.38% standard deviation=2.82% Skewness=0.41 Kurtosis=0.46
+//Monthly total_shouyilv average: 1.17% standard deviation=2.60% Skewness=1.43 Kurtosis=1.34
+//mixed selected positive rate: 33.93%
+//Monthly summary_judge_result summary: good number= 25 bad number=20
+//===============================end of summary=====================================for : baggingM5P
 public class BaggingM5P extends ContinousClassifier {
 
 	public BaggingM5P() {
 		super();
 		classifierName = "baggingM5P";
 		WORK_PATH =WORK_PATH+classifierName+"\\";
-		m_noCaculationAttrib=true; //不添加计算字段
-		m_skipTrainInBacktest = false;
-		m_skipEvalInBacktest = false;
+		m_skipTrainInBacktest = true;
+		m_skipEvalInBacktest = true;
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
+
+		m_noCaculationAttrib=true; //不添加计算字段
 		m_sepeperate_eval_HS300=false;//单独为HS300评估阀值
 		m_seperate_classify_HS300=false; //M5P不适用沪深300，缺省不单独评估HS300
 		EVAL_RECENT_PORTION = 0.9; // 计算最近数据阀值从历史记录中选取多少比例的最近样本
@@ -26,16 +39,23 @@ public class BaggingM5P extends ContinousClassifier {
 		TP_FP_BOTTOM_LINE=0.9; //TP/FP的下限
 	}
 
+
+
+
 	@Override
 	protected Classifier buildModel(Instances train) throws Exception {
+		//bagging特有参数
+		int bagging_iteration=10;
+		int bagging_samplePercent=70;
+		//m5p特有参数
+		int leafMinObjNum=300;
+		
 		//设置基础的m5p classifier参数
 		MyAttributionSelectorWithPCA classifier = new MyAttributionSelectorWithPCA();
-
-
 		M5P model = new M5P();
 		int minNumObj=train.numInstances()/300;
-		if (minNumObj<300){
-			minNumObj=300; //防止树过大
+		if (minNumObj<leafMinObjNum){
+			minNumObj=leafMinObjNum; //防止树过大
 		}
 		String batchSize=Integer.toString(minNumObj);
 		model.setBatchSize(batchSize);
@@ -48,9 +68,9 @@ public class BaggingM5P extends ContinousClassifier {
 	    // set up the bagger and build the classifier
 	    Bagging bagger = new Bagging();
 	    bagger.setClassifier(classifier);
-	    bagger.setNumIterations(10);
+	    bagger.setNumIterations(bagging_iteration);
 	    bagger.setNumExecutionSlots(3);
-	    bagger.setBagSizePercent(70);
+	    bagger.setBagSizePercent(bagging_samplePercent);
 	    bagger.buildClassifier(train);
 		return bagger;
 	}

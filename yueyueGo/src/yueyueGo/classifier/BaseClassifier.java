@@ -1,4 +1,4 @@
-package yueyueGo;
+package yueyueGo.classifier;
 
 import java.io.IOException;
 import java.util.Vector;
@@ -12,6 +12,10 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SerializationHelper;
+import yueyueGo.ArffFormat;
+import yueyueGo.FileUtility;
+import yueyueGo.FormatUtility;
+import yueyueGo.InstanceUtility;
 
 public abstract class BaseClassifier {
 	//统一常量
@@ -44,9 +48,9 @@ public abstract class BaseClassifier {
 	
 	//无须由外界函数设置的，在各子类中近乎常量的值
 	protected double EVAL_RECENT_PORTION;// 计算最近数据阀值从历史记录中选取多少比例的最近样本
-	protected double[] SAMPLE_LOWER_LIMIT; // 各条均线选择样本的下限
-	protected double[] SAMPLE_UPPER_LIMIT; // 各条均线选择样本的上限
-	protected double[] TP_FP_RATIO_LIMIT; //各条均线TP/FP选择阀值比例上限
+	public double[] SAMPLE_LOWER_LIMIT; // 各条均线选择样本的下限
+	public double[] SAMPLE_UPPER_LIMIT; // 各条均线选择样本的上限
+	public double[] TP_FP_RATIO_LIMIT; //各条均线TP/FP选择阀值比例上限
 	protected double TP_FP_BOTTOM_LINE=0.5; //TP/FP的缺省下限
 	
 	//用于评估时使用

@@ -1,4 +1,4 @@
-package yueyueGo;
+package yueyueGo.classifier;
 
 import java.util.ArrayList;
 import java.util.Vector;
@@ -11,6 +11,10 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.classifiers.Evaluation;
+import yueyueGo.ArffFormat;
+import yueyueGo.FormatUtility;
+import yueyueGo.InstanceUtility;
+import yueyueGo.ProcessData;
 
 public abstract class ContinousClassifier extends BaseClassifier {
 	

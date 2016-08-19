@@ -1,12 +1,12 @@
-package yueyueGo.classifier;
+package yueyueGo.classifier.numeric;
 //attribution Selection for M5P 用主成份分析法
 
 
 import weka.classifiers.Classifier;
 import weka.classifiers.trees.M5P;
 import weka.core.Instances;
-import yueyueGo.ContinousClassifier;
-import yueyueGo.MyAttributionSelectorWithPCA;
+import yueyueGo.classifier.ContinousClassifier;
+import yueyueGo.classifier.MyAttributionSelectorWithPCA;
 
 
 // 2016-07-19 选择 
@@ -73,12 +73,16 @@ public class M5PABClassifier extends ContinousClassifier {
 	@Override
 	protected Classifier buildModel(Instances train) throws Exception {
 
+		//m5p特有参数
+		int leafMinObjNum=300;
+		
+		//设置基础的m5p classifier参数
 		MyAttributionSelectorWithPCA classifier = new MyAttributionSelectorWithPCA();
 
 		M5P model = new M5P();
 		int minNumObj=train.numInstances()/300;
-		if (minNumObj<300){
-			minNumObj=300; //防止树过大
+		if (minNumObj<leafMinObjNum){
+			minNumObj=leafMinObjNum; //防止树过大
 		}
 		String batchSize=Integer.toString(minNumObj);
 		model.setBatchSize(batchSize);

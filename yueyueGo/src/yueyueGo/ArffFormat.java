@@ -101,7 +101,7 @@ public class ArffFormat {
 	public static final String[] DAILY_DATA_TO_PREDICT_FORMAT_LEGACY = FormatUtility.concatStrings(new String[]{ID},OLD_TRAINING_ATTRIB_MAPPER);
 	
 	@Deprecated
-	protected static Instances renameOldArffName(Instances oldInstances){
+	public static Instances renameOldArffName(Instances oldInstances){
 		Attribute oldAttribute=null;
 		for (int i=0;i<OLD_TRAINING_ARFF_SHORT_FORMAT.length;i++){
 			oldAttribute=oldInstances.attribute(OLD_TRAINING_ARFF_SHORT_FORMAT[i]);
