@@ -104,8 +104,8 @@ public class MLPABClassifier extends NominalClassifier {
 		
 		m_noCaculationAttrib=true; //不使用计算字段
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
-		m_skipTrainInBacktest = false;
-		m_skipEvalInBacktest = false;
+		m_skipTrainInBacktest = true;
+		m_skipEvalInBacktest = true;
 		m_sepeperate_eval_HS300=true;//单独评估
 		m_seperate_classify_HS300=true;
 		
