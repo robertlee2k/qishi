@@ -39,13 +39,25 @@ import yueyueGo.MyAttributionSelectorWithPCA;
 //Monthly summary_judge_result summary: good number= 260 bad number=255
 //===============================end of summary=====================================for : m5pAB
 
+// 20160819新模型（按年评估）
+//===============================output summary===================================== for : m5pAB
+//Monthly selected_TPR mean: 31.50% standard deviation=12.20% Skewness=-0.05 Kurtosis=0.54
+//Monthly selected_LIFT mean : 1.04
+//Monthly selected_positive summary: 10,922
+//Monthly selected_count summary: 29,287
+//Monthly selected_shouyilv average: 1.29% standard deviation=3.48% Skewness=0.47 Kurtosis=0.7
+//Monthly total_shouyilv average: 1.17% standard deviation=2.60% Skewness=1.43 Kurtosis=1.34
+//mixed selected positive rate: 37.29%
+//Monthly summary_judge_result summary: good number= 21 bad number=24
+//===============================end of summary=====================================for : m5pAB
+
 public class M5PABClassifier extends ContinousClassifier {
 	public M5PABClassifier() {
 		super();
 		classifierName = "m5pAB";
 		WORK_PATH =WORK_PATH+classifierName+"\\";
-		m_noCaculationAttrib=true; //不添加计算字段
-		m_skipTrainInBacktest = false;
+		m_noCaculationAttrib=false; //添加计算字段
+		m_skipTrainInBacktest = true;
 		m_skipEvalInBacktest = false;
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_sepeperate_eval_HS300=false;//单独为HS300评估阀值
