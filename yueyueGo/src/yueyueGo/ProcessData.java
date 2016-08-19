@@ -48,21 +48,19 @@ public class ProcessData {
 	public static final String PREDICT_WORK_DIR=C_ROOT_DIRECTORY+"03-预测模型\\";
 	public static final String RESULT_EXTENSION = "-Test Result.csv";
 	
-//	public static final String MLP_PREDICT_MODEL= "\\交易分析2005-2016 by month-new-mlp-201605 MA ";
-//	public static final String MLP_EVAL_MODEL= "\\交易分析2005-2016 by month-new-mlp-201605 MA ";
 	public static String M5P_PREDICT_MODEL="\\extData2005-2016-m5p-201607 MA ";//交易分析2005-2016 by month-new-m5p-201605 MA ";
 	public static String M5P_EVAL_MODEL="\\extData2005-2016-m5p-201607 MA ";//交易分析2005-2016 by month-new-m5p-201605 MA ";
 
 	public static final String MLP_PREDICT_MODEL= "\\extData2005-2016 month-new-mlp-2016 MA ";
 	public static final String MLP_EVAL_MODEL= "\\extData2005-2016 month-new-mlp-201606 MA ";
-//	public static final String M5P_PREDICT_MODEL="\\extData2005-2016-m5p-201606 MA ";
-//	public static final String M5P_EVAL_MODEL="\\extData2005-2016-m5p-201606 MA ";
 	
 	//经过主成分分析后的数据
-	public static final String M5PAB_PREDICT_MODEL="\\extData2005-2016-m5pAB-201607 MA ";//"\\extData2005-2016-m5pAB-201606 MA ";
-	public static final String M5PAB_EVAL_MODEL="\\extData2005-2016-m5pAB-201607 MA "; //"\\extData2005-2016-m5pAB-201606 MA ";
-	public static final String MLPAB_PREDICT_MODEL="\\extData2005-2016-mlpAB-2016 MA "; //"\\extData2005-2016 month-new-mlpAB-2016 MA ";
-	public static final String MLPAB_EVAL_MODEL="\\extData2005-2016-mlpAB-2016 MA "; //"\\extData2005-2016 month-new-mlpAB-201606 MA ";
+	public static final String M5PAB_PREDICT_MODEL="\\extData2005-2016-m5pAB-201607 MA ";
+	public static final String M5PAB_EVAL_MODEL="\\extData2005-2016-m5pAB-201607 MA "; 
+	public static final String MLPAB_PREDICT_MODEL="\\extData2005-2016-mlpAB-2016 MA ";
+	public static final String MLPAB_EVAL_MODEL="\\extData2005-2016-mlpAB-2016 MA "; 
+	public static final String BAGGING_PREDICT_MODEL="\\extData2005-2016-baggingM5P-2016 MA ";
+	public static final String BAGGING_EVAL_MODEL="\\extData2005-2016-baggingM5P-2016 MA ";
 	
 	public static final String[] splitYear ={
 		
@@ -116,6 +114,10 @@ public class ProcessData {
 		//M5P主成分分析预测
 		M5PABClassifier cABModel=new M5PABClassifier();
 		predictWithDB(cABModel,PREDICT_WORK_DIR);		
+		
+		//BaggingM5P
+		BaggingM5P cBagModel=new BaggingM5P();
+		predictWithDB(cBagModel,PREDICT_WORK_DIR);		
 
 		//用旧连续模型预测每日增量数据
 		M5P_PREDICT_MODEL="\\交易分析2005-2016 by month-new-m5p-201605 MA ";
@@ -212,7 +214,7 @@ public class ProcessData {
 			fullData=ArffFormat.addCalculateAttribute(fullData);		
 		}
 		
-		FileUtility.SaveDataIntoFile(fullData, pathName+FormatUtility.getDateStringFor(1)+"dailyInput-new116.arff");
+//		FileUtility.SaveDataIntoFile(fullData, pathName+FormatUtility.getDateStringFor(1)+"dailyInput-new116.arff");
 		
 //		//获得”均线策略"的位置属性
 		int maIndex=InstanceUtility.findATTPosition(fullData,ArffFormat.SELECTED_AVG_LINE);
@@ -253,6 +255,11 @@ public class ProcessData {
 				modelFileName = pathName+"\\"+clModel.classifierName+MLPAB_PREDICT_MODEL
 						+  clModel.m_policySubGroup[j]	;
 				evalFileName = pathName+"\\"+clModel.classifierName+MLPAB_EVAL_MODEL
+						 + clModel.m_policySubGroup[j]+BaseClassifier.THRESHOLD_EXTENSION	;				
+			}else if (clModel instanceof BaggingM5P ){
+				modelFileName = pathName+"\\"+clModel.classifierName+BAGGING_PREDICT_MODEL
+						+  clModel.m_policySubGroup[j]	;
+				evalFileName = pathName+"\\"+clModel.classifierName+BAGGING_EVAL_MODEL
 						 + clModel.m_policySubGroup[j]+BaseClassifier.THRESHOLD_EXTENSION	;				
 			}else {
 				throw new Exception("undefined predict model");
