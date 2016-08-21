@@ -51,14 +51,29 @@ import yueyueGo.MyAttributionSelectorWithPCA;
 //mixed selected positive rate: 33.19%
 //Monthly summary_judge_result summary: good number= 293 bad number=222
 //===============================end of summary=====================================for : baggingM5P
+
+
+// 3. 其他同上面的模型2，只是在201407和201607处增加一个模型
+//2008-2016 全市场 收益率优先10-20-30-50，收益率为15%-14%-15%-14% 2014年下半年行情没抓住，但整体净值平稳， 2010年有亏损
+//如果采用胜率优先，效果很好10-20-30-50单元可做到19%-16%-14%-14% 因为选股少，单元格少的收益率大，胜率优先2010年不亏损
+//===============================output summary===================================== for : baggingM5P
+//Monthly selected_TPR mean: 26.19% standard deviation=28.85% Skewness=0.95 Kurtosis=0.04
+//Monthly selected_LIFT mean : 0.85
+//Monthly selected_positive summary: 4,306
+//Monthly selected_count summary: 12,877
+//Monthly selected_shouyilv average: 1.17% standard deviation=7.49% Skewness=2.94 Kurtosis=14.46
+//Monthly total_shouyilv average: 0.98% standard deviation=6.13% Skewness=3.04 Kurtosis=15.43
+//mixed selected positive rate: 33.44%
+//Monthly summary_judge_result summary: good number= 292 bad number=223
+//===============================end of summary=====================================for : baggingM5P
 public class BaggingM5P extends ContinousClassifier {
 
 	public BaggingM5P() {
 		super();
 		classifierName = "baggingM5P";
 		WORK_PATH =WORK_PATH+classifierName+"\\";
-		m_skipTrainInBacktest = false;
-		m_skipEvalInBacktest = false;
+		m_skipTrainInBacktest = true;
+		m_skipEvalInBacktest = true;
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 
 		m_noCaculationAttrib=true; //不添加计算字段
