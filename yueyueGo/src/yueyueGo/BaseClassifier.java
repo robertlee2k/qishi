@@ -86,7 +86,7 @@ public abstract class BaseClassifier {
 		summary_selectedShouyilv= new DescriptiveStatistics();
 		summary_totalShouyilv= new DescriptiveStatistics();
 
-		WORK_FILE_PREFIX = "extData2005-2016";//"交易分析2005-2016 by month-new";
+		WORK_FILE_PREFIX = "extData2005-2016";
 		
 	}
 	

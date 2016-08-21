@@ -117,7 +117,7 @@ public class MLPABClassifier extends NominalClassifier {
 		m_noCaculationAttrib=true; //不使用计算字段
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = true;
-		m_skipEvalInBacktest = false;
+		m_skipEvalInBacktest = true;
 		m_sepeperate_eval_HS300=true;//单独评估
 		m_seperate_classify_HS300=true;
 		
@@ -154,13 +154,17 @@ public class MLPABClassifier extends NominalClassifier {
 		//这是为MLP单独准备的模型，模型文件是按年读取，但evaluation文件不变仍按月
 		int inputYear=Integer.parseInt(yearSplit.substring(0,4));
 
-		String filename=this.WORK_PATH+this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + inputYear + MA_PREFIX + policySplit;//如果使用固定模型
+		//为特定年份下半年增加一个模型，提高准确度
+		String halfYearString="";
+		int inputMonth=Integer.parseInt(yearSplit.substring(4,6));
+		//TODO 2014年也应该加上
+		if ((inputYear==2016) && inputMonth>6){
+			halfYearString="07";
+		}
+		
+		String filename=this.WORK_PATH+this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + inputYear +halfYearString+ MA_PREFIX + policySplit;
 		
 		this.setModelFileName(filename);
-		
-//		//TODO: 临时处理用同一个eval
-//		this.setEvaluationFilename(filename+".eval");
-
 	
 		return loadModelFromFile();
 	}	
