@@ -72,8 +72,8 @@ public class BaggingM5P extends ContinousClassifier {
 		super();
 		classifierName = "baggingM5P";
 		WORK_PATH =WORK_PATH+classifierName+"\\";
-		m_skipTrainInBacktest = true;
-		m_skipEvalInBacktest = true;
+		m_skipTrainInBacktest = false;
+		m_skipEvalInBacktest = false;
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 
 		m_noCaculationAttrib=true; //不添加计算字段
@@ -129,12 +129,13 @@ public class BaggingM5P extends ContinousClassifier {
 		
 		//为特定年份下半年增加一个模型，提高准确度
 		String halfYearString="";
-		int inputMonth=Integer.parseInt(yearSplit.substring(4,6));
-		//TODO 2015年也应该加上
-		if ((inputYear==2014 || inputYear==2016) && inputMonth>6){
-			halfYearString="07";
+		if(yearSplit.length()==6){
+			int inputMonth=Integer.parseInt(yearSplit.substring(4,6));
+			//TODO 2015年也应该加上
+			if ((inputYear==2014 || inputYear==2016) && inputMonth>6){
+				halfYearString="07";
+			}
 		}
-
 		String filename=this.WORK_PATH+this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + inputYear +halfYearString+ MA_PREFIX + policySplit;//如果使用固定模型
 		
 		this.setModelFileName(filename);

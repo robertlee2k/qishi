@@ -156,10 +156,12 @@ public class MLPABClassifier extends NominalClassifier {
 
 		//为特定年份下半年增加一个模型，提高准确度
 		String halfYearString="";
-		int inputMonth=Integer.parseInt(yearSplit.substring(4,6));
-		//TODO 2014年也应该加上
-		if ((inputYear==2016) && inputMonth>6){
-			halfYearString="07";
+		if(yearSplit.length()==6){
+			int inputMonth=Integer.parseInt(yearSplit.substring(4,6));
+			//TODO 2014年也应该加上
+			if ((inputYear==2016) && inputMonth>6){
+				halfYearString="07";
+			}
 		}
 		
 		String filename=this.WORK_PATH+this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + inputYear +halfYearString+ MA_PREFIX + policySplit;
