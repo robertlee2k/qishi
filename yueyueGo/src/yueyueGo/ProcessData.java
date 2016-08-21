@@ -69,10 +69,10 @@ public class ProcessData {
 	public static void main(String[] args) {
 		try {
 			//用模型预测每日增量数据
-			callDailyPredict();
+//			callDailyPredict();
 
 			//调用回测函数回测
-//			callTestBack();
+			callTestBack();
 			
 			//用最新的单次交易数据，更新原始的交易数据文件
 //			UpdateHistoryArffFile.callRefreshInstances();
@@ -101,10 +101,17 @@ public class ProcessData {
 	protected static void callDailyPredict() throws Exception {
 		//用二分类模型预测每日增量数据
 //		MLPClassifier nModel=new MLPClassifier();
-
+		
+		//用旧连续模型预测每日增量数据
+		M5P_PREDICT_MODEL="\\交易分析2005-2016 by month-new-m5p-201605 MA ";
+		M5P_EVAL_MODEL="\\交易分析2005-2016 by month-new-m5p-201605 MA ";
+		M5PClassifier cModel=new M5PClassifier();
+		cModel.arff_format=ArffFormat.LEGACY_FORMAT; 
+		predictWithDB(cModel,PREDICT_WORK_DIR);
+		
 		//MLP主成分分析预测
-		MLPABClassifier nModel=new MLPABClassifier();
-		predictWithDB(nModel,PREDICT_WORK_DIR);
+		MLPABClassifier nABModel=new MLPABClassifier();
+		predictWithDB(nABModel,PREDICT_WORK_DIR);
 		
 		//M5P主成分分析预测
 		M5PABClassifier cABModel=new M5PABClassifier();
@@ -113,13 +120,6 @@ public class ProcessData {
 		//BaggingM5P
 		BaggingM5P cBagModel=new BaggingM5P();
 		predictWithDB(cBagModel,PREDICT_WORK_DIR);		
-
-		//用旧连续模型预测每日增量数据
-		M5P_PREDICT_MODEL="\\交易分析2005-2016 by month-new-m5p-201605 MA ";
-		M5P_EVAL_MODEL="\\交易分析2005-2016 by month-new-m5p-201605 MA ";
-		M5PClassifier cModel=new M5PClassifier();
-		cModel.arff_format=ArffFormat.LEGACY_FORMAT; 
-		predictWithDB(cModel,PREDICT_WORK_DIR);
 
 //			//使用文件预测
 //			String dataFileName=("t_stock_avgline_increment_zuixin_v"+FormatUtility.getDateStringFor(-1)).trim();
@@ -150,17 +150,17 @@ public class ProcessData {
 		//神经网络
 //		MLPClassifier nModel = new MLPClassifier();
 		MLPABClassifier nModel = new MLPABClassifier();
-//		Instances nominalResult=testBackward(nModel);
+		Instances nominalResult=testBackward(nModel);
 		//不真正回测了，直接从以前的结果文件中加载
-		Instances nominalResult=loadBackTestResultFromFile(nModel.classifierName);
+//		Instances nominalResult=loadBackTestResultFromFile(nModel.classifierName);
 
 		//按连续分类器回测历史数据
 //		M5PClassifier cModel=new M5PClassifier();
-		M5PABClassifier cModel=new M5PABClassifier();
-//		BaggingM5P cModel=new BaggingM5P();
-		Instances continuousResult=testBackward(cModel);
+//		M5PABClassifier cModel=new M5PABClassifier();
+		BaggingM5P cModel=new BaggingM5P();
+//		Instances continuousResult=testBackward(cModel);
 		//不真正回测了，直接从以前的结果文件中加载
-//		Instances continuousResult=loadBackTestResultFromFile(cModel.classifierName);
+		Instances continuousResult=loadBackTestResultFromFile(cModel.classifierName);
 		
 		//统一输出统计结果
 		nModel.outputClassifySummary();

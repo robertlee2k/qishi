@@ -83,7 +83,7 @@ import yueyueGo.NominalClassifier;
 //Monthly summary_judge_result summary: good number= 272 bad number=238
 //===============================end of summary=====================================for : mlpAB
 
-//新模型
+//5. 新模型
 //===============================output summary===================================== for : mlpAB
 //Monthly selected_TPR mean: 28.06% standard deviation=28.29% Skewness=0.83 Kurtosis=-0.31
 //Monthly selected_LIFT mean : 0.94
@@ -93,6 +93,18 @@ import yueyueGo.NominalClassifier;
 //Monthly total_shouyilv average: 0.98% standard deviation=6.13% Skewness=3.04 Kurtosis=15.43
 //mixed selected positive rate: 38.30%
 //Monthly summary_judge_result summary: good number= 265 bad number=250
+//===============================end of summary=====================================for : mlpAB
+
+//6. 新模型按月评估（为什么会和上面的4有差异？ 是因为4是按年评估模型，这个是按月评估模型）
+//===============================output summary===================================== for : mlpAB
+//Monthly selected_TPR mean: 29.29% standard deviation=28.06% Skewness=0.76 Kurtosis=-0.41
+//Monthly selected_LIFT mean : 1
+//Monthly selected_positive summary: 17,521
+//Monthly selected_count summary: 46,048
+//Monthly selected_shouyilv average: 1.09% standard deviation=7.70% Skewness=2.92 Kurtosis=13.8
+//Monthly total_shouyilv average: 0.98% standard deviation=6.13% Skewness=3.04 Kurtosis=15.43
+//mixed selected positive rate: 38.05%
+//Monthly summary_judge_result summary: good number= 267 bad number=248
 //===============================end of summary=====================================for : mlpAB
 
 public class MLPABClassifier extends NominalClassifier {
@@ -105,7 +117,7 @@ public class MLPABClassifier extends NominalClassifier {
 		m_noCaculationAttrib=true; //不使用计算字段
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 		m_skipTrainInBacktest = true;
-		m_skipEvalInBacktest = true;
+		m_skipEvalInBacktest = false;
 		m_sepeperate_eval_HS300=true;//单独评估
 		m_seperate_classify_HS300=true;
 		
@@ -146,8 +158,8 @@ public class MLPABClassifier extends NominalClassifier {
 		
 		this.setModelFileName(filename);
 		
-		//TODO: 临时处理用同一个eval
-		this.setEvaluationFilename(filename+".eval");
+//		//TODO: 临时处理用同一个eval
+//		this.setEvaluationFilename(filename+".eval");
 
 	
 		return loadModelFromFile();
