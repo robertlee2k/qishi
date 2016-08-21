@@ -111,8 +111,16 @@ public class BaggingM5P extends ContinousClassifier {
 	public Classifier loadModel(String yearSplit, String policySplit) throws Exception{
 		//这是单独准备的模型，模型文件是按年读取，但evaluation文件不变仍按月
 		int inputYear=Integer.parseInt(yearSplit.substring(0,4));
+		
+		//为特定年份下半年增加一个模型，提高准确度
+		String halfYearString="";
+		int inputMonth=Integer.parseInt(yearSplit.substring(4,6));
+		//TODO 2015年也应该加上
+		if ((inputYear==2014 || inputYear==2016) && inputMonth>6){
+			halfYearString="07";
+		}
 
-		String filename=this.WORK_PATH+this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + inputYear + MA_PREFIX + policySplit;//如果使用固定模型
+		String filename=this.WORK_PATH+this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + inputYear +halfYearString+ MA_PREFIX + policySplit;//如果使用固定模型
 		
 		this.setModelFileName(filename);
 
