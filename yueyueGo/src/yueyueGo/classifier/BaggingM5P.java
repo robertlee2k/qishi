@@ -22,7 +22,7 @@ import yueyueGo.MyAttributionSelectorWithPCA;
 //Monthly summary_judge_result summary: good number= 25 bad number=20
 //===============================end of summary=====================================for : baggingM5P
 
-//2.新模型 按月评估 （取meanabserror和thredsholdbottom均值为阀值）
+//2.新模型 按月评估 （取meanabserror和thredsholdbottom均值为阀值） 不添加计算字段
 // 2008-2016 全市场 收益率优先10-20-30-50，收益率为18%-15%-14%-14%  因为选股少，越多单元格2014年净值越不理想（50格1.07左右）,2013年表现好，2010年表现不好，净值整体平稳
 //  如果采用胜率优先，效果很好10-20-30-50单元可做到21%-16%-15%-14%
 // 沪深300收益率优先时，效果不错10-20-30-50单元可做到20%-14%-14%-14%
@@ -66,13 +66,16 @@ import yueyueGo.MyAttributionSelectorWithPCA;
 //mixed selected positive rate: 33.44%
 //Monthly summary_judge_result summary: good number= 292 bad number=223
 //===============================end of summary=====================================for : baggingM5P
+
+//4. 参数同2， 但添加计算字段。
+
 public class BaggingM5P extends ContinousClassifier {
 
 	public BaggingM5P() {
 		super();
 		classifierName = "baggingM5P";
 		WORK_PATH =WORK_PATH+classifierName+"\\";
-		m_skipTrainInBacktest = false;
+		m_skipTrainInBacktest = true;
 		m_skipEvalInBacktest = false;
 		m_policySubGroup = new String[]{"5","10","20","30","60" };
 
@@ -129,13 +132,13 @@ public class BaggingM5P extends ContinousClassifier {
 		
 		//为特定年份下半年增加一个模型，提高准确度
 		String halfYearString="";
-		if(yearSplit.length()==6){
-			int inputMonth=Integer.parseInt(yearSplit.substring(4,6));
-			//TODO 2015年也应该加上
-			if ((inputYear==2014 || inputYear==2016) && inputMonth>6){
-				halfYearString="07";
-			}
-		}
+//		if(yearSplit.length()==6){
+//			int inputMonth=Integer.parseInt(yearSplit.substring(4,6));
+//			//TODO 2015年也应该加上
+//			if ((inputYear==2014 || inputYear==2016) && inputMonth>6){
+//				halfYearString="07";
+//			}
+//		}
 		String filename=this.WORK_PATH+this.WORK_FILE_PREFIX +"-"+this.classifierName+ "-" + inputYear +halfYearString+ MA_PREFIX + policySplit;//如果使用固定模型
 		
 		this.setModelFileName(filename);
